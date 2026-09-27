@@ -402,7 +402,6 @@ await check("12 ch5 AMDP fuel per 100 km", async () => {
   return `on ${db}: ${lines.length} ships as computed from the seed`;
 });
 
-
 await check("13 ch2 classic ALV ZGUI_OSD_FLEET_ALV", async () => {
   const res = await fetch(`${base}/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_ALV`);
   const page = await res.text();
