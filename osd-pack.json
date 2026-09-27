@@ -1,0 +1,7 @@
+{
+  "name": "osg-demo",
+  "description": "Guided ABAP demo for open-steamgate",
+  "package": "$ZOSD_DEMO",
+  "order": 100,
+  "abap": "src"
+}

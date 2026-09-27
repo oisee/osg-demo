@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "about": "Only this demo's reviewed objects may be packaged for a system.",
+  "customerNamespaces": [],
+  "units": {
+    "osg-demo": {
+      "description": "The hello class and report for system import. The local transaction is excluded because its generated wrapper is not deployed.",
+      "sources": ["src"],
+      "objects": [
+        "CLAS ZOSD_DEMO_HELLO",
+        "PROG ZOSD_DEMO_REPORT"
+      ]
+    }
+  }
+}
