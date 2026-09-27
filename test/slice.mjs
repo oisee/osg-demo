@@ -27,11 +27,22 @@
 //        needs to reach it);
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
 //
+// and the README chapters after the slice (chapter 4's check is item 5):
+//     7. ch2: transaction ZOSD_FLEET (WEBGUI) shows the six report lines;
+//     8. ch2: with negative steam on a ship the classrun dumps in steam_check
+//        (ASSERTION_FAILED), and prints again once the value is restored;
+//     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
+//        S001 and S006 through ShipSet(..)/Voyages match the seed;
+//    10. ch6: segw:zip of this folder refuses exactly the two local objects,
+//        and of a copy without them carries every object the deploy unit
+//        lists and no seed rows (docs/take-to-system.md).
+//
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
 // engine's Playwright expects (for a machine with a different build).
 import {spawn, spawnSync} from "node:child_process";
-import {readFileSync} from "node:fs";
+import {cpSync, existsSync, mkdtempSync, readFileSync, rmSync} from "node:fs";
+import {tmpdir} from "node:os";
 import {createServer} from "node:net";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
@@ -257,6 +268,93 @@ await check("6 ABAP Unit ltcl_fleet", async () => {
   expect(/testMethod adtcore:name="COUNTS_VOYAGES"/.test(xml), "COUNTS_VOYAGES did not run");
   expect(!/<alert[\s>]/.test(xml), `the run has alerts:\n${xml}`);
   return "counts_voyages passed";
+});
+
+await check("7 ch2 transaction ZOSD_FLEET", async () => {
+  const res = await fetch(`${base}/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET`);
+  const html = await res.text();
+  expect(res.ok, `HTTP ${res.status}`);
+  expect(html.includes('data-transaction="ZOSD_FLEET - Airship fleet"'), "the screen is not titled ZOSD_FLEET - Airship fleet");
+  const missing = ships.filter((s) => !html.includes(`${s.ship_id} ${s.name} (`));
+  expect(missing.length === 0, `no line for ${missing.map((s) => s.ship_id)}`);
+  return `${ships.length} lines on the screen`;
+});
+
+await check("8 ch2 negative steam dumps in steam_check", async () => {
+  const url = `${odata}/ShipSet('S004')`;
+  const before = (await json(url)).SteamPct;
+  const headers = {...await csrf(`${odata}/`), "content-type": "application/json"};
+  const merge = (value) => fetch(url, {method: "MERGE", headers, body: JSON.stringify({SteamPct: value})});
+  const classrun = async () => {
+    const adt = await csrf(`${base}/sap/bc/adt/discovery`);
+    return (await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, {method: "POST", headers: adt})).text();
+  };
+  expect((await merge(-5)).status === 204, "MERGE -5 failed");
+  let dumped;
+  try {
+    dumped = await classrun();
+  } finally {
+    await merge(before);
+  }
+  expect(/ASSERTION_FAILED/.test(dumped) && dumped.includes("ASSERT iv_steam_pct >= 0."), `no assertion dump in:\n${dumped}`);
+  expect(!/^S00\d /m.test(dumped), "ship lines were printed despite the dump");
+  const again = await classrun();
+  expect(/^S004 /m.test(again), "the report does not print after the restore");
+  return "ASSERTION_FAILED, then clean after restoring";
+});
+
+await check("9 ch3 value help and Ship/Voyages", async () => {
+  const vh = await json(`${odata}/StatusVHSet('A')`);
+  expect(vh.Status === "A" && vh.Text === "Aloft", `StatusVHSet('A') is ${JSON.stringify(vh)}`);
+  const voyages = seed("zosd_fleet_voy");
+  for (const id of ["S001", "S006"]) {
+    const got = (await json(`${odata}/ShipSet('${id}')/Voyages`)).results.map((v) => v.VoyageId).sort();
+    const want = voyages.filter((v) => v.ship_id === id).map((v) => v.voyage_id).sort();
+    expect(JSON.stringify(got) === JSON.stringify(want), `${id}/Voyages: ${got} instead of ${want}`);
+  }
+  return "A Aloft; S001 and S006 voyages as seeded";
+});
+
+
+await check("10 ch6 segw:zip carries the unit, not the local objects", async () => {
+  const work = mkdtempSync(join(tmpdir(), "osg-slice-zip-"));
+  try {
+    const zip = (from, out) => spawnSync(process.execPath, ["tools/osd-abapgit-zip.mjs", from, "--unit", "osg-demo",
+      "--manifest", join(repo, "deploy", "manifest.json"), "--out", out], {cwd: home, encoding: "utf8"});
+    const refused = zip(repo, join(work, "refused.zip"));
+    const said = refused.stdout + refused.stderr;
+    expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
+    const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
+    const refusedKeys = [...new Set(keys)].sort().join(", ");
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+
+    const stage = join(work, "osg-demo");
+    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
+      && !/zcl_osd_fleet_tran\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+    const made = zip(stage, join(work, "osg-demo.zip"));
+    expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
+    // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
+    // TABL ... list names with ", "; IWSV/IWMO add a version and SICF a node
+    // id after the name, which the key drops
+    const carried = new Set();
+    for (const [, type, names] of made.stdout.matchAll(/^  ([A-Z]{4})  (.+)$/gm)) {
+      const list = ["IWSV", "IWMO", "SICF"].includes(type) ? [names.trim().split(/\s+/)[0]] : names.split(/,\s*/);
+      for (const name of list) carried.add(`${type} ${name.trim().toUpperCase()}`);
+    }
+    const key = (o) => {
+      const [type, name] = o.split(" ");
+      return `${type} ${(type === "SICF" ? name.split("/").filter(Boolean).pop() : name).toUpperCase()}`;
+    };
+    const listed = new Set(JSON.parse(readFileSync(join(repo, "deploy", "manifest.json"), "utf8")).units["osg-demo"].objects.map(key));
+    const missing = [...listed].filter((k) => !carried.has(k));
+    const extra = [...carried].filter((k) => !listed.has(k));
+    expect(missing.length === 0 && extra.length === 0, `not carried: ${missing.join(", ") || "-"}; carried but not listed: ${extra.join(", ") || "-"}`);
+    const unpaired = ["ship", "stat", "voy"].filter((t) => !made.stdout.includes(`NOT carried: zosd_fleet_${t}.tabu.json`));
+    expect(unpaired.length === 0 && ![...carried].some((k) => k.startsWith("DATA ")), `no "NOT carried" line for: ${unpaired.join(", ")}`);
+    return `refuses ${refusedKeys}; staged copy carries exactly the ${listed.size} listed objects, no seed rows`;
+  } finally {
+    rmSync(work, {recursive: true, force: true});
+  }
 });
 
 stop();

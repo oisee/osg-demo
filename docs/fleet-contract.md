@@ -99,8 +99,9 @@ collective search help is not served.
   - implements `ZIF_OSD_TRANSACTION` and shows the report's lines;
   - transaction `ZOSD_FLEET` names it;
   - it does not use `SUBMIT` (not implemented).
-- The existing `ZOSD_DEMO_HELLO` / `ZOSD_DEMO_REPORT` / `ZOSD_DEMO` stay as
-  chapter 1.
+- `ZOSD_DEMO_HELLO` stays as chapter 1. The earlier `ZOSD_DEMO_REPORT` and
+  its transaction `ZOSD_DEMO` are gone; chapter 2's transaction is
+  `ZOSD_FLEET`.
 
 ## OData service
 
@@ -183,4 +184,4 @@ The e2e runs the pack through `OSD_PACKS`. A reader opens the folder in
 VS Code, and the folder is layered as a workspace pack (engine W1, #158).
 Seed rows use `MANDT` `123`; dates may be ISO strings in the TABU JSON.
 
-After the slice, chapters 2–5 are split into PRs, one e2e assertion each.
+After the slice, chapters 2–5 follow in PRs, each chapter with at least one e2e assertion.
