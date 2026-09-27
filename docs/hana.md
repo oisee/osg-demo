@@ -12,3 +12,13 @@ The local SQLite path is the quickest way through this demo. For HANA, use a loc
 ## What to expect
 
 Open SQL and the local OData runtime can use HANA for the same demo flow. eAMDP takes a method's SQLScript body and runs it as a HANA procedure or function; HANA is required for that path. The portable AMDP path supports a limited subset and must be checked per example. A detached ABAP Unit run can use HANA through `osd.database.tests`; choose a separate test schema so tests do not write to an application schema. HANA startup and first seeding dominate the first run, so subsequent source edits are a better measure of the ABAP loop.
+
+## Chapter 5 on HANA
+
+README chapter 5 runs `ZCL_OSD_FLEET_FUEL=>fuel_per_100km` on DuckDB and states what HANA should give. On a HANA Express, with the system started on HANA as above:
+
+1. Run `ZCL_OSD_FLEET_FUEL` (F9, or `POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`). Expected: `Fuel per 100 km (HDB)`, then the same five lines as on DuckDB, S001 `225.94` through S005 `290.48`. The procedure runs on HANA as written: `CAST(SUM(fuel_kg) AS INTEGER) * 100 / CAST(SUM(distance_km) AS INTEGER)`.
+2. If the numbers come out whole (`225.00`), HANA divided two integers as integers; that would be a difference from DuckDB worth recording, and the portable body would need a decimal on one side.
+3. The cube service `ZC_OSD_FLEETCUBE_CDS` answers the same 20 rows on HANA; grouping on `$select` depends on the engine, not on the database.
+
+Not checked from this repository: nothing here reaches a HANA.
