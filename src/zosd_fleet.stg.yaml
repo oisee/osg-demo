@@ -44,6 +44,8 @@ entities:
       ArrDate: {type: Date, field: ARR_DATE, label: Arrival}
       Passengers: {type: Int32, field: PASSENGERS, label: Passengers}
       FuelKg: {type: Int32, field: FUEL_KG, label: Fuel (kg)}
+      DistanceKm: {type: Int32, field: DISTANCE_KM, label: Distance (km)}
+      DepMonth: {type: String(6), field: DEP_MONTH, label: Month}
 
   StatusVH:
     set: StatusVHSet
