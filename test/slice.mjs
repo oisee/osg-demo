@@ -40,7 +40,10 @@
 //        voyage, and $filter on the ship gives that ship's voyages;
 //    12. ch5: ZCL_OSD_FLEET_FUEL's classrun prints fuel per 100 km per ship,
 //        computed from the seed, on DuckDB or HANA (STG_DB=duckdb|hana), and
-//        says it needs one of them on SQLite.
+//        says it needs one of them on SQLite;
+//    13. ch2: the classic ALV report ZOSD_FLEET_ALV, run as transaction
+//        ZGUI_OSD_FLEET_ALV, shows a grid of the six ships with their status
+//        texts.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -397,6 +400,26 @@ await check("12 ch5 AMDP fuel per 100 km", async () => {
   const missing = lines.filter((l) => !text.includes(l));
   expect(missing.length === 0, `missing: ${missing.join(" | ")}\nin:\n${text}`);
   return `on ${db}: ${lines.length} ships as computed from the seed`;
+});
+
+
+await check("13 ch2 classic ALV ZGUI_OSD_FLEET_ALV", async () => {
+  const res = await fetch(`${base}/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_ALV`);
+  const page = await res.text();
+  expect(res.ok, `HTTP ${res.status}: ${page.slice(0, 200)}`);
+  // the page embeds the report's document escaped, twice over in places;
+  // unescape it and drop the markup to read the grid as text
+  let text = page;
+  for (let i = 0; i < 2; i++) {
+    text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  }
+  text = text.replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " | ").replace(/(\s*\|\s*)+/g, " | ");
+  expect(text.includes(`${ships.length} rows`), "no row count of the grid");
+  for (const h of ["SHIP_ID", "NAME", "STATUS", "TEXT", "STEAM_PCT", "HOME_PORT"]) expect(text.includes(` ${h} `), `no column ${h}`);
+  const texts = new Map(seed("zosd_fleet_stat").map((s) => [s.status, s.text]));
+  const missing = ships.filter((s) => !text.includes(` ${s.ship_id} | ${s.name} | ${s.status} | ${texts.get(s.status)} | ${s.steam_pct} | ${s.home_port} `));
+  expect(missing.length === 0, `rows missing or wrong: ${missing.map((s) => s.ship_id).join(", ")}`);
+  return `${ships.length} rows with status texts`;
 });
 
 stop();

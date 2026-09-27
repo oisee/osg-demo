@@ -8,6 +8,7 @@
       "sources": ["src"],
       "objects": [
         "CLAS ZOSD_DEMO_HELLO",
+        "PROG ZOSD_FLEET_ALV",
         "TABL ZOSD_FLEET_SHIP",
         "TABL ZOSD_FLEET_VOY",
         "TABL ZOSD_FLEET_STAT",

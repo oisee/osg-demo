@@ -97,6 +97,10 @@ collective search help is not served.
 - Test class for it, `ltcl_fleet`:
   - `counts_voyages`: the report's line for a known ship;
   - `broken_on_purpose`: commented out, the reader uncomments it.
+- `ZOSD_FLEET_ALV`: a report that shows the ships with their status text
+  in a classic ALV (`CL_SALV_TABLE`); the engine runs it as transaction
+  `ZGUI_OSD_FLEET_ALV`. Built-in types in its row type, because the
+  engine's report converter is not given the dictionary.
 - `ZCL_OSD_FLEET_TRAN`:
   - implements `ZIF_OSD_TRANSACTION` and shows the report's lines;
   - transaction `ZOSD_FLEET` names it;
