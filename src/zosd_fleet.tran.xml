@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TRAN" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TSTC>
+    <TCODE>ZOSD_FLEET</TCODE>
+    <PGMNA>ZCL_OSD_FLEET_TRAN</PGMNA>
+   </TSTC>
+   <TSTCC>
+    <TCODE>ZOSD_FLEET</TCODE>
+    <S_WEBGUI>1</S_WEBGUI>
+   </TSTCC>
+   <TSTCT>
+    <SPRSL>E</SPRSL>
+    <TCODE>ZOSD_FLEET</TCODE>
+    <TTEXT>Airship fleet</TTEXT>
+   </TSTCT>
+   <TSTCP>
+    <TCODE>ZOSD_FLEET</TCODE>
+    <PARAM>\PROGRAM=ZCL_OSD_FLEET_TRAN\CLASS=ZCL_OSD_FLEET_TRAN\METHOD=ZIF_OSD_TRANSACTION~PBO</PARAM>
+   </TSTCP>
+  </asx:values>
+ </asx:abap>
+</abapGit>
