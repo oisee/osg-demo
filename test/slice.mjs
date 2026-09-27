@@ -189,10 +189,24 @@ if (process.env.SLICE_SKIP_UI === "1") {
     const {chromium} = createRequire(join(home, "package.json"))("playwright");
     const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePath: process.env.SLICE_CHROMIUM} : {});
     try {
-      const page = await browser.newPage();
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      // Console errors from SAPUI5 itself are common and not ours; they are
+      // printed for the record. What fails the check is ours: an HTTP error
+      // on this pack's app, its BSP copy or its service, or a console error
+      // that names them.
+      const ours = /\/app\/osg-demo\/|\/sap\/bc\/ui5_ui5\/sap\/zosg_demo\/|\/ZOSD_FLEET_SRV\//i;
       const errors = [];
-      page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
-      page.on("pageerror", (e) => errors.push(e.message));
+      const failures = [];
+      const listen = (p) => {
+        p.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+        p.on("pageerror", (e) => errors.push(e.message));
+      };
+      listen(page);
+      context.on("page", listen);
+      context.on("response", (r) => {
+        if (r.status() >= 400 && r.url().startsWith(base) && ours.test(r.url()) && !/Component-preload\.js(\?|$)/.test(r.url())) failures.push(`${r.status()} ${r.url()}`);
+      });
       await page.goto(`${base}/app/flp.html`, {waitUntil: "domcontentloaded"});
       // a tile whose URL is not an intent may open in this tab or in a new
       // one; follow whichever happens
@@ -205,14 +219,18 @@ if (process.env.SLICE_SKIP_UI === "1") {
         ]),
         tile.click(),
       ]);
-      if (app !== page) app.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
       await app.waitForLoadState("domcontentloaded");
       const names = ships.map((s) => s.name);
       for (const name of names) {
         await app.getByText(name, {exact: true}).first().waitFor({timeout: 90_000});
       }
       expect(new URL(app.url()).pathname.startsWith("/app/osg-demo/"), `the tile went to ${app.url()}`);
-      return `${names.length} rows: ${names.join(", ")}${errors.length ? ` (console errors: ${errors.length})` : ""}`;
+      await app.waitForLoadState("networkidle").catch(() => {});
+      for (const e of errors) console.log(`      console error: ${e.replace(/\s+/g, " ").slice(0, 200)}`);
+      const named = errors.filter((e) => ours.test(e) || /ZOSD_FLEET|osd\.fleet/.test(e));
+      expect(failures.length === 0, `HTTP errors on this pack: ${failures.join("; ")}`);
+      expect(named.length === 0, `console errors naming this pack: ${named.join(" | ").slice(0, 400)}`);
+      return `${names.length} rows: ${names.join(", ")}; ${errors.length} console errors, none of them this pack's`;
     } finally {
       await browser.close();
     }
