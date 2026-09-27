@@ -333,12 +333,25 @@ await check("10 ch6 segw:zip carries the unit, not the local objects", async () 
       && !/zcl_osd_fleet_tran\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
-    const listed = JSON.parse(readFileSync(join(repo, "deploy", "manifest.json"), "utf8")).units["osg-demo"].objects;
-    const carried = made.stdout.toLowerCase();
-    const missing = listed.filter((o) => !carried.includes(o.split(" ")[1].replace(/^\/sap\/bc\/ui5_ui5\/sap\//i, "").toLowerCase()));
-    expect(missing.length === 0, `not carried: ${missing.join(", ")}`);
-    expect(/NOT carried: zosd_fleet_ship\.tabu\.json/.test(made.stdout), "the seed rows were carried, or not reported");
-    return `refuses ${refusedKeys}; staged copy carries all ${listed.length} listed objects, no seed rows`;
+    // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
+    // TABL ... list names with ", "; IWSV/IWMO add a version and SICF a node
+    // id after the name, which the key drops
+    const carried = new Set();
+    for (const [, type, names] of made.stdout.matchAll(/^  ([A-Z]{4})  (.+)$/gm)) {
+      const list = ["IWSV", "IWMO", "SICF"].includes(type) ? [names.trim().split(/\s+/)[0]] : names.split(/,\s*/);
+      for (const name of list) carried.add(`${type} ${name.trim().toUpperCase()}`);
+    }
+    const key = (o) => {
+      const [type, name] = o.split(" ");
+      return `${type} ${(type === "SICF" ? name.split("/").filter(Boolean).pop() : name).toUpperCase()}`;
+    };
+    const listed = new Set(JSON.parse(readFileSync(join(repo, "deploy", "manifest.json"), "utf8")).units["osg-demo"].objects.map(key));
+    const missing = [...listed].filter((k) => !carried.has(k));
+    const extra = [...carried].filter((k) => !listed.has(k));
+    expect(missing.length === 0 && extra.length === 0, `not carried: ${missing.join(", ") || "-"}; carried but not listed: ${extra.join(", ") || "-"}`);
+    const unpaired = ["ship", "stat", "voy"].filter((t) => !made.stdout.includes(`NOT carried: zosd_fleet_${t}.tabu.json`));
+    expect(unpaired.length === 0 && ![...carried].some((k) => k.startsWith("DATA ")), `seed rows carried: ${unpaired.join(", ")}`);
+    return `refuses ${refusedKeys}; staged copy carries exactly the ${listed.size} listed objects, no seed rows`;
   } finally {
     rmSync(work, {recursive: true, force: true});
   }

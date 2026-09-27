@@ -14,9 +14,10 @@ rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
+rm -rf "$(dirname "$STAGE")"
 ```
 
-Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: it prints what it carried, by object type:
+Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: 31 files, ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
 
 ```
 CLAS  zcl_osd_fleet_report, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
@@ -24,13 +25,13 @@ IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
 IWSV  zosd_fleet_srv 0001
 SHLP  zosd_fleet_status_sh
-SICF  zosg_demo ...
+SICF  zosg_demo <node id>
 TABL  zosd_fleet_ship, zosd_fleet_stat, zosd_fleet_voy
 WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-and the same line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the two local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
+and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the two local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
 
 ## What travels and what does not
 
@@ -47,7 +48,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | Fiori app | yes, as BSP `ZOSG_DEMO` (WAPA) | Its manifest's data source is rebased for the BSP location, `../../../../opu/odata/sap/ZOSD_FLEET_SRV/`, which is `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` seen from `/sap/bc/ui5_ui5/sap/zosg_demo/`. SAPUI5 still loads from ui5.sap.com (`index.html`), so the browser needs to reach it. |
 | The app's ICF node | yes, as SICF `/sap/bc/ui5_ui5/sap/zosg_demo` | A customer name under the path where a system keeps its UI5 applications. |
 | The launchpad tile | no | The tile is `osd-pack.json`, which only the open-steamgate launchpad reads. On a system, the inbound `AirshipFleet-display` in the manifest is what a launchpad catalog and target mapping would point at; neither is in the zip. |
-| Seed rows (`data/*.tabu.json`) | no | abapGit carries a table's rows only with a `.conf.json` beside the `.tabu.json` (which tables, which condition), and this repository has none. With one, the rows would be written into the logon client, whatever their `MANDT` says. |
+| Seed rows (`data/*.tabu.json`) | no | Two things would be needed and neither is here: a `.conf.json` beside each `.tabu.json` (abapGit's instruction: which table, which condition), and a `TABU <table>` entry in the deploy unit (without it the tool refuses the rows as `not-in-manifest`). With both, the rows would be written into the logon client, whatever their `MANDT` says. |
 | Transaction `ZOSD_FLEET` and `ZCL_OSD_FLEET_TRAN` | no | The class implements `ZIF_OSD_TRANSACTION`, an interface of the open-steamgate runtime that a system does not have, so neither is in the deploy unit. |
 | `test/slice.mjs`, `docs/`, the README | no | Files for this repository, not ABAP objects. |
 
