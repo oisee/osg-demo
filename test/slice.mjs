@@ -27,7 +27,7 @@
 //        needs to reach it);
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
 //
-// and one per README chapter after the slice:
+// and the README chapters after the slice (chapter 4's check is item 5):
 //     7. ch2: transaction ZOSD_FLEET (WEBGUI) shows the six report lines;
 //     8. ch2: with negative steam on a ship the classrun dumps in steam_check
 //        (ASSERTION_FAILED), and prints again once the value is restored;

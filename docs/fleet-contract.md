@@ -184,4 +184,4 @@ The e2e runs the pack through `OSD_PACKS`. A reader opens the folder in
 VS Code, and the folder is layered as a workspace pack (engine W1, #158).
 Seed rows use `MANDT` `123`; dates may be ISO strings in the TABU JSON.
 
-After the slice, chapters 2–5 are split into PRs, one e2e assertion each.
+After the slice, chapters 2–5 follow in PRs, each chapter with at least one e2e assertion.
