@@ -158,16 +158,19 @@ The pack's `webapp/` is a Fiori Elements V2 list report + object page over
 - `webapp/manifest.json` declares the inbound `AirshipFleet-display` in
   `crossNavigation.inbounds`.
 - `osd-pack.json` gets one entry under `tiles`: "Airship fleet", whose URL is
-  `/app/osg-demo/`, the pack's own page (the engine's default tile URL). The
-  tile takes a URL, not an intent field. It does not point at
-  `/app/flp.html#AirshipFleet-display`: the launchpad resolves only the
-  intents `webapp/flp.html` names before boot, and a pack's inbounds are
-  not registered there yet. Once the engine registers them, the tile can
-  move to the intent.
-- From `/app/osg-demo/` the data source `../../sap/opu/odata/sap/ZOSD_FLEET_SRV/`
-  resolves as written. The BSP copy of the app, `/sap/bc/ui5_ui5/sap/zosg_demo/`,
-  loads data once the engine's pack-app manifest rebase has landed (packApps
-  rewrites the OData URI in `manifest.json`).
+  `/app/flp.html#AirshipFleet-display`. The tile takes a URL, not an intent
+  field; a URL that is the launchpad's own intent stays in the shell.
+- The launchpad registers the pack's inbounds before it boots (open-steamgate
+  `0ba17ed`, oisee/open-steamgate#173, or later): `AirshipFleet-display`
+  opens the component `osd.fleet` from the BSP copy of the app,
+  `/sap/bc/ui5_ui5/sap/zosg_demo/`, embedded in the shell, the way a
+  launchpad on a system opens it through a target mapping. The inbound's
+  `title` is the app's title there.
+- The BSP copy's data source is rebased for its location by the engine
+  (`../../../../opu/odata/sap/ZOSD_FLEET_SRV/`, open-steamgate
+  oisee/open-steamgate#168). `/app/osg-demo/` still serves the app
+  standalone, where `../../sap/opu/odata/sap/ZOSD_FLEET_SRV/` resolves as
+  written.
 
 ## First joint slice
 

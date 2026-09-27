@@ -25,6 +25,7 @@
     "crossNavigation": {
       "inbounds": {
         "AirshipFleet-display": {
+          "title": "Airship fleet",
           "semanticObject": "AirshipFleet",
           "action": "display",
           "signature": {

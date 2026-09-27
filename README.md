@@ -57,10 +57,10 @@ The rest of the guide uses the Airship fleet: six ships and their voyages, seede
 
 The pack's [webapp/](webapp/) is a Fiori Elements list report and object page over `ZOSD_FLEET_SRV`. It has no controller code: the columns, filters and facets come from the annotations in the YAML. SAPUI5 loads from ui5.sap.com, so the browser needs to reach it.
 
-1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the list report opens and shows the six ships with Ship, Name, Status (text first, e.g. `Aloft (A)`), Steam (%) and Home port.
+1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the address ends in `#AirshipFleet-display`, and the list report opens inside the launchpad and shows the six ships with Ship, Name, Status (text first, e.g. `Aloft (A)`), Steam (%) and Home port.
 2. In the filter bar, open the value help of **Status**, pick `Maintenance`, and press **Go**. Expected: Cumulus and Old Boiler. The value help lists the three statuses from `StatusVHSet`.
 3. Click **Old Boiler**. Expected: the object page shows its general data and an empty **Voyages** table. Go back and open **Albatross**: its **Voyages** table lists six voyages.
-4. The tile opens the app as a page of its own (`/app/osg-demo/`). Its manifest also declares the intent `AirshipFleet-display`, which a real launchpad uses; see [the contract](docs/fleet-contract.md#app).
+4. The tile goes through the launchpad the way a system's does: `#AirshipFleet-display` is the intent the app's [manifest](webapp/manifest.json) declares in `crossNavigation.inbounds`, and the launchpad opens the component `osd.fleet` from the app's BSP copy, `/sap/bc/ui5_ui5/sap/zosg_demo/`. The same app also runs standalone at `http://localhost:8099/app/osg-demo/`; see [the contract](docs/fleet-contract.md#app).
 
 ## 5. AMDP
 
@@ -76,4 +76,4 @@ What can leave this repository for a real system is listed, object by object, in
 
 ## Run the checks
 
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. The engine's main branch is enough; the app's BSP copy under `/sap/bc/ui5_ui5/sap/zosg_demo/` also needs the engine's pack-app manifest rebase (branch `vg/pack-manifest-rebase` until merged). It stops the engine it started, and exits non-zero if any check fails.
+In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails.
