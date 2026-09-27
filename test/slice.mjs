@@ -350,7 +350,7 @@ await check("10 ch6 segw:zip carries the unit, not the local objects", async () 
     const extra = [...carried].filter((k) => !listed.has(k));
     expect(missing.length === 0 && extra.length === 0, `not carried: ${missing.join(", ") || "-"}; carried but not listed: ${extra.join(", ") || "-"}`);
     const unpaired = ["ship", "stat", "voy"].filter((t) => !made.stdout.includes(`NOT carried: zosd_fleet_${t}.tabu.json`));
-    expect(unpaired.length === 0 && ![...carried].some((k) => k.startsWith("DATA ")), `seed rows carried: ${unpaired.join(", ")}`);
+    expect(unpaired.length === 0 && ![...carried].some((k) => k.startsWith("DATA ")), `no "NOT carried" line for: ${unpaired.join(", ")}`);
     return `refuses ${refusedKeys}; staged copy carries exactly the ${listed.size} listed objects, no seed rows`;
   } finally {
     rmSync(work, {recursive: true, force: true});

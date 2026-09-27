@@ -4,7 +4,7 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout whose `segw:zip` accepts `--unit` and `--manifest` (main at `d67f8660` or later). The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the two objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout whose `segw:zip` accepts `--unit` and `--manifest` (main at `3048c59`, oisee/open-steamgate#168, or later: from there the app's manifest is rebased for its BSP location). The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the two objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo
