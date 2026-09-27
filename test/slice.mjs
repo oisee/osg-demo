@@ -35,7 +35,12 @@
 //        S001 and S006 through ShipSet(..)/Voyages match the seed;
 //    10. ch6: segw:zip of this folder refuses exactly the two local objects,
 //        and of a copy without them carries every object the deploy unit
-//        lists and no seed rows (docs/take-to-system.md).
+//        lists and no seed rows (docs/take-to-system.md);
+//    11. ch5: the cube service ZC_OSD_FLEETCUBE_CDS answers one row per
+//        voyage, and $filter on the ship gives that ship's voyages;
+//    12. ch5: ZCL_OSD_FLEET_FUEL's classrun prints fuel per 100 km per ship,
+//        computed from the seed, on DuckDB or HANA (STG_DB=duckdb|hana), and
+//        says it needs one of them on SQLite.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -315,7 +320,6 @@ await check("9 ch3 value help and Ship/Voyages", async () => {
   return "A Aloft; S001 and S006 voyages as seeded";
 });
 
-
 await check("10 ch6 segw:zip carries the unit, not the local objects", async () => {
   const work = mkdtempSync(join(tmpdir(), "osg-slice-zip-"));
   try {
@@ -355,6 +359,46 @@ await check("10 ch6 segw:zip carries the unit, not the local objects", async () 
   } finally {
     rmSync(work, {recursive: true, force: true});
   }
+});
+
+await check("11 ch5 cube ZC_OSD_FLEETCUBE_CDS", async () => {
+  const cube = `${base}/sap/opu/odata/sap/ZC_OSD_FLEETCUBE_CDS/ZC_OSD_FLEETCUBE`;
+  const voyages = seed("zosd_fleet_voy");
+  const all = (await json(`${cube}?$format=json`)).results;
+  expect(all.length === voyages.length, `${all.length} rows, the seed has ${voyages.length} voyages`);
+  const byId = new Map(voyages.map((v) => [v.voyage_id, v]));
+  const wrong = all.filter((r) => {
+    const v = byId.get(r.VOYAGEID);
+    return v === undefined || r.SHIPID !== v.ship_id || r.DEPMONTH !== v.dep_month
+      || r.PASSENGERS !== v.passengers || r.FUELKG !== v.fuel_kg || r.DISTANCEKM !== v.distance_km;
+  });
+  expect(wrong.length === 0, `rows unlike the seed: ${wrong.map((r) => r.VOYAGEID).join(", ")}`);
+  const s001 = (await json(`${cube}?$filter=${encodeURIComponent("SHIPID eq 'S001'")}&$format=json`)).results;
+  const want = voyages.filter((v) => v.ship_id === "S001").length;
+  expect(s001.length === want && s001.every((r) => r.SHIPID === "S001"), `S001 filter: ${s001.length} rows, want ${want}`);
+  return `${all.length} voyage rows as seeded; S001 has ${s001.length}`;
+});
+
+await check("12 ch5 AMDP fuel per 100 km", async () => {
+  const headers = await csrf(`${base}/sap/bc/adt/discovery`);
+  const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`, {method: "POST", headers});
+  const text = await res.text();
+  expect(res.ok, `HTTP ${res.status}`);
+  const db = process.env.STG_DB ?? "sqlite";
+  if (db !== "duckdb" && db !== "hana") {
+    expect(text.includes("AMDP needs DuckDB or HANA; this system runs on sqlite."), `on ${db}:\n${text}`);
+    return `on ${db}: says it needs DuckDB or HANA (run with STG_DB=duckdb for the numbers)`;
+  }
+  const totals = new Map();
+  for (const v of seed("zosd_fleet_voy").filter((x) => x.distance_km > 0)) {
+    const t = totals.get(v.ship_id) ?? {fuel: 0, km: 0};
+    totals.set(v.ship_id, {fuel: t.fuel + v.fuel_kg, km: t.km + v.distance_km});
+  }
+  const lines = [...totals].sort(([a], [b]) => a.localeCompare(b)).map(([ship, t]) =>
+    `${ship}: ${t.fuel} kg over ${t.km} km = ${(Math.round(t.fuel * 10000 / t.km) / 100).toFixed(2)} kg/100 km`);
+  const missing = lines.filter((l) => !text.includes(l));
+  expect(missing.length === 0, `missing: ${missing.join(" | ")}\nin:\n${text}`);
+  return `on ${db}: ${lines.length} ships as computed from the seed`;
 });
 
 stop();

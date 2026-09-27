@@ -55,6 +55,8 @@ start.
 | ARR_DATE   | DATS    |     |                         |
 | PASSENGERS | INT4    |     |                         |
 | FUEL_KG    | INT4    |     |                         |
+| DISTANCE_KM | INT4   |     | chapter 5: fuel per 100 km |
+| DEP_MONTH  | CHAR 6  |     | `YYYYMM` of `DEP_DATE`; the cube's month dimension |
 
 `ZOSD_FLEET_STAT`: the status values and their texts.
 
@@ -126,7 +128,7 @@ Defined in `src/zosd_fleet.stg.yaml` and compiled by `stg-compile --all`.
   serves Travel.
 - Property names are the fields in CamelCase: `ShipId`, `Name`, `Status`,
   `SteamPct`, `HomePort`, `VoyageId`, `FromPort`, `ToPort`, `DepDate`,
-  `ArrDate`, `Passengers`, `FuelKg`, `Text`.
+  `ArrDate`, `Passengers`, `FuelKg`, `DistanceKm`, `DepMonth`, `Text`.
 - Every property whose DDIC field has an underscore names it with `field:`
   (for example `ShipId: {type: String(4), field: SHIP_ID}`). Without that,
   stg-compile uppercases the property name and gets `SHIPID`. This is the
@@ -168,6 +170,34 @@ The pack's `webapp/` is a Fiori Elements V2 list report + object page over
   resolves as written. The BSP copy of the app, `/sap/bc/ui5_ui5/sap/zosg_demo/`,
   loads data once the engine's pack-app manifest rebase has landed (packApps
   rewrites the OData URI in `manifest.json`).
+
+## Cube and AMDP (chapter 5)
+
+- `ZC_OSD_FLEETCUBE` (SQL view `ZVOSDFLEETCUBE`): a CDS view over
+  `ZOSD_FLEET_VOY` with `@Analytics.dataCategory: #CUBE` and
+  `@OData.publish: true`, published as its own service
+  `ZC_OSD_FLEETCUBE_CDS`, entity set `ZC_OSD_FLEETCUBE`. Key `VoyageId`;
+  dimensions `ShipId`, `DepMonth`; measures `Passengers`, `FuelKg`,
+  `DistanceKm` with `@Aggregation.default: #SUM`.
+  - The engine publishes the properties in upper case, as it does for its
+    own cubes: `VOYAGEID`, `SHIPID`, `DEPMONTH`, `PASSENGERS`, `FUELKG`,
+    `DISTANCEKM`. A system's `@OData.publish` service keeps the aliases as
+    written (`VoyageId`, `ShipId`, ...).
+  - The month is the column `DEP_MONTH`, not an expression: the engine's
+    CDS support keeps plain columns and casts of columns only.
+  - The engine's `@OData.publish` services do not group on `$select` yet,
+    so the service answers one row per voyage; grouping by ship and month
+    comes when the engine carries the cube's aggregate semantics into a
+    published service.
+- `ZCL_OSD_FLEET_FUEL=>fuel_per_100km`: an AMDP procedure
+  (`if_amdp_marker_hdb`) from the engine's portable SQLScript subset, one
+  row per ship with fuel, distance and fuel per 100 km; voyages without a
+  distance are left out. Its classrun prints the rows.
+  - DuckDB (`STG_DB=duckdb`): runs portably.
+  - SQLite (the engine's default): the engine does not run AMDP there; the
+    classrun says so.
+  - HANA: the same SQLScript; to be checked on a HANA Express.
+- No second analytical Fiori page in the first release.
 
 ## First joint slice
 

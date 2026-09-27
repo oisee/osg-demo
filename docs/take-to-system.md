@@ -17,10 +17,11 @@ unzip -Z1 /tmp/osg-demo.zip
 rm -rf "$(dirname "$STAGE")"
 ```
 
-Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: 31 files, ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
+Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: 35 files, ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
 
 ```
-CLAS  zcl_osd_fleet_report, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+CLAS  zcl_osd_fleet_fuel, zcl_osd_fleet_report, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+DDLS  zc_osd_fleetcube
 IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
 IWSV  zosd_fleet_srv 0001
@@ -46,6 +47,8 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | SEGW project `ZOSD_FLEET`, service `ZOSD_FLEET_SRV 0001`, model `ZOSD_FLEET_MDL 0001` | yes (IWPR, IWSV, IWMO) | Compiled from the YAML. The service still has to be activated in the gateway hub (`/IWFND/MAINT_SERVICE`) before `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` answers. |
 | `ZCL_ZOSD_FLEET_MPC`, `_MPC_EXT`, `_MPC_ANN`, `_DPC`, `_DPC_EXT` | yes | The generated classes, and the hand-written `_DPC_EXT`. `VoyageSet` is served by SADL over `ZOSD_FLEET_VOY` through the generated `_DPC`. |
 | Fiori app | yes, as BSP `ZOSG_DEMO` (WAPA) | Its manifest's data source is rebased for the BSP location, `../../../../opu/odata/sap/ZOSD_FLEET_SRV/`, which is `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` seen from `/sap/bc/ui5_ui5/sap/zosg_demo/`. SAPUI5 still loads from ui5.sap.com (`index.html`), so the browser needs to reach it. |
+| Cube `ZC_OSD_FLEETCUBE` | yes (DDLS) | The CDS source; a system creates its SQL view `ZVOSDFLEETCUBE` on activation, and, because of `@OData.publish: true`, the service `ZC_OSD_FLEETCUBE_CDS`, which still has to be activated in the gateway hub. There its properties keep the CDS aliases (`VoyageId`, `ShipId`, ...), where the local engine serves them in upper case (`VOYAGEID`, `SHIPID`, ...). |
+| AMDP class `ZCL_OSD_FLEET_FUEL` | yes | A real AMDP on a HANA-based system: the source is not rewritten for the local engine. |
 | The app's ICF node | yes, as SICF `/sap/bc/ui5_ui5/sap/zosg_demo` | A customer name under the path where a system keeps its UI5 applications. |
 | The launchpad tile | no | The tile is `osd-pack.json`, which only the open-steamgate launchpad reads. On a system, the inbound `AirshipFleet-display` in the manifest is what a launchpad catalog and target mapping would point at; neither is in the zip. |
 | Seed rows (`data/*.tabu.json`) | no | Two things would be needed and neither is here: a `.conf.json` beside each `.tabu.json` (abapGit's instruction: which table, which condition), and a `TABU <table>` entry in the deploy unit (without it the tool refuses the rows as `not-in-manifest`). With both, the rows would be written into the logon client, whatever their `MANDT` says. |
