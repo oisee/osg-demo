@@ -6,7 +6,9 @@ CLASS zcl_osd_fleet_fuel DEFINITION PUBLIC FINAL CREATE PUBLIC.
 *
 * A voyage without a distance would divide by zero, and HANA and DuckDB
 * raise on that while SQLite returns NULL, so the body leaves such rows out
-* before it divides.
+* before it divides. The quotient is rounded to two decimals in SQL: HANA
+* returns a longer decimal, and how it is then narrowed into the result
+* column (truncated or rounded) is not something to leave to the database.
   PUBLIC SECTION.
     INTERFACES if_amdp_marker_hdb.
     INTERFACES if_oo_adt_classrun.
@@ -35,8 +37,8 @@ CLASS zcl_osd_fleet_fuel IMPLEMENTATION.
     et_fuel = SELECT ship_id,
                      CAST(SUM(fuel_kg) AS INTEGER) AS fuel_kg,
                      CAST(SUM(distance_km) AS INTEGER) AS distance_km,
-                     CAST(SUM(fuel_kg) AS INTEGER) * 100
-                       / CAST(SUM(distance_km) AS INTEGER) AS fuel_per_100km
+                     ROUND( CAST(SUM(fuel_kg) AS INTEGER) * 100
+                            / CAST(SUM(distance_km) AS INTEGER), 2 ) AS fuel_per_100km
                 FROM zosd_fleet_voy
                WHERE mandt = CAST(:iv_client AS NVARCHAR(3))
                  AND distance_km > 0

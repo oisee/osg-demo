@@ -17,8 +17,8 @@ Open SQL and the local OData runtime can use HANA for the same demo flow. eAMDP 
 
 README chapter 5 runs `ZCL_OSD_FLEET_FUEL=>fuel_per_100km` on DuckDB and states what HANA should give. On a HANA Express, with the system started on HANA as above:
 
-1. Run `ZCL_OSD_FLEET_FUEL` (F9, or `POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`). Expected: `Fuel per 100 km (HDB)`, then the same five lines as on DuckDB, S001 `225.94` through S005 `290.48`. The procedure runs on HANA as written: `CAST(SUM(fuel_kg) AS INTEGER) * 100 / CAST(SUM(distance_km) AS INTEGER)`.
-2. If the numbers come out whole (`225.00`), HANA divided two integers as integers; that would be a difference from DuckDB worth recording, and the portable body would need a decimal on one side.
-3. The cube service `ZC_OSD_FLEETCUBE_CDS` answers the same 20 rows on HANA; grouping on `$select` depends on the engine, not on the database.
+1. Run `ZCL_OSD_FLEET_FUEL` (F9, or `POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`). Expected: `Fuel per 100 km (HDB)`, then the same five lines as on DuckDB, S001 `225.94` through S005 `290.48`. The procedure runs on HANA as written.
+2. The one place HANA could differ is the division. On HANA, `/` on two integers gives a decimal (the engine measured `1 / 1` as `DECIMAL(16,6)`), not an integer, so nothing is cut to a whole number; but narrowing that decimal into the two-decimal result column is where HANA truncates and DuckDB rounds. The body therefore rounds in SQL, `ROUND( ..., 2 )`. S002 is the line that shows it: 106.428571 is `106.43` rounded and would be `106.42` truncated. If HANA prints `106.42`, the rounding did not take and that is worth recording.
+3. The cube service `ZC_OSD_FLEETCUBE_CDS` answers the same 20 rows on HANA; grouping on `$select` depends on the engine, not on the database. The property names are the engine's (`SHIPID`, `DEPMONTH`, ...), as in README chapter 5.
 
 Not checked from this repository: nothing here reaches a HANA.

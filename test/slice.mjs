@@ -320,8 +320,6 @@ await check("9 ch3 value help and Ship/Voyages", async () => {
   return "A Aloft; S001 and S006 voyages as seeded";
 });
 
-
-
 await check("10 ch6 segw:zip carries the unit, not the local objects", async () => {
   const work = mkdtempSync(join(tmpdir(), "osg-slice-zip-"));
   try {
