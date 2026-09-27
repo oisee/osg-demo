@@ -99,8 +99,9 @@ collective search help is not served.
   - implements `ZIF_OSD_TRANSACTION` and shows the report's lines;
   - transaction `ZOSD_FLEET` names it;
   - it does not use `SUBMIT` (not implemented).
-- The existing `ZOSD_DEMO_HELLO` / `ZOSD_DEMO_REPORT` / `ZOSD_DEMO` stay as
-  chapter 1.
+- `ZOSD_DEMO_HELLO` stays as chapter 1. The earlier `ZOSD_DEMO_REPORT` and
+  its transaction `ZOSD_DEMO` are gone; chapter 2's transaction is
+  `ZOSD_FLEET`.
 
 ## OData service
 

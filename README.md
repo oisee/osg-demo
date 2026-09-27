@@ -14,15 +14,41 @@ For a terminal runtime, from an open-steamgate checkout run `OSD_PACKS=/path/to/
 
 ## 2. Debug, tests, and dumps
 
-Coming. The report, debugger, failing-test, and dump exercises are drafted in [Next chapters](docs/next-chapters.md).
+The rest of the guide uses the Airship fleet: six ships and their voyages, seeded into `ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY` and `ZOSD_FLEET_STAT` every time the system starts (see [the contract](docs/fleet-contract.md)).
+
+1. Open [ZCL_OSD_FLEET_REPORT](src/zcl_osd_fleet_report.clas.abap) and press **F9**. Expected: the console shows `Airship fleet` and one line per ship, starting with `S001 Albatross (Aloft): 6 voyages, 305 passengers` and ending with `S006 Old Boiler (Maintenance): 0 voyages, 0 passengers`.
+2. Set `osd.debug` to `true` before **osd: Start**. In `ship_lines`, set a breakpoint on `steam_check( ls_ship-steam_pct ).` with **Ctrl+Shift+B** and run **osd: Run as ABAP Application with debugger**. Expected: VS Code stops on that line with the first ship, `S001`, in `ls_ship`. Continue with **F8**; the console prints the same six lines as in step 1.
+3. Break a test on purpose. In [the test class](src/zcl_osd_fleet_report.clas.testclasses.abap), remove the leading `*` from the `broken_on_purpose` declaration (line 11) and from its method (lines 40-44), press **Ctrl+F3**, and run the tests of `ZCL_OSD_FLEET_REPORT` in Testing. Expected: `counts_voyages` is green and `broken_on_purpose` is red with a failed assertion: it expects `1 voyages` for S006, and the report says `0 voyages`. Put the six `*` back, activate, and rerun: only `counts_voyages` is left, green.
+4. Make the report dump. Old Boiler cannot have less than no steam, and `steam_check` says so with `ASSERT iv_steam_pct >= 0`. Give a ship negative steam through OData (chapter 3 explains the calls):
+
+   ```
+   B=http://localhost:8099/sap/opu/odata/sap/ZOSD_FLEET_SRV
+   T=$(curl -s -c jar -D - -o /dev/null -H "x-csrf-token: fetch" "$B/" | grep -i '^x-csrf-token' | tr -d '\r' | cut -d' ' -f2)
+   curl -s -b jar -X MERGE -H "x-csrf-token: $T" -H "Content-Type: application/json" -d '{"SteamPct":-5}' "$B/ShipSet('S004')"
+   ```
+
+   Run the report again with **F9**. Expected: the console shows `Airship fleet` and then `Runtime error: ASSERTION_FAILED` with `zcl_osd_fleet_report.clas.abap` and the line `ASSERT iv_steam_pct >= 0.`; no ship line is printed: the report collects all lines before it writes any, and S004's check stops it first. Set `SteamPct` back to `15` with the same MERGE, or restart the system: the seed replaces the rows at every start.
+5. Run the transaction. Open the launchpad's **WEBGUI** tile (or `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET`) and enter `ZOSD_FLEET`. Expected: the screen is titled `ZOSD_FLEET - Airship fleet` and lists the same six lines. The transaction is [ZCL_OSD_FLEET_TRAN](src/zcl_osd_fleet_tran.clas.abap): it implements the engine's `ZIF_OSD_TRANSACTION` and calls `ship_lines( )`; it does not `SUBMIT` a report.
 
 ## 3. OData ladder
 
-Coming. The core service navigation and method map are drafted in [Next chapters](docs/next-chapters.md).
+`ZOSD_FLEET_SRV` is defined in one file, [zosd_fleet.stg.yaml](src/zosd_fleet.stg.yaml); the engine compiles it into the SEGW project, the model and the data provider at start. [ZCL_ZOSD_FLEET_DPC_EXT](src/zcl_zosd_fleet_dpc_ext.clas.abap) is the hand-written part. The URLs below assume port 8099; any browser shows the `GET`s.
 
-## 4. Fiori apps and APC
+1. `$metadata`: open `http://localhost:8099/sap/opu/odata/sap/ZOSD_FLEET_SRV/$metadata`. Expected: three entity sets, `ShipSet`, `VoyageSet` and `StatusVHSet`; `Ship` has the navigation property `Voyages`, and the annotations give `Ship/Status` a value list.
+2. Query: `.../ShipSet?$format=json`. Expected: six ships, each with `StatusText` (`Aloft`, `Docked` or `Maintenance`) next to its `Status`. `ShipSet/$count` answers `6`. `StatusText` is not a column of `ZOSD_FLEET_SHIP`; `shipset_get_entityset` fills it from `ZOSD_FLEET_STAT`.
+3. Filter: `.../ShipSet?$filter=Status eq 'A'&$format=json`. Expected: S001 Albatross and S003 Brass Heron, the two aloft ships. Try `$orderby=SteamPct desc` and `$top=2&$inlinecount=allpages`: the page has two rows and `__count` stays `6`.
+4. Change a ship with MERGE, using the commands of chapter 2 step 4 with `-d '{"SteamPct":55}'` on `ShipSet('S002')`. Expected: HTTP 204; `.../ShipSet('S002')?$format=json` then reads `"SteamPct":55`, and `Name` is still `Nimbus`, because MERGE changes only the fields it sends. `shipset_update_entity` writes the row.
+5. Value help: `.../StatusVHSet?$format=json`. Expected: three rows, `A` Aloft, `D` Docked, `M` Maintenance, served by the elementary search help `ZOSD_FLEET_STATUS_SH`. `.../StatusVHSet('A')` answers the single row.
+6. Navigation: `.../ShipSet('S001')/Voyages?$format=json`. Expected: S001's six voyages, from `V00001` in January to later in the year. `.../ShipSet('S006')/Voyages` is empty: Old Boiler never left port. `voyageset_get_entityset` serves this navigation, because a `table:` source has no association binding yet.
 
-Coming. The core APC example and planned Fiori exercise are noted in [Next chapters](docs/next-chapters.md).
+## 4. Fiori apps
+
+The pack's [webapp/](webapp/) is a Fiori Elements list report and object page over `ZOSD_FLEET_SRV`. It has no controller code: the columns, filters and facets come from the annotations in the YAML. SAPUI5 loads from ui5.sap.com, so the browser needs to reach it.
+
+1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the list report opens and shows the six ships with Ship, Name, Status (as text, e.g. `Aloft`), Steam (%) and Home port.
+2. In the filter bar, open the value help of **Status**, pick `Maintenance`, and press **Go**. Expected: Cumulus and Old Boiler. The value help lists the three statuses from `StatusVHSet`.
+3. Click **Old Boiler**. Expected: the object page shows its general data and an empty **Voyages** table. Go back and open **Albatross**: its **Voyages** table lists six voyages.
+4. The tile opens the app as a page of its own (`/app/osg-demo/`). Its manifest also declares the intent `AirshipFleet-display`, which a real launchpad uses; see [the contract](docs/fleet-contract.md#app).
 
 ## 5. AMDP
 
