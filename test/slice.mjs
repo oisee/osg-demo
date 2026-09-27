@@ -203,6 +203,10 @@ if (process.env.SLICE_SKIP_UI === "1") {
       // on this pack's app, its BSP copy or its service, or a console error
       // that names them.
       const ours = /\/app\/osg-demo\/|\/sap\/bc\/ui5_ui5\/sap\/zosg_demo\/|\/ZOSD_FLEET_SRV\//i;
+      // what SAPUI5 asks every app for and does without: the component
+      // preload and the flexibility bundles of an app with no preload. A
+      // BSP on a system answers them the same way.
+      const uiProbe = /\/(Component-preload\.js|changes\/(changes|flexibility)-bundle\.json)(\?|$)/;
       const errors = [];
       const failures = [];
       const listen = (p) => {
@@ -212,7 +216,7 @@ if (process.env.SLICE_SKIP_UI === "1") {
       listen(page);
       context.on("page", listen);
       context.on("response", (r) => {
-        if (r.status() >= 400 && r.url().startsWith(base) && ours.test(r.url()) && !/Component-preload\.js(\?|$)/.test(r.url())) failures.push(`${r.status()} ${r.url()}`);
+        if (r.status() >= 400 && r.url().startsWith(base) && ours.test(r.url()) && !uiProbe.test(r.url())) failures.push(`${r.status()} ${r.url()}`);
       });
       await page.goto(`${base}/app/flp.html`, {waitUntil: "domcontentloaded"});
       // a tile whose URL is not an intent may open in this tab or in a new
