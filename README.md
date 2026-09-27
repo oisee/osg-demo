@@ -19,7 +19,7 @@ The rest of the guide uses the Airship fleet: six ships and their voyages, seede
 1. Open [ZCL_OSD_FLEET_REPORT](src/zcl_osd_fleet_report.clas.abap) and press **F9**. Expected: the console shows `Airship fleet` and one line per ship, starting with `S001 Albatross (Aloft): 6 voyages, 305 passengers` and ending with `S006 Old Boiler (Maintenance): 0 voyages, 0 passengers`.
 2. Set `osd.debug` to `true` before **osd: Start**. In `ship_lines`, set a breakpoint on `steam_check( ls_ship-steam_pct ).` with **Ctrl+Shift+B** and run **osd: Run as ABAP Application with debugger**. Expected: VS Code stops on that line with the first ship, `S001`, in `ls_ship`. Continue with **F8**; the console prints the same six lines as in step 1.
 3. Break a test on purpose. In [the test class](src/zcl_osd_fleet_report.clas.testclasses.abap), remove the leading `*` from the `broken_on_purpose` declaration (line 11) and from its method (lines 40-44), press **Ctrl+F3**, and run the tests of `ZCL_OSD_FLEET_REPORT` in Testing. Expected: `counts_voyages` is green and `broken_on_purpose` is red with a failed assertion: it expects `1 voyages` for S006, and the report says `0 voyages`. Put the six `*` back, activate, and rerun: only `counts_voyages` is left, green.
-4. Make the report dump. Old Boiler cannot have less than no steam, and `steam_check` says so with `ASSERT iv_steam_pct >= 0`. Give a ship negative steam through OData (chapter 3 explains the calls):
+4. Make the report dump. A ship cannot have less than no steam, and `steam_check` says so with `ASSERT iv_steam_pct >= 0`. Give a ship negative steam through OData (chapter 3 explains the calls):
 
    ```
    B=http://localhost:8099/sap/opu/odata/sap/ZOSD_FLEET_SRV
@@ -28,7 +28,7 @@ The rest of the guide uses the Airship fleet: six ships and their voyages, seede
    ```
 
    Run the report again with **F9**. Expected: the console shows `Airship fleet` and then `Runtime error: ASSERTION_FAILED` with `zcl_osd_fleet_report.clas.abap` and the line `ASSERT iv_steam_pct >= 0.`; no ship line is printed: the report collects all lines before it writes any, and S004's check stops it first. Set `SteamPct` back to `15` with the same MERGE, or restart the system: the seed replaces the rows at every start.
-5. Run the transaction. Open the launchpad's **WEBGUI** tile (or `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET`) and enter `ZOSD_FLEET`. Expected: the screen is titled `ZOSD_FLEET - Airship fleet` and lists the same six lines. The transaction is [ZCL_OSD_FLEET_TRAN](src/zcl_osd_fleet_tran.clas.abap): it implements the engine's `ZIF_OSD_TRANSACTION` and calls `ship_lines( )`; it does not `SUBMIT` a report.
+5. Run the transaction. Open the launchpad's **WEBGUI** tile and enter `ZOSD_FLEET` (or open `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET` directly). Expected: the screen is titled `ZOSD_FLEET - Airship fleet` and lists the same six lines. The transaction is [ZCL_OSD_FLEET_TRAN](src/zcl_osd_fleet_tran.clas.abap): it implements the engine's `ZIF_OSD_TRANSACTION` and calls `ship_lines( )`; it does not `SUBMIT` a report.
 
 ## 3. OData ladder
 
@@ -45,7 +45,7 @@ The rest of the guide uses the Airship fleet: six ships and their voyages, seede
 
 The pack's [webapp/](webapp/) is a Fiori Elements list report and object page over `ZOSD_FLEET_SRV`. It has no controller code: the columns, filters and facets come from the annotations in the YAML. SAPUI5 loads from ui5.sap.com, so the browser needs to reach it.
 
-1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the list report opens and shows the six ships with Ship, Name, Status (as text, e.g. `Aloft`), Steam (%) and Home port.
+1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the list report opens and shows the six ships with Ship, Name, Status (text first, e.g. `Aloft (A)`), Steam (%) and Home port.
 2. In the filter bar, open the value help of **Status**, pick `Maintenance`, and press **Go**. Expected: Cumulus and Old Boiler. The value help lists the three statuses from `StatusVHSet`.
 3. Click **Old Boiler**. Expected: the object page shows its general data and an empty **Voyages** table. Go back and open **Albatross**: its **Voyages** table lists six voyages.
 4. The tile opens the app as a page of its own (`/app/osg-demo/`). Its manifest also declares the intent `AirshipFleet-display`, which a real launchpad uses; see [the contract](docs/fleet-contract.md#app).

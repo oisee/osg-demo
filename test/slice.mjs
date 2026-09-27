@@ -27,6 +27,13 @@
 //        needs to reach it);
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
 //
+// and one per README chapter after the slice:
+//     7. ch2: transaction ZOSD_FLEET (WEBGUI) shows the six report lines;
+//     8. ch2: with negative steam on a ship the classrun dumps in steam_check
+//        (ASSERTION_FAILED), and prints again once the value is restored;
+//     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
+//        S001 and S006 through ShipSet(..)/Voyages match the seed.
+//
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
 // engine's Playwright expects (for a machine with a different build).
@@ -235,6 +242,51 @@ await check("6 ABAP Unit ltcl_fleet", async () => {
   expect(/testMethod adtcore:name="COUNTS_VOYAGES"/.test(xml), "COUNTS_VOYAGES did not run");
   expect(!/<alert[\s>]/.test(xml), `the run has alerts:\n${xml}`);
   return "counts_voyages passed";
+});
+
+await check("7 ch2 transaction ZOSD_FLEET", async () => {
+  const res = await fetch(`${base}/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET`);
+  const html = await res.text();
+  expect(res.ok, `HTTP ${res.status}`);
+  expect(html.includes('data-transaction="ZOSD_FLEET - Airship fleet"'), "the screen is not titled ZOSD_FLEET - Airship fleet");
+  const missing = ships.filter((s) => !html.includes(`${s.ship_id} ${s.name} (`));
+  expect(missing.length === 0, `no line for ${missing.map((s) => s.ship_id)}`);
+  return `${ships.length} lines on the screen`;
+});
+
+await check("8 ch2 negative steam dumps in steam_check", async () => {
+  const url = `${odata}/ShipSet('S004')`;
+  const before = (await json(url)).SteamPct;
+  const headers = {...await csrf(`${odata}/`), "content-type": "application/json"};
+  const merge = (value) => fetch(url, {method: "MERGE", headers, body: JSON.stringify({SteamPct: value})});
+  const classrun = async () => {
+    const adt = await csrf(`${base}/sap/bc/adt/discovery`);
+    return (await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, {method: "POST", headers: adt})).text();
+  };
+  expect((await merge(-5)).status === 204, "MERGE -5 failed");
+  let dumped;
+  try {
+    dumped = await classrun();
+  } finally {
+    await merge(before);
+  }
+  expect(/ASSERTION_FAILED/.test(dumped) && dumped.includes("ASSERT iv_steam_pct >= 0."), `no assertion dump in:\n${dumped}`);
+  expect(!/^S00\d /m.test(dumped), "ship lines were printed despite the dump");
+  const again = await classrun();
+  expect(/^S004 /m.test(again), "the report does not print after the restore");
+  return "ASSERTION_FAILED, then clean after restoring";
+});
+
+await check("9 ch3 value help and Ship/Voyages", async () => {
+  const vh = await json(`${odata}/StatusVHSet('A')`);
+  expect(vh.Status === "A" && vh.Text === "Aloft", `StatusVHSet('A') is ${JSON.stringify(vh)}`);
+  const voyages = seed("zosd_fleet_voy");
+  for (const id of ["S001", "S006"]) {
+    const got = (await json(`${odata}/ShipSet('${id}')/Voyages`)).results.map((v) => v.VoyageId).sort();
+    const want = voyages.filter((v) => v.ship_id === id).map((v) => v.voyage_id).sort();
+    expect(JSON.stringify(got) === JSON.stringify(want), `${id}/Voyages: ${got} instead of ${want}`);
+  }
+  return "A Aloft; S001 and S006 voyages as seeded";
 });
 
 stop();

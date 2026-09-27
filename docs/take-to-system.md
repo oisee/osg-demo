@@ -16,7 +16,7 @@ unzip -Z1 /tmp/osg-demo.zip
 rm -rf "$STAGE"
 ```
 
-The tool checks every staged source object against the unit's type/name allowlist and refuses SAP-owned names even if listed. It writes `.abapgit.xml`, `src/package.devc.xml`, and the admitted files into the zip. Expected: the tool lists `CLAS zosd_demo_hello`; the zip contains no `*.tran.xml`. If an extra object is staged, the command exits with `not-in-manifest` and produces no new zip; an older zip at the same path is left as it was, so remove it before retrying (or use a new output name) and inspect the output and zip before import. This unit has no seed rows, SEGW service, or app. The parent open-steamgate project's `demo` and `demo-app` units can package their SEGW service, DPC/MPC, DDIC, search help, seed rows, and BSP plus ICF node separately. This demo manifest does not authorize those objects.
+The tool checks every staged source object against the unit's type/name allowlist and refuses SAP-owned names even if listed. It writes `.abapgit.xml`, `src/package.devc.xml`, and the admitted files into the zip. Expected: the tool lists `CLAS zosd_demo_hello`; the zip contains no `*.tran.xml`. If an extra object is staged, the command exits with `not-in-manifest` and produces no new zip; an older zip at the same path is left as it was, so remove it before retrying (or use a new output name) and inspect the output and zip before import. This procedure stages only the hello class. The unit also lists the Airship fleet's tables, search help, report class, OData service and app; staging and importing those is not written up yet (it comes with chapter 6).
 
 ## Offline abapGit import
 
