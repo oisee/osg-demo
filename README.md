@@ -68,7 +68,11 @@ Coming. See [Running on HANA](docs/hana.md) and the planned exercise in [Next ch
 
 ## 6. Take it to a system
 
-Coming. The reviewed offline packaging path is in [Take it to a system](docs/take-to-system.md).
+What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
+
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the three fleet tables, the search help, the report class, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no zip. The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
+3. Importing the zip into a sandbox is a human step on a system you are allowed to change; the page lists what to activate and check there.
 
 ## Run the checks
 

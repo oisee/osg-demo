@@ -32,13 +32,17 @@
 //     8. ch2: with negative steam on a ship the classrun dumps in steam_check
 //        (ASSERTION_FAILED), and prints again once the value is restored;
 //     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
-//        S001 and S006 through ShipSet(..)/Voyages match the seed.
+//        S001 and S006 through ShipSet(..)/Voyages match the seed;
+//    10. ch6: segw:zip of this folder refuses exactly the two local objects,
+//        and of a copy without them carries every object the deploy unit
+//        lists and no seed rows (docs/take-to-system.md).
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
 // engine's Playwright expects (for a machine with a different build).
 import {spawn, spawnSync} from "node:child_process";
-import {readFileSync} from "node:fs";
+import {cpSync, existsSync, mkdtempSync, readFileSync, rmSync} from "node:fs";
+import {tmpdir} from "node:os";
 import {createServer} from "node:net";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
@@ -309,6 +313,35 @@ await check("9 ch3 value help and Ship/Voyages", async () => {
     expect(JSON.stringify(got) === JSON.stringify(want), `${id}/Voyages: ${got} instead of ${want}`);
   }
   return "A Aloft; S001 and S006 voyages as seeded";
+});
+
+
+await check("10 ch6 segw:zip carries the unit, not the local objects", async () => {
+  const work = mkdtempSync(join(tmpdir(), "osg-slice-zip-"));
+  try {
+    const zip = (from, out) => spawnSync(process.execPath, ["tools/osd-abapgit-zip.mjs", from, "--unit", "osg-demo",
+      "--manifest", join(repo, "deploy", "manifest.json"), "--out", out], {cwd: home, encoding: "utf8"});
+    const refused = zip(repo, join(work, "refused.zip"));
+    const said = refused.stdout + refused.stderr;
+    expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
+    const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
+    const refusedKeys = [...new Set(keys)].sort().join(", ");
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+
+    const stage = join(work, "osg-demo");
+    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
+      && !/zcl_osd_fleet_tran\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+    const made = zip(stage, join(work, "osg-demo.zip"));
+    expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
+    const listed = JSON.parse(readFileSync(join(repo, "deploy", "manifest.json"), "utf8")).units["osg-demo"].objects;
+    const carried = made.stdout.toLowerCase();
+    const missing = listed.filter((o) => !carried.includes(o.split(" ")[1].replace(/^\/sap\/bc\/ui5_ui5\/sap\//i, "").toLowerCase()));
+    expect(missing.length === 0, `not carried: ${missing.join(", ")}`);
+    expect(/NOT carried: zosd_fleet_ship\.tabu\.json/.test(made.stdout), "the seed rows were carried, or not reported");
+    return `refuses ${refusedKeys}; staged copy carries all ${listed.length} listed objects, no seed rows`;
+  } finally {
+    rmSync(work, {recursive: true, force: true});
+  }
 });
 
 stop();
