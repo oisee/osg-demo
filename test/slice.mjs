@@ -6,10 +6,9 @@
 //   OSD_HOME=<open-steamgate checkout> node test/slice.mjs
 //
 // The engine checkout needs `npm install && npm run bootstrap` done once.
-// Its main branch is enough for these checks: the tile opens the pack's page
-// at /app/osg-demo/. The BSP copy of the app (/sap/bc/ui5_ui5/sap/zosg_demo/)
-// loads data only with the engine's pack-app manifest rebase, open-steamgate
-// branch `vg/pack-manifest-rebase` until it is merged.
+// Its main branch at 0ba17ed (oisee/open-steamgate#173) or later: the tile
+// opens the intent #AirshipFleet-display, which the launchpad resolves from
+// the pack's manifest to the app's BSP copy (/sap/bc/ui5_ui5/sap/zosg_demo/).
 //
 // What it does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
@@ -21,8 +20,9 @@
 //     2. POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT prints a line for S001;
 //     3. ShipSet?$filter=Status eq 'A' returns exactly the seed's aloft ships;
 //     4. a MERGE on ShipSet('S002') reads back with the new value (then restored);
-//     5. the "Airship fleet" tile on the launchpad opens the list report at
-//        /app/osg-demo/, which shows the six ship names (Playwright from the
+//     5. the "Airship fleet" tile on the launchpad opens the list report by
+//        the intent #AirshipFleet-display, inside the launchpad, and it shows
+//        the six ship names (Playwright from the
 //        engine's node_modules; SAPUI5 comes from ui5.sap.com, so the browser
 //        needs to reach it);
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
@@ -228,23 +228,21 @@ if (process.env.SLICE_SKIP_UI === "1") {
         if (r.status() >= 400 && r.url().startsWith(base) && ours.test(r.url()) && !uiProbe.test(r.url())) failures.push(`${r.status()} ${r.url()}`);
       });
       await page.goto(`${base}/app/flp.html`, {waitUntil: "domcontentloaded"});
-      // a tile whose URL is not an intent may open in this tab or in a new
-      // one; follow whichever happens
+      // the tile's URL is the launchpad's own intent, so it stays in the
+      // shell: same tab, the hash changes, the app is embedded
       const tile = page.getByText("Airship fleet", {exact: true}).first();
       await tile.waitFor({timeout: 90_000});
-      const [app] = await Promise.all([
-        Promise.race([
-          page.context().waitForEvent("page", {timeout: 90_000}),
-          page.waitForURL(/\/app\/osg-demo\//, {timeout: 90_000}).then(() => page),
-        ]),
+      await Promise.all([
+        page.waitForURL(/#AirshipFleet-display/, {timeout: 90_000}),
         tile.click(),
       ]);
-      await app.waitForLoadState("domcontentloaded");
+      const app = page;
       const names = ships.map((s) => s.name);
       for (const name of names) {
         await app.getByText(name, {exact: true}).first().waitFor({timeout: 90_000});
       }
-      expect(new URL(app.url()).pathname.startsWith("/app/osg-demo/"), `the tile went to ${app.url()}`);
+      expect(new URL(app.url()).pathname === "/app/flp.html" && app.url().includes("#AirshipFleet-display"),
+        `the tile went to ${app.url()}`);
       await app.waitForLoadState("networkidle").catch(() => {});
       for (const e of errors) console.log(`      console error: ${e.replace(/\s+/g, " ").slice(0, 200)}`);
       const named = errors.filter((e) => ours.test(e) || /ZOSD_FLEET|osd\.fleet/.test(e));
