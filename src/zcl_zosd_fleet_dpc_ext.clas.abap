@@ -296,6 +296,9 @@ CLASS zcl_zosd_fleet_dpc_ext IMPLEMENTATION.
 
   METHOD voyageset_get_entityset.
     DATA lv_ship_id TYPE ty_ship_id.
+    DATA lv_skip    TYPE i.
+    DATA lv_top     TYPE i.
+    DATA lv_index   TYPE i.
 
 * ShipSet('S001')/Voyages: the parent key arrives in it_key_tab
     IF it_navigation_path IS INITIAL.
@@ -323,5 +326,21 @@ CLASS zcl_zosd_fleet_dpc_ext IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF TABLE et_entityset
       WHERE ship_id = lv_ship_id
       ORDER BY dep_date voyage_id.
+
+* the object page's voyages table pages like any list
+    es_response_context-inlinecount = |{ lines( et_entityset ) }|.
+    lv_skip = is_paging-skip.
+    lv_top  = is_paging-top.
+    IF lv_skip > 0.
+      DO lv_skip TIMES.
+        DELETE et_entityset INDEX 1.
+      ENDDO.
+    ENDIF.
+    IF lv_top > 0.
+      lv_index = lv_top + 1.
+      WHILE lines( et_entityset ) >= lv_index.
+        DELETE et_entityset INDEX lv_index.
+      ENDWHILE.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

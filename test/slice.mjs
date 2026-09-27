@@ -194,12 +194,24 @@ if (process.env.SLICE_SKIP_UI === "1") {
       page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
       page.on("pageerror", (e) => errors.push(e.message));
       await page.goto(`${base}/app/flp.html`, {waitUntil: "domcontentloaded"});
-      await page.getByText("Airship fleet", {exact: true}).first().click({timeout: 90_000});
+      // a tile whose URL is not an intent may open in this tab or in a new
+      // one; follow whichever happens
+      const tile = page.getByText("Airship fleet", {exact: true}).first();
+      await tile.waitFor({timeout: 90_000});
+      const [app] = await Promise.all([
+        Promise.race([
+          page.context().waitForEvent("page", {timeout: 90_000}),
+          page.waitForURL(/\/app\/osg-demo\//, {timeout: 90_000}).then(() => page),
+        ]),
+        tile.click(),
+      ]);
+      if (app !== page) app.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+      await app.waitForLoadState("domcontentloaded");
       const names = ships.map((s) => s.name);
       for (const name of names) {
-        await page.getByText(name, {exact: true}).first().waitFor({timeout: 90_000});
+        await app.getByText(name, {exact: true}).first().waitFor({timeout: 90_000});
       }
-      expect(new URL(page.url()).pathname.startsWith("/app/osg-demo/"), `the tile went to ${page.url()}`);
+      expect(new URL(app.url()).pathname.startsWith("/app/osg-demo/"), `the tile went to ${app.url()}`);
       return `${names.length} rows: ${names.join(", ")}${errors.length ? ` (console errors: ${errors.length})` : ""}`;
     } finally {
       await browser.close();
