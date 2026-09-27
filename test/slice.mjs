@@ -6,8 +6,10 @@
 //   OSD_HOME=<open-steamgate checkout> node test/slice.mjs
 //
 // The engine checkout needs `npm install && npm run bootstrap` done once.
-// Until the engine's pack-app manifest rebase is on its main branch, check
-// out `fix/pack-app-manifest-rebase` there, or the Fiori app loads no data.
+// Its main branch is enough for these checks: the tile opens the pack's page
+// at /app/osg-demo/. The BSP copy of the app (/sap/bc/ui5_ui5/sap/zosg_demo/)
+// loads data only with the engine's pack-app manifest rebase, open-steamgate
+// branch `vg/pack-manifest-rebase` until it is merged.
 //
 // What it does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
@@ -19,9 +21,10 @@
 //     2. POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT prints a line for S001;
 //     3. ShipSet?$filter=Status eq 'A' returns exactly the seed's aloft ships;
 //     4. a MERGE on ShipSet('S002') reads back with the new value (then restored);
-//     5. the "Airship fleet" tile opens the list report, which shows the six
-//        ship names (Playwright from the engine's node_modules; SAPUI5 comes
-//        from ui5.sap.com, so the browser needs to reach it);
+//     5. the "Airship fleet" tile on the launchpad opens the list report at
+//        /app/osg-demo/, which shows the six ship names (Playwright from the
+//        engine's node_modules; SAPUI5 comes from ui5.sap.com, so the browser
+//        needs to reach it);
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
@@ -133,7 +136,11 @@ await check("1 tables + seed: ShipSet/$count", async () => {
   expect(res.ok, `HTTP ${res.status}`);
   const count = Number(await res.text());
   expect(count === ships.length && count === 6, `expected ${ships.length} (6), got ${count}`);
-  return `${count} ships`;
+  // a page of two still counts every ship, as the list report's title does
+  const page = await json(`${odata}/ShipSet?$top=2&$inlinecount=allpages`);
+  expect(page.results.length === 2 && Number(page.__count) === count,
+    `$top=2&$inlinecount=allpages: ${page.results.length} rows, __count ${page.__count}`);
+  return `${count} ships, a page of 2 counts ${page.__count}`;
 });
 
 await check("2 classrun ZCL_OSD_FLEET_REPORT prints S001", async () => {
@@ -192,7 +199,7 @@ if (process.env.SLICE_SKIP_UI === "1") {
       for (const name of names) {
         await page.getByText(name, {exact: true}).first().waitFor({timeout: 90_000});
       }
-      expect(page.url().includes("#AirshipFleet-display"), `the tile went to ${page.url()}`);
+      expect(new URL(page.url()).pathname.startsWith("/app/osg-demo/"), `the tile went to ${page.url()}`);
       return `${names.length} rows: ${names.join(", ")}${errors.length ? ` (console errors: ${errors.length})` : ""}`;
     } finally {
       await browser.close();

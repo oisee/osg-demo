@@ -154,6 +154,9 @@ CLASS zcl_zosd_fleet_dpc_ext IMPLEMENTATION.
     fill_status_text( CHANGING ct_ship = et_entityset ).
     order_ship( EXPORTING it_order = it_order CHANGING ct_ship = et_entityset ).
 
+* $inlinecount counts every matching row, before the page is cut
+    es_response_context-inlinecount = |{ lines( et_entityset ) }|.
+
     lv_skip = is_paging-skip.
     lv_top  = is_paging-top.
     IF lv_skip > 0.
