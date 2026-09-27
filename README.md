@@ -31,3 +31,7 @@ Coming. See [Running on HANA](docs/hana.md) and the planned exercise in [Next ch
 ## 6. Take it to a system
 
 Coming. The reviewed offline packaging path is in [Take it to a system](docs/take-to-system.md).
+
+## Run the checks
+
+`OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com), and the report's ABAP Unit test. It stops the engine it started, and exits non-zero if any check fails.

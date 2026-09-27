@@ -112,10 +112,17 @@ Defined in `src/zosd_fleet.stg.yaml` and compiled by `stg-compile --all`.
 
 | Entity   | Set         | Keys      | Source             | Operations         |
 |----------|-------------|-----------|--------------------|--------------------|
-| Ship     | ShipSet     | ShipId    | `ZOSD_FLEET_SHIP`  | C R U D Q          |
-| Voyage   | VoyageSet   | VoyageId  | `ZOSD_FLEET_VOY`   | R Q                |
+| Ship     | ShipSet     | ShipId    | the DPC_EXT over `ZOSD_FLEET_SHIP` | C R U D Q |
+| Voyage   | VoyageSet   | VoyageId  | `table: ZOSD_FLEET_VOY` (SADL) | R Q    |
 | StatusVH | StatusVHSet | Status    | the search help    | R Q                |
 
+- Ship has no `table:` source. A table source types the entity as the table
+  (`TS_SHIP type ZOSD_FLEET_SHIP`), and the table has no column for
+  `StatusText`, so the DPC_EXT could not fill it. Ship's properties declare
+  its structure instead, and `ZCL_ZOSD_FLEET_DPC_EXT` serves all five
+  operations with Open SQL over `ZOSD_FLEET_SHIP` (filter, search,
+  `$orderby`, paging), the way the engine's own `ZCL_ZSTG_DEMO_DPC_EXT`
+  serves Travel.
 - Property names are the fields in CamelCase: `ShipId`, `Name`, `Status`,
   `SteamPct`, `HomePort`, `VoyageId`, `FromPort`, `ToPort`, `DepDate`,
   `ArrDate`, `Passengers`, `FuelKg`, `Text`.
@@ -132,7 +139,7 @@ Defined in `src/zosd_fleet.stg.yaml` and compiled by `stg-compile --all`.
   - The search-help mapping maps both `query` and `read`, so
     `StatusVHSet('A')` answers.
 - Navigation `Ship/Voyages` (1:n on `ShipId`): the association is declared
-  in the model, but a `table:` source has no association binding. So
+  in the model, but Voyage's `table:` source has no association binding. So
   `ZCL_ZOSD_FLEET_DPC_EXT` filters `ZOSD_FLEET_VOY` by `SHIP_ID` for that
   navigation. The first slice does not use it; the object-page facet does.
   A binding for table sources in the engine can come after the slice.

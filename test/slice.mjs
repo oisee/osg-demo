@@ -25,6 +25,8 @@
 //     6. ABAP Unit of ZCL_OSD_FLEET_REPORT (ltcl_fleet) is green.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
+// SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
+// engine's Playwright expects (for a machine with a different build).
 import {spawn, spawnSync} from "node:child_process";
 import {readFileSync} from "node:fs";
 import {createServer} from "node:net";
@@ -178,7 +180,7 @@ if (process.env.SLICE_SKIP_UI === "1") {
 } else {
   await check("5 tile -> list report shows the six ships", async () => {
     const {chromium} = createRequire(join(home, "package.json"))("playwright");
-    const browser = await chromium.launch();
+    const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePath: process.env.SLICE_CHROMIUM} : {});
     try {
       const page = await browser.newPage();
       const errors = [];
