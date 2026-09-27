@@ -3,5 +3,13 @@
   "description": "Guided ABAP demo for open-steamgate",
   "package": "$ZOSD_DEMO",
   "order": 100,
-  "abap": "src"
+  "abap": "src",
+  "tiles": [
+    {
+      "id": "osg-demo-fleet",
+      "title": "Airship fleet",
+      "subtitle": "osg-demo",
+      "url": "/app/osg-demo/"
+    }
+  ]
 }

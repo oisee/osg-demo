@@ -1,0 +1,5 @@
+[
+  {"mandt": "123", "status": "D", "text": "Docked"},
+  {"mandt": "123", "status": "A", "text": "Aloft"},
+  {"mandt": "123", "status": "M", "text": "Maintenance"}
+]

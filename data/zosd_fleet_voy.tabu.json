@@ -1,0 +1,22 @@
+[
+  {"mandt": "123", "voyage_id": "V00001", "ship_id": "S001", "from_port": "Port Aurel", "to_port": "Cloudhaven", "dep_date": "2026-01-03", "arr_date": "2026-01-04", "passengers": 12, "fuel_kg": 400},
+  {"mandt": "123", "voyage_id": "V00002", "ship_id": "S003", "from_port": "Cloudhaven", "to_port": "Port Aurel", "dep_date": "2026-01-10", "arr_date": "2026-01-12", "passengers": 29, "fuel_kg": 537},
+  {"mandt": "123", "voyage_id": "V00003", "ship_id": "S002", "from_port": "Tinmere", "to_port": "Port Aurel", "dep_date": "2026-02-17", "arr_date": "2026-02-20", "passengers": 46, "fuel_kg": 674},
+  {"mandt": "123", "voyage_id": "V00004", "ship_id": "S001", "from_port": "Port Aurel", "to_port": "Tinmere", "dep_date": "2026-02-24", "arr_date": "2026-02-25", "passengers": 63, "fuel_kg": 811},
+  {"mandt": "123", "voyage_id": "V00005", "ship_id": "S005", "from_port": "Cloudhaven", "to_port": "Tinmere", "dep_date": "2026-03-07", "arr_date": "2026-03-09", "passengers": 20, "fuel_kg": 948},
+  {"mandt": "123", "voyage_id": "V00006", "ship_id": "S003", "from_port": "Tinmere", "to_port": "Cloudhaven", "dep_date": "2026-04-14", "arr_date": "2026-04-17", "passengers": 37, "fuel_kg": 1085},
+  {"mandt": "123", "voyage_id": "V00007", "ship_id": "S001", "from_port": "Port Aurel", "to_port": "Cloudhaven", "dep_date": "2026-04-21", "arr_date": "2026-04-22", "passengers": 54, "fuel_kg": 1222},
+  {"mandt": "123", "voyage_id": "V00008", "ship_id": "S004", "from_port": "Cloudhaven", "to_port": "Port Aurel", "dep_date": "2026-05-04", "arr_date": "2026-05-06", "passengers": 71, "fuel_kg": 459},
+  {"mandt": "123", "voyage_id": "V00009", "ship_id": "S002", "from_port": "Tinmere", "to_port": "Port Aurel", "dep_date": "2026-05-11", "arr_date": "2026-05-14", "passengers": 28, "fuel_kg": 596},
+  {"mandt": "123", "voyage_id": "V00010", "ship_id": "S003", "from_port": "Port Aurel", "to_port": "Tinmere", "dep_date": "2026-06-18", "arr_date": "2026-06-19", "passengers": 45, "fuel_kg": 733},
+  {"mandt": "123", "voyage_id": "V00011", "ship_id": "S001", "from_port": "Cloudhaven", "to_port": "Tinmere", "dep_date": "2026-07-25", "arr_date": "2026-07-27", "passengers": 62, "fuel_kg": 870},
+  {"mandt": "123", "voyage_id": "V00012", "ship_id": "S005", "from_port": "Tinmere", "to_port": "Cloudhaven", "dep_date": "2026-07-08", "arr_date": "2026-07-11", "passengers": 19, "fuel_kg": 1007},
+  {"mandt": "123", "voyage_id": "V00013", "ship_id": "S003", "from_port": "Port Aurel", "to_port": "Cloudhaven", "dep_date": "2026-08-15", "arr_date": "2026-08-16", "passengers": 36, "fuel_kg": 1144},
+  {"mandt": "123", "voyage_id": "V00014", "ship_id": "S001", "from_port": "Cloudhaven", "to_port": "Port Aurel", "dep_date": "2026-08-22", "arr_date": "2026-08-24", "passengers": 53, "fuel_kg": 1281},
+  {"mandt": "123", "voyage_id": "V00015", "ship_id": "S002", "from_port": "Tinmere", "to_port": "Port Aurel", "dep_date": "2026-09-05", "arr_date": "2026-09-08", "passengers": 70, "fuel_kg": 518},
+  {"mandt": "123", "voyage_id": "V00016", "ship_id": "S004", "from_port": "Port Aurel", "to_port": "Tinmere", "dep_date": "2026-10-12", "arr_date": "2026-10-13", "passengers": 27, "fuel_kg": 655},
+  {"mandt": "123", "voyage_id": "V00017", "ship_id": "S003", "from_port": "Cloudhaven", "to_port": "Tinmere", "dep_date": "2026-10-19", "arr_date": "2026-10-21", "passengers": 44, "fuel_kg": 792},
+  {"mandt": "123", "voyage_id": "V00018", "ship_id": "S001", "from_port": "Tinmere", "to_port": "Cloudhaven", "dep_date": "2026-11-26", "arr_date": "2026-11-29", "passengers": 61, "fuel_kg": 929},
+  {"mandt": "123", "voyage_id": "V00019", "ship_id": "S005", "from_port": "Port Aurel", "to_port": "Cloudhaven", "dep_date": "2026-11-09", "arr_date": "2026-11-10", "passengers": 18, "fuel_kg": 1066},
+  {"mandt": "123", "voyage_id": "V00020", "ship_id": "S003", "from_port": "Cloudhaven", "to_port": "Port Aurel", "dep_date": "2026-12-16", "arr_date": "2026-12-18", "passengers": 35, "fuel_kg": 1203}
+]

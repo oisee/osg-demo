@@ -1,0 +1,115 @@
+# The Airship fleet service (docs/fleet-contract.md, "OData service").
+# The engine's `npm run transpile` compiles it with `stg-compile --all`;
+# ZCL_ZOSD_FLEET_DPC_EXT in this folder wins over the generated skeleton.
+#
+# Voyage is served by SADL over its table. Ship is not: a table source types
+# the entity as the table, and ZOSD_FLEET_SHIP has no column for StatusText.
+# So Ship declares its structure from the properties, and
+# ZCL_ZOSD_FLEET_DPC_EXT serves it with Open SQL over ZOSD_FLEET_SHIP and
+# fills StatusText from ZOSD_FLEET_STAT. The DPC_EXT also serves the
+# navigation Ship/Voyages, which a table source has no binding for yet.
+project: ZOSD_FLEET
+service: ZOSD_FLEET_SRV
+model: ZOSD_FLEET_MDL
+description: "osg-demo: the Airship fleet"
+
+entities:
+  Ship:
+    set: ShipSet
+    keys: [ShipId]
+    searchable: true
+    properties:
+      ShipId: {type: String(4), field: SHIP_ID, label: Ship}
+      Name: {type: String(30), field: NAME, label: Name}
+      Status: {type: String(1), field: STATUS, label: Status}
+      SteamPct: {type: Int32, field: STEAM_PCT, label: Steam (%)}
+      HomePort: {type: String(20), field: HOME_PORT, label: Home port}
+      # read-only, the DPC_EXT fills it from ZOSD_FLEET_STAT
+      StatusText: {type: String(20), field: STATUS_TEXT, readonly: true, sortable: false, filterable: false, label: Status text}
+
+  Voyage:
+    set: VoyageSet
+    source: {table: ZOSD_FLEET_VOY}
+    keys: [VoyageId]
+    creatable: false
+    updatable: false
+    deletable: false
+    operations: [R, Q]
+    properties:
+      VoyageId: {type: String(6), field: VOYAGE_ID, label: Voyage}
+      ShipId: {type: String(4), field: SHIP_ID, label: Ship}
+      FromPort: {type: String(20), field: FROM_PORT, label: From}
+      ToPort: {type: String(20), field: TO_PORT, label: To}
+      DepDate: {type: Date, field: DEP_DATE, label: Departure}
+      ArrDate: {type: Date, field: ARR_DATE, label: Arrival}
+      Passengers: {type: Int32, field: PASSENGERS, label: Passengers}
+      FuelKg: {type: Int32, field: FUEL_KG, label: Fuel (kg)}
+
+  StatusVH:
+    set: StatusVHSet
+    keys: [Status]
+    creatable: false
+    updatable: false
+    deletable: false
+    searchable: true
+    operations:
+      read:
+        searchhelp: ZOSD_FLEET_STATUS_SH
+        in: {Status: STATUS}
+        out: {Status: "RESULT_LIST\\STATUS", Text: "RESULT_LIST\\TEXT"}
+      query:
+        searchhelp: ZOSD_FLEET_STATUS_SH
+        in: {Status: STATUS}
+        out: {Status: "RESULT_LIST\\STATUS", Text: "RESULT_LIST\\TEXT"}
+    properties:
+      Status: {type: String(1), field: STATUS, readonly: true, label: Status}
+      Text: {type: String(20), field: TEXT, readonly: true, label: Status text}
+
+associations:
+  ShipToVoyages:
+    from: Ship
+    to: Voyage
+    cardinality: 1:N
+    constraint: {ShipId: ShipId}
+    navigation: {Ship: Voyages, Voyage: to_Ship}
+
+annotations:
+  Ship:
+    header: {typeName: Airship, typeNamePlural: Airships, title: Name, description: ShipId}
+    selectionFields: [Status, HomePort]
+    lineItem:
+      - {value: ShipId, label: Ship}
+      - {value: Name, label: Name}
+      - {value: Status, label: Status}
+      - {value: SteamPct, label: Steam (%)}
+      - {value: HomePort, label: Home port}
+    facets:
+      - {id: General, label: General, fieldGroup: General}
+      - {id: Voyages, label: Voyages, lineItem: Voyages}
+    fieldGroups:
+      General: [ShipId, Name, Status, SteamPct, HomePort]
+  Ship/ShipId: {label: Ship}
+  Ship/Name: {label: Name}
+  Ship/Status:
+    label: Status
+    text: {path: StatusText, arrangement: TextFirst}
+    valueList:
+      label: Status
+      collection: StatusVHSet
+      search: true
+      parameters: [{inOut: {Status: Status}}, {displayOnly: Text}]
+  Ship/StatusText: {label: Status text}
+  Ship/SteamPct: {label: Steam (%)}
+  Ship/HomePort: {label: Home port}
+  Voyage:
+    header: {typeName: Voyage, typeNamePlural: Voyages, title: VoyageId}
+    lineItem:
+      - {value: VoyageId, label: Voyage}
+      - {value: FromPort, label: From}
+      - {value: ToPort, label: To}
+      - {value: DepDate, label: Departure}
+      - {value: ArrDate, label: Arrival}
+      - {value: Passengers, label: Passengers}
+      - {value: FuelKg, label: Fuel (kg)}
+  StatusVH/Status: {label: Status}
+  StatusVH/Text: {label: Status text}

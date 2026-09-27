@@ -1,0 +1,8 @@
+[
+  {"mandt": "123", "ship_id": "S001", "name": "Albatross", "status": "A", "steam_pct": 82, "home_port": "Port Aurel"},
+  {"mandt": "123", "ship_id": "S002", "name": "Nimbus", "status": "D", "steam_pct": 100, "home_port": "Port Aurel"},
+  {"mandt": "123", "ship_id": "S003", "name": "Brass Heron", "status": "A", "steam_pct": 64, "home_port": "Cloudhaven"},
+  {"mandt": "123", "ship_id": "S004", "name": "Cumulus", "status": "M", "steam_pct": 15, "home_port": "Cloudhaven"},
+  {"mandt": "123", "ship_id": "S005", "name": "Lady Kelvin", "status": "D", "steam_pct": 90, "home_port": "Tinmere"},
+  {"mandt": "123", "ship_id": "S006", "name": "Old Boiler", "status": "M", "steam_pct": 0, "home_port": "Tinmere"}
+]

@@ -4,11 +4,26 @@
   "customerNamespaces": [],
   "units": {
     "osg-demo": {
-      "description": "The hello class and report for system import. The local transaction is excluded because its generated wrapper is not deployed.",
+      "description": "The hello class and report, and the Airship fleet: its tables, search help, report class, OData service and Fiori app. The local transaction is excluded because its generated wrapper is not deployed.",
       "sources": ["src"],
       "objects": [
         "CLAS ZOSD_DEMO_HELLO",
-        "PROG ZOSD_DEMO_REPORT"
+        "PROG ZOSD_DEMO_REPORT",
+        "TABL ZOSD_FLEET_SHIP",
+        "TABL ZOSD_FLEET_VOY",
+        "TABL ZOSD_FLEET_STAT",
+        "SHLP ZOSD_FLEET_STATUS_SH",
+        "CLAS ZCL_OSD_FLEET_REPORT",
+        "IWPR ZOSD_FLEET",
+        "IWSV ZOSD_FLEET_SRV 0001",
+        "IWMO ZOSD_FLEET_MDL 0001",
+        "CLAS ZCL_ZOSD_FLEET_MPC",
+        "CLAS ZCL_ZOSD_FLEET_MPC_EXT",
+        "CLAS ZCL_ZOSD_FLEET_MPC_ANN",
+        "CLAS ZCL_ZOSD_FLEET_DPC",
+        "CLAS ZCL_ZOSD_FLEET_DPC_EXT",
+        "WAPA ZOSG_DEMO",
+        "SICF /sap/bc/ui5_ui5/sap/zosg_demo"
       ]
     }
   }

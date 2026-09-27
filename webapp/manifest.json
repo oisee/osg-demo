@@ -1,0 +1,115 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "osd.fleet",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": [""],
+      "fallbackLocale": ""
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "../../sap/opu/odata/sap/ZOSD_FLEET_SRV/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "AirshipFleet-display": {
+          "semanticObject": "AirshipFleet",
+          "action": "display",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.suite.ui.generic.template": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "osd.fleet.i18n.i18n",
+          "supportedLocales": [""],
+          "fallbackLocale": ""
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "useBatch": true,
+          "defaultCountMode": "Inline",
+          "defaultBindingMode": "TwoWay",
+          "refreshAfterChange": false
+        }
+      }
+    }
+  },
+  "sap.ui.generic.app": {
+    "_version": "1.3.0",
+    "settings": {
+      "flexibilityEnabled": false
+    },
+    "pages": {
+      "ListReport|ShipSet": {
+        "entitySet": "ShipSet",
+        "component": {
+          "name": "sap.suite.ui.generic.template.ListReport",
+          "list": true,
+          "settings": {
+            "dataLoadSettings": {
+              "loadDataOnAppLaunch": "always"
+            },
+            "smartVariantManagement": false,
+            "condensedTableLayout": true
+          }
+        },
+        "pages": {
+          "ObjectPage|ShipSet": {
+            "entitySet": "ShipSet",
+            "component": {
+              "name": "sap.suite.ui.generic.template.ObjectPage",
+              "settings": {
+                "editableHeaderContent": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
