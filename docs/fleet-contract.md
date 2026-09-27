@@ -12,7 +12,9 @@ use the `ZOSD_` / `ZCL_OSD_` prefix.
 
 1. Seeded ships are in the tables when the system starts.
 2. Run the fleet report as a classrun; set a breakpoint, step through it.
-3. Break a unit test on purpose; see a dump on the steam guard.
+3. a. Break a unit test on purpose; ABAP Unit reports a failed assertion.
+   b. Run the report with a negative steam value; the `ASSERT` in
+      `steam_check` dumps. This is a separate exercise from 3a.
 4. Change a ship through OData (`ShipSet`, MERGE).
 5. See the change in the Fiori list report, with the status value help.
 
@@ -117,9 +119,23 @@ Defined in `src/zosd_fleet.stg.yaml` and compiled by `stg-compile --all`.
 - Property names are the fields in CamelCase: `ShipId`, `Name`, `Status`,
   `SteamPct`, `HomePort`, `VoyageId`, `FromPort`, `ToPort`, `DepDate`,
   `ArrDate`, `Passengers`, `FuelKg`, `Text`.
-- Navigation `Ship/Voyages` (1:n on `ShipId`).
-- `Ship/Status` carries `Common.ValueList` to `StatusVHSet` and
-  `Common.Text` from `StatusVH/Text`.
+- Every property whose DDIC field has an underscore names it with `field:`
+  (for example `ShipId: {type: String(4), field: SHIP_ID}`). Without that,
+  stg-compile uppercases the property name and gets `SHIPID`. This is the
+  same shape as `zstg_demo.stg.yaml` in the engine.
+- YAML types: CHAR n is `String(n)`, INT4 is `Int32`, DATS is `Date`.
+- `Ship.StatusText` (String(20), read-only, not sortable or filterable):
+  `ZCL_ZOSD_FLEET_DPC_EXT` fills it from `ZOSD_FLEET_STAT`.
+  - `Ship/Status` carries `text: {path: StatusText, arrangement: TextFirst}`.
+  - It also carries a `Common.ValueList` to `StatusVHSet`, with
+    `inOut: {Status: Status}` and `displayOnly: Text`.
+  - The search-help mapping maps both `query` and `read`, so
+    `StatusVHSet('A')` answers.
+- Navigation `Ship/Voyages` (1:n on `ShipId`): the association is declared
+  in the model, but a `table:` source has no association binding. So
+  `ZCL_ZOSD_FLEET_DPC_EXT` filters `ZOSD_FLEET_VOY` by `SHIP_ID` for that
+  navigation. The first slice does not use it; the object-page facet does.
+  A binding for table sources in the engine can come after the slice.
 - Annotations are in the YAML: a header, `selectionFields` [Status,
   HomePort], a `lineItem` [ShipId, Name, Status, SteamPct, HomePort], and
   an object page facet with the voyages table.
@@ -130,16 +146,28 @@ Defined in `src/zosd_fleet.stg.yaml` and compiled by `stg-compile --all`.
 
 The pack's `webapp/` is a Fiori Elements V2 list report + object page over
 `ZOSD_FLEET_SRV`. The engine derives its BSP application name, `ZOSG_DEMO`
-(`packAppName`). It has a launchpad tile, "Airship fleet", whose intent is
-`AirshipFleet-display`.
+(`packAppName`).
+- `webapp/manifest.json` declares the inbound `AirshipFleet-display` in
+  `crossNavigation.inbounds`.
+- `osd-pack.json` gets a `tile` "Airship fleet", whose URL is
+  `/app/flp.html#AirshipFleet-display`. The tile takes a URL, not an intent
+  field.
+- The app loads data once the engine's pack-app manifest rebase has landed
+  (packApps rewrites the OData URI in `manifest.json`).
 
 ## First joint slice
 
 One running workspace pack. Each item has one e2e assertion on what the
 reader sees:
 - tables + seed: `ShipSet` returns 6;
-- the classrun prints a line for `S001`;
+- the classrun prints a line for `S001`:
+  `POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, then look for that
+  line in the plain-text answer;
 - the service answers `ShipSet?$filter=Status eq 'A'`;
 - the tile opens the list report, and the list shows 6 rows.
+
+The e2e runs the pack through `OSD_PACKS`. A reader opens the folder in
+VS Code, and the folder is layered as a workspace pack (engine W1, #158).
+Seed rows use `MANDT` `123`; dates may be ISO strings in the TABU JSON.
 
 After the slice, chapters 2–5 are split into PRs, one e2e assertion each.
