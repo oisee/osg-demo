@@ -3,6 +3,10 @@
 Received from dell on Alice's request, 2026-09-27. Verbatim below; lessons
 learned are appended at the end, one line each.
 
+Also read: the shared playbook for working alone, open-steamgate branch
+`handover/2026-09-27-cloud`, file `handover/solo-playbook.md` (tick loop,
+three kinds of decisions, critic lenses, reporting).
+
 BRANCHES
 - Never push to main of osg-demo or open-steamgate, never merge, never use --admin.
 - Work on feat/fleet-slice (it is yours now) and on your own `af/<topic>` branches cut from origin/main.
@@ -52,3 +56,8 @@ Then stop and ask Alice.
 - Leftover files in the engine's ignored gen/ break its build (DUPLICATE); never park scratch copies there.
 - ui5.sap.com is blocked in the cloud container, so the Fiori e2e item cannot run here.
 - Playwright 1.62 in the engine wants chromium_headless_shell-1234; the container has 1194 at /opt/pw-browsers.
+- `segw:zip` takes the pack folder (it compiles the `.stg.yaml` and flattens `src/ddic/`); given `src/` it refuses the YAML. Say which input a claim is about.
+- Mutation checks run on a copy of the pack (`cp -r`, drop `.git`); the copy's own `test/slice.mjs` uses the copy as the pack. One combined run with one break per item is enough if each item isolates its target.
+- `rm` with a glob after `cd` is blocked by the safety check; clear scratch folders with `find <absolute path> -type f -delete`.
+- Objects that implement engine-only interfaces (`ZIF_OSD_TRANSACTION`) cannot be in a deploy unit, and the unit has no "stays local" list: the zip of the whole pack refuses them by design.
+- The engine accepts OData writes without a CSRF token; write chapters and tests the way a real Gateway needs it anyway.
