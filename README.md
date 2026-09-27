@@ -2,9 +2,21 @@ ABAP running locally in VS Code, no SAP or ADT connection.
 
 # open-steamgate demo
 
-This folder is an abapGit repository and an open-steamgate workspace layer. Clone it, install the open-steamgate VS Code extension from a `.vsix` built from [open-steamgate main](https://github.com/oisee/open-steamgate), and open the clone as a VS Code workspace folder. The minimum extension build is **`vscode-v0.1.1111`**, built from main revision `d67f8660`; from a fresh clone of that checkout run `npm install && npm run bootstrap && npm run vsix` (bootstrap fetches the pinned libraries and pack sources; see its docs/vscode-extension.md) and install the resulting `build/vsix/osd-vscode-0.1.1111.vsix`. Run **osd: Start (build + run this system)**. The extension discovers this folder and links its `src/` through `OSD_PACKS` as a workspace layer. It then appears under **Workspace layers** in Test Explorer. Add this folder before starting when using a multi-folder workspace.
+This folder is an abapGit repository and an open-steamgate workspace pack. The extension carries a whole local ABAP system; this repository adds its own objects on top of it.
 
-For a terminal runtime, from an open-steamgate checkout run `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start` with a free port and an isolated database. Pack discovery should list `osg-demo` and package `$ZOSD_DEMO`. The editable ABAP is in `src/`; activation loads edits into the local runtime.
+## Install
+
+1. Install the **open-steamgate** extension (`oisee.open-steamgate`, pre-release). Search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX…**.
+2. Clone this repository and open the clone as a VS Code folder.
+3. Run **osd: Start (build + run this system)**. The bundled system starts. Because this folder has an `osd-pack.json`, it is layered on top as a full pack: its classes, tables, seed rows and page, in package `$ZOSD_DEMO`. The folder shows up under **Workspace layers** in Test Explorer.
+
+To add this folder to a multi-folder workspace, add it before you start.
+
+From an open-steamgate checkout, the same pack runs in a terminal: `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`, with a free port. The editable ABAP is in `src/`; activating an object loads it into the running system.
+
+## The story
+
+The chapters run on one small domain this repository owns: a fleet of airships and their voyages. Chapter 1 needs nothing but a class. From chapter 2 on, the fleet's tables, service and app are used; [the fleet contract](docs/fleet-contract.md) fixes their names and shapes.
 
 ## 1. Hello
 
