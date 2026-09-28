@@ -1,7 +1,7 @@
 @AbapCatalog.sqlViewName: 'ZVOSDFLEETCUBE'
 @AbapCatalog.compiler.compareFilter: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Airship fleet: voyages by ship and month'
+@EndUserText.label: 'osg-demo Ch5: voyage cube by ship and month'
 @Analytics.dataCategory: #CUBE
 @OData.publish: true
 define view ZC_OSD_FLEETCUBE

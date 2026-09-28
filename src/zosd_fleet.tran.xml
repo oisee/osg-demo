@@ -13,7 +13,7 @@
    <TSTCT>
     <SPRSL>E</SPRSL>
     <TCODE>ZOSD_FLEET</TCODE>
-    <TTEXT>Airship fleet</TTEXT>
+    <TTEXT>osg-demo Ch2: fleet report</TTEXT>
    </TSTCT>
    <TSTCP>
     <TCODE>ZOSD_FLEET</TCODE>

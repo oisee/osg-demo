@@ -8,7 +8,7 @@
       "supportedLocales": [""],
       "fallbackLocale": ""
     },
-    "title": "{{appTitle}}",
+    "title": "osg-demo Ch4: Airship fleet app",
     "description": "{{appDescription}}",
     "applicationVersion": {
       "version": "0.0.1"

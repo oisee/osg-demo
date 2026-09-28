@@ -205,6 +205,24 @@ await check("1b fleet audit result and ABAP Unit", async () => {
   return "6 ships, 20 voyages; success and mismatch paths passed";
 });
 
+await check("1c service tree: chapter labels", async () => {
+  const res = await fetch(`${base}/sap/bc/adt/core/http/services`);
+  expect(res.ok, `service tree: HTTP ${res.status}`);
+  const {services} = await res.json();
+  const labels = new Map(services.map((s) => [s.path, s.text]));
+  for (const [path, label] of [
+    ["/sap/opu/odata/sap/ZOSD_FLEET_SRV", "osg-demo Ch3: ships and voyages (OData)"],
+    ["/app/flp.html#AirshipFleet-display", "osg-demo Ch4: Airship fleet app"],
+    ["/sap/opu/odata/sap/ZC_OSD_FLEETCUBE_CDS", "osg-demo Ch5: voyage cube by ship and month"],
+  ]) expect(labels.get(path) === label, `${path}: ${labels.get(path) ?? "missing"}`);
+  const transactions = await fetch(`${base}/sap/bc/adt/core/http/transactions`);
+  expect(transactions.ok, `transaction tree: HTTP ${transactions.status}`);
+  const inventory = (await transactions.json()).transactions;
+  const fleet = inventory.find((t) => t.tcode === "ZOSD_FLEET");
+  expect(fleet?.text === "osg-demo Ch2: fleet report", `ZOSD_FLEET: ${fleet?.text ?? "missing"}`);
+  return "chapters 2, 3, 4 and 5 labelled";
+});
+
 await check("2 classrun ZCL_OSD_FLEET_REPORT prints S001", async () => {
   const headers = await csrf(`${base}/sap/bc/adt/discovery`);
   const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, {method: "POST", headers});
