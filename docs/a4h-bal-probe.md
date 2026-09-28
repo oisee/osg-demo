@@ -61,7 +61,10 @@ package after reviewing the source. It has not been activated or syntax-checked
 on A4H yet. Use `W` with two different run IDs and severity `S`, then `W`
 with a third ID and severity `E`; run `R` for each ID in separate sessions.
 Use `X`, `S` and `D` with new IDs for the rollback, second-connection and
-repeated-ID cases respectively, followed by `R` in fresh sessions.
+repeated-ID cases respectively, followed by `R` in fresh sessions. For
+pre-commit visibility, pause mode `W` in the debugger immediately before
+`COMMIT WORK` and read the same ID from a second session; an ADT execution
+request may otherwise commit implicitly when it ends.
 
 Use a unique probe prefix in each external run ID and retain the returned
 log handles. Run these cases from fresh sessions, loading by exact external
