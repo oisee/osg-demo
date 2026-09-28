@@ -106,7 +106,10 @@ What can leave this repository for a real system is listed, object by object, in
 [Fleet operations trace](docs/fleet-operations-trace.md) sketches a small
 business-log viewer, two event-connected job chains, and an optional doctor
 daemon. It is a proposed scenario with explicit runtime dependencies, not a
-step in the runnable chapters above.
+step in the runnable chapters above. The read-only
+[ZCL_OSD_FLEET_AUDIT](src/zcl_osd_fleet_audit.clas.abap) already runs with F9:
+`Fleet audit OK: 6 ships, 20 voyages`. Its ABAP Unit tests cover that result
+and a forced count mismatch. Persistent BAL logging is still pending.
 
 ## Run the checks
 

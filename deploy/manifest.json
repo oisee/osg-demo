@@ -4,7 +4,7 @@
   "customerNamespaces": [],
   "units": {
     "osg-demo": {
-      "description": "The hello class and the Airship fleet: its tables, search help, report class, OData service, Fiori app, cube and AMDP class. Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have.",
+      "description": "The hello class and the Airship fleet: its tables, search help, report and audit classes, OData service, Fiori app, cube and AMDP class. Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have.",
       "sources": ["src"],
       "objects": [
         "CLAS ZOSD_DEMO_HELLO",
@@ -14,6 +14,7 @@
         "TABL ZOSD_FLEET_STAT",
         "SHLP ZOSD_FLEET_STATUS_SH",
         "CLAS ZCL_OSD_FLEET_REPORT",
+        "CLAS ZCL_OSD_FLEET_AUDIT",
         "IWPR ZOSD_FLEET",
         "IWSV ZOSD_FLEET_SRV 0001",
         "IWMO ZOSD_FLEET_MDL 0001",

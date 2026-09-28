@@ -7,6 +7,10 @@ classic ALV report independently.
 
 ## First slice: business log and viewer
 
+`ZCL_OSD_FLEET_AUDIT` now provides the read-only count and success/error
+result. It is runnable with F9 and has ABAP Unit checks for both outcomes.
+It does not yet write a business log.
+
 Run a fleet audit synchronously. Give each run an ID. Record the start,
 ship and voyage counts, a validation outcome, and the finish or failure as
 business-log messages with severity and time. Show the log in a read-only
