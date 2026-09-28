@@ -38,6 +38,12 @@ that public surface exists. The current `CL_BALI_LOG_DB` library stand-in that
 remembers one log in memory does not meet this contract. Do not add a private
 BAL table to the demo.
 
+Keep the fleet caller's interface narrow: record the run ID, observed counts
+and outcome. A test-only in-memory recorder may verify that caller without a
+database. The shipped adapter must use the shared BAL API. A generic logger
+that accepts arbitrary ABAP values, handles SAP GUI display or owns its own
+storage would enlarge this slice without proving the persistence contract.
+
 ## A4H behavioral probe still needed
 
 In a disposable, authorized A4H namespace: register a fleet log
