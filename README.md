@@ -72,14 +72,19 @@ The pack's [webapp/](webapp/) is a Fiori Elements list report and object page ov
 3. Click **Old Boiler**. Expected: the object page shows its general data and an empty **Voyages** table. Go back and open **Albatross**: its **Voyages** table lists six voyages.
 4. The tile goes through the launchpad the way a system's does: `#AirshipFleet-display` is the intent the app's [manifest](webapp/manifest.json) declares in `crossNavigation.inbounds`, and the launchpad opens the component `osd.fleet` from the app's BSP copy, `/sap/bc/ui5_ui5/sap/zosg_demo/`. The same app also runs standalone at `http://localhost:8099/app/osg-demo/`; see [the contract](docs/fleet-contract.md#app).
 
-## 5. Cube and AMDP
+## 5. CDS cube
 
-An advanced chapter: the voyages as an analytical CDS cube, and one AMDP method. The cube runs on any database the engine uses; the AMDP method needs DuckDB or HANA, and the outcomes differ, so each step says which database it is on. The names are fixed in [the contract](docs/fleet-contract.md#cube-and-amdp-chapter-5).
+The voyages form an analytical CDS cube on the default SQLite system too. Its names and current limits are fixed in [the contract](docs/fleet-contract.md#cds-cube-chapter-5).
 
 1. The cube. [zc_osd_fleetcube.ddls.asddls](src/cds/zc_osd_fleetcube.ddls.asddls) is a CDS view over `ZOSD_FLEET_VOY` with `@Analytics.dataCategory: #CUBE` and `@OData.publish: true`; the engine publishes it as its own service. Open `http://localhost:8099/sap/opu/odata/sap/ZC_OSD_FLEETCUBE_CDS/ZC_OSD_FLEETCUBE?$format=json`. Expected: 20 rows, one per voyage, each with `SHIPID`, `DEPMONTH` (e.g. `202601`), `PASSENGERS`, `FUELKG` and `DISTANCEKM`. `...ZC_OSD_FLEETCUBE?$filter=SHIPID eq 'S001'&$format=json` gives S001's six voyages.
 2. What the cube does not do here yet: `...ZC_OSD_FLEETCUBE?$select=SHIPID,PASSENGERS,FUELKG&$format=json`. Expected on this engine: still 20 rows with every column, not one per ship: `$select` is not applied to this service yet. A system groups a cube on `$select` (the dimensions you select become the grouping, the measures are summed); the engine does that only for its own reference services so far, not for a service published from a CDS view. The month is a column, `DEP_MONTH`, because the engine's CDS support keeps plain columns and does not compute `substring( dep_date, 1, 6 )`.
-3. The AMDP method on the default database. Open [ZCL_OSD_FLEET_FUEL](src/zcl_osd_fleet_fuel.clas.abap): `fuel_per_100km` is `BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT`, one `SELECT` with `SUM` and `GROUP BY ship_id`, leaving out voyages without a distance so nothing divides by zero. Press **F9**. Expected on SQLite: `AMDP needs DuckDB or HANA; this system runs on sqlite. Start it with STG_DB=duckdb.`
-4. The same method on DuckDB. DuckDB needs an open-steamgate checkout (the packaged extension has no DuckDB module): stop the system and start it again with `STG_DB=duckdb OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`, then run the class again. Expected:
+
+## 6. AMDP on the fleet
+
+This optional chapter runs SQLScript from ABAP classes. The default SQLite system shows why these methods need another database. DuckDB runs the supported portable subset; HANA runs the original SQLScript. See [the contract](docs/fleet-contract.md#amdp-chapter-6).
+
+1. Open [ZCL_OSD_FLEET_FUEL](src/zcl_osd_fleet_fuel.clas.abap): `fuel_per_100km` is `BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT`, one `SELECT` with `SUM` and `GROUP BY ship_id`, leaving out voyages without a distance so nothing divides by zero. Press **F9**. Expected on SQLite: `AMDP needs DuckDB or HANA; this system runs on sqlite. Start it with STG_DB=duckdb.`
+2. DuckDB needs an open-steamgate checkout (the packaged extension has no DuckDB module): stop the system and start it again with `STG_DB=duckdb OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`, then run the class again. Expected:
 
    ```
    Fuel per 100 km (duckdb)
@@ -91,13 +96,14 @@ An advanced chapter: the voyages as an analytical CDS cube, and one AMDP method.
    ```
 
    Old Boiler has no voyages, so it has no line. The engine translated the SQLScript into DuckDB SQL; the source in `src/` is unchanged.
-5. The same method on HANA. Run the system on a HANA Express as [Running on HANA](docs/hana.md) describes (`STG_DB=hana`, or `osd.database.system` = `hana`), then run the class. Expected: the heading says `(HDB)` and the five lines are the same as on DuckDB; here the SQLScript runs on HANA as written. [Running on HANA](docs/hana.md#chapter-5-on-hana) lists what to check.
+3. Open [ZCL_OSD_FLEET_SUMMARY](src/zcl_osd_fleet_summary.clas.abap) and press **F9**. Its second read-only AMDP joins ships to voyages, groups by ship and keeps ships with no voyages through a `LEFT OUTER JOIN`. The classrun reads the same tables through Open SQL and checks every result. Expected on DuckDB: `Fleet summary (duckdb); checked against Open SQL`, six ship lines, from `S001 A: 6 voyages, 305 passengers, 2440 km` to `S006 M: 0 voyages, 0 passengers, 0 km`, then `MATCH: 6 ships`. On SQLite it prints the same database requirement as step 1.
+4. On HANA Express, run both classes as [Running on HANA](docs/hana.md) describes (`STG_DB=hana`, or `osd.database.system` = `hana`). Expected: both headings say `(HDB)`; the fuel lines and six summary lines match DuckDB. Here the SQLScript runs on HANA as written. [The HANA checklist](docs/hana.md#chapter-6-on-hana) lists what to check.
 
-## 6. Take it to a system
+## 7. Take it to a system
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report class, the cube `DDLS zc_osd_fleetcube`, the AMDP class `zcl_osd_fleet_fuel`, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report class, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 

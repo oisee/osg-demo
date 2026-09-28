@@ -1,6 +1,6 @@
 CLASS zcl_osd_fleet_fuel DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * Fuel per 100 km for each ship of the Airship fleet, as one AMDP method
-* (README chapter 5). The body is SQLScript from the subset the
+* (README chapter 6). The body is SQLScript from the subset the
 * open-steamgate engine runs portably on DuckDB; on HANA it is plain
 * SQLScript. The classrun prints the result.
 *

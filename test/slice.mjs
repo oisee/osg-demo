@@ -33,14 +33,16 @@
 //        (ASSERTION_FAILED), and prints again once the value is restored;
 //     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
 //        S001 and S006 through ShipSet(..)/Voyages match the seed;
-//    10. ch6: segw:zip of this folder refuses exactly the two local objects,
+//    10. ch7: segw:zip of this folder refuses exactly the two local objects,
 //        and of a copy without them carries every object the deploy unit
 //        lists and no seed rows (docs/take-to-system.md);
 //    11. ch5: the cube service ZC_OSD_FLEETCUBE_CDS answers one row per
 //        voyage, and $filter on the ship gives that ship's voyages;
-//    12. ch5: ZCL_OSD_FLEET_FUEL's classrun prints fuel per 100 km per ship,
+//    12. ch6: ZCL_OSD_FLEET_FUEL's classrun prints fuel per 100 km per ship,
 //        computed from the seed, on DuckDB or HANA (STG_DB=duckdb|hana), and
 //        says it needs one of them on SQLite;
+//    12a. ch6: ZCL_OSD_FLEET_SUMMARY includes the ship without voyages and
+//         reconciles the AMDP rows with independent Open SQL reads;
 //    13. ch2: the classic ALV report ZOSD_FLEET_ALV, run as transaction
 //        ZGUI_OSD_FLEET_ALV, shows a grid of the six ships with their status
 //        texts.
@@ -384,7 +386,7 @@ await check("9 ch3 value help and Ship/Voyages", async () => {
   return "A Aloft; S001 and S006 voyages as seeded";
 });
 
-await check("10 ch6 segw:zip carries the unit, not the local objects", async () => {
+await check("10 ch7 segw:zip carries the unit, not the local objects", async () => {
   const work = mkdtempSync(join(tmpdir(), "osg-slice-zip-"));
   try {
     const zip = (from, out) => spawnSync(process.execPath, ["tools/osd-abapgit-zip.mjs", from, "--unit", "osg-demo",
@@ -443,7 +445,7 @@ await check("11 ch5 cube ZC_OSD_FLEETCUBE_CDS", async () => {
   return `${all.length} voyage rows as seeded; S001 has ${s001.length}`;
 });
 
-await check("12 ch5 AMDP fuel per 100 km", async () => {
+await check("12 ch6 AMDP fuel per 100 km", async () => {
   const headers = await csrf(`${base}/sap/bc/adt/discovery`);
   const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`, {method: "POST", headers});
   const text = await res.text();
@@ -463,6 +465,30 @@ await check("12 ch5 AMDP fuel per 100 km", async () => {
   const missing = lines.filter((l) => !text.includes(l));
   expect(missing.length === 0, `missing: ${missing.join(" | ")}\nin:\n${text}`);
   return `on ${db}: ${lines.length} ships as computed from the seed`;
+});
+
+await check("12a ch6 AMDP summary versus Open SQL", async () => {
+  const headers = await csrf(`${base}/sap/bc/adt/discovery`);
+  const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_SUMMARY`, {method: "POST", headers});
+  const output = await res.text();
+  expect(res.ok, `HTTP ${res.status}: ${output.slice(0, 200)}`);
+  const db = process.env.STG_DB ?? "sqlite";
+  if (db !== "duckdb" && db !== "hana") {
+    expect(output.includes("AMDP needs DuckDB or HANA; this system runs on sqlite."), `on ${db}:\n${output}`);
+    return `on ${db}: says it needs DuckDB or HANA`;
+  }
+  expect(output.includes("checked against Open SQL"), `missing reconciliation heading:\n${output}`);
+  expect(!output.includes("MISMATCH"), `AMDP and Open SQL disagree:\n${output}`);
+  const voyages = seed("zosd_fleet_voy");
+  for (const ship of ships) {
+    const rows = voyages.filter((v) => v.ship_id === ship.ship_id);
+    const pax = rows.reduce((n, v) => n + v.passengers, 0);
+    const km = rows.reduce((n, v) => n + v.distance_km, 0);
+    const line = `${ship.ship_id} ${ship.status}: ${rows.length} voyages, ${pax} passengers, ${km} km`;
+    expect(output.includes(line), `missing ${line}:\n${output}`);
+  }
+  expect(output.includes(`MATCH: ${ships.length} ships`), `missing final match:\n${output}`);
+  return `on ${db}: ${ships.length} AMDP rows match Open SQL and the seed`;
 });
 
 await check("13 ch2 classic ALV ZGUI_OSD_FLEET_ALV", async () => {

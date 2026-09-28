@@ -20,8 +20,9 @@ use the `ZOSD_` / `ZCL_OSD_` prefix.
 
 Out of the main path:
 - the APC "fleet radar";
-- the cube plus AMDP chapter, which is optional and advanced, with the
-  portable (SQLite/DuckDB) outcome and the HANA outcome stated separately;
+- the CDS cube in chapter 5, available on the default database;
+- the optional AMDP chapter 6, with the SQLite refusal and the DuckDB/HANA
+  outcomes stated separately;
 - the export chapter, which is an honest inventory of what `segw:zip`
   carries, not a feature build.
 
@@ -55,7 +56,7 @@ start.
 | ARR_DATE   | DATS    |     |                         |
 | PASSENGERS | INT4    |     |                         |
 | FUEL_KG    | INT4    |     |                         |
-| DISTANCE_KM | INT4   |     | chapter 5: fuel per 100 km |
+| DISTANCE_KM | INT4   |     | chapter 6: fuel per 100 km and ship summary |
 | DEP_MONTH  | CHAR 6  |     | `YYYYMM` of `DEP_DATE`; the cube's month dimension |
 
 `ZOSD_FLEET_STAT`: the status values and their texts.
@@ -178,7 +179,7 @@ The pack's `webapp/` is a Fiori Elements V2 list report + object page over
   standalone, where `../../sap/opu/odata/sap/ZOSD_FLEET_SRV/` resolves as
   written.
 
-## Cube and AMDP (chapter 5)
+## CDS cube (chapter 5)
 
 - `ZC_OSD_FLEETCUBE` (SQL view `ZVOSDFLEETCUBE`): a CDS view over
   `ZOSD_FLEET_VOY` with `@Analytics.dataCategory: #CUBE` and
@@ -196,6 +197,9 @@ The pack's `webapp/` is a Fiori Elements V2 list report + object page over
     so the service answers one row per voyage; grouping by ship and month
     comes when the engine carries the cube's aggregate semantics into a
     published service.
+
+## AMDP (chapter 6)
+
 - `ZCL_OSD_FLEET_FUEL=>fuel_per_100km`: an AMDP procedure
   (`if_amdp_marker_hdb`) from the engine's portable SQLScript subset, one
   row per ship with fuel, distance and fuel per 100 km; voyages without a
@@ -204,6 +208,12 @@ The pack's `webapp/` is a Fiori Elements V2 list report + object page over
   - SQLite (the engine's default): the engine does not run AMDP there; the
     classrun says so.
   - HANA: the same SQLScript; to be checked on a HANA Express.
+- `ZCL_OSD_FLEET_SUMMARY=>ship_summary`: a second read-only AMDP over both
+  fleet tables. A left join and grouping return all six ships, including
+  `S006` with zero voyages, passengers and distance. Its classrun checks each
+  row against independent Open SQL reads and prints `MATCH: 6 ships` only
+  when every ship and every total agrees. It has the same database requirement
+  as the fuel procedure.
 - No second analytical Fiori page in the first release.
 
 ## First joint slice
