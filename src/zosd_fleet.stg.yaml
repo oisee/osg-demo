@@ -11,7 +11,7 @@
 project: ZOSD_FLEET
 service: ZOSD_FLEET_SRV
 model: ZOSD_FLEET_MDL
-description: "osg-demo: the Airship fleet"
+description: "osg-demo Ch3: ships and voyages (OData)"
 
 entities:
   Ship:
