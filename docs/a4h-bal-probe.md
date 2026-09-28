@@ -1,9 +1,10 @@
 # Fleet BAL contract: A4H API readout
 
 On 2026-09-28, the A4H sandbox (ABAP 7.58 / 2022) answered read-only ADT
-requests through `vsp` for the classes and interfaces below. This establishes
-API presence and signatures. No BAL object was configured, no log was written,
-and persistence or transaction behavior has **not** been measured yet.
+requests through `vsp` for the classes and interfaces below. This established
+API presence and signatures. A subsequent write probe on the same date is
+recorded below; it measured persistence and rollback for one background-report
+execution path, not all possible SAP transaction contexts.
 
 | Need | A4H API observed |
 | --- | --- |
@@ -45,20 +46,19 @@ database. The shipped adapter must use the shared BAL API. A generic logger
 that accepts arbitrary ABAP values, handles SAP GUI display or owns its own
 storage would enlarge this slice without proving the persistence contract.
 
-## A4H behavioral probe still needed
+## A4H behavioral probe
 
-The A4H read-only check found no `ZOSD*` entry in `BALOBJ` or `BALSUB` on
-2026-09-28. Before a write probe, register **only** log object `ZOSD_FLEET`
-and subobject `AUDIT` in a disposable namespace (for example via SLG0), and
-record the package/transport used. Do not write probe entries under an
-unrelated existing log object. The proposed test program is a separate
-throwaway A4H object; the demo pack does not deploy it.
+The initial read-only check found no `ZOSD*` entry in `BALOBJ` or `BALSUB`.
+The user then registered log object `ZOSD_FLEET` and subobject `AUDIT` on the
+test A4H; both rows were verified by read-only queries. The separate report
+`ZOSD_BAL_PROBE` was created and activated in `$TMP` through `vsp deploy`.
+It is not in the demo pack.
 
 The [standalone probe source](../probes/a4h/zosd_bal_probe.prog.abap) uses
 synthetic fleet counts, so it does not require importing the demo's fleet
-tables into A4H. Create `PROG ZOSD_BAL_PROBE` only in the approved sandbox
-package after reviewing the source. It has not been activated or syntax-checked
-on A4H yet. Use `W` with two different run IDs and severity `S`, then `W`
+tables into A4H. To repeat on a separate sandbox, first register the same
+object/subobject and create the report only in an approved disposable package.
+Use `W` with two different run IDs and severity `S`, then `W`
 with a third ID and severity `E`; run `R` for each ID in separate sessions.
 Use `X`, `S` and `D` with new IDs for the rollback, second-connection and
 repeated-ID cases respectively, followed by `R` in fresh sessions. For
@@ -77,11 +77,26 @@ ID and then by handle, and compare ordered item texts and severities:
 | Repeated ID | Save two logs with the same external ID. Record both handles and whether the filter returns both; do not infer uniqueness from the field name. |
 | Second connection | Repeat the rollback case with `SAVE_LOG_2ND_DB_CONNECTION`, the A4H method that replaces the deprecated `use_2nd_db_connection` flag. Record whether its log remains readable after the caller rolls back. |
 
-This is a behavioral experiment, so none of the transaction or duplicate-ID
-outcomes is asserted in advance. The probe writes SAP application logs and
-customizing; no such write has been run yet. Database-writing ABAP Unit tests
-belong at `RISK LEVEL DANGEROUS`; the current audit tests remain harmless
-because they only read fleet rows.
+### Observed on A4H
+
+The report ran as a fresh background job for each call through `vsp rfc run`;
+the reads used separate job sessions and `vsp applog` independently queried
+persisted logs and messages. The run IDs were prefixed `OSD_BAL_20260928_`.
+
+| Case | Observation |
+| --- | --- |
+| Baseline | `OK1`, `OK2` and `ERR` produced three distinct persisted logs. Each has ordered start/count/finish items; `ERR` has one error item and the others have none. The public filter and handle load returned the expected text and severity for `OK1` and `ERR` in fresh sessions; `vsp applog` independently read all three. |
+| Caller rollback | `RB` used `SAVE_LOG` followed by `ROLLBACK WORK`; no log appeared in the independent read. For the exact-ID filter with no match, A4H raised `CX_BALI_RUNTIME` with `No log found in the database` instead of returning an empty table. |
+| Second connection | `2CN` used `SAVE_LOG_2ND_DB_CONNECTION` followed by caller rollback. Its log remained readable in a fresh session. |
+| Repeated ID | `DUP` created two logs with distinct handles. The exact-ID filter returned both; `external_id` is not a uniqueness constraint. |
+
+In total, the independent application-log read showed **six persisted logs and
+18 messages**; the ordinary rollback run was absent. Pre-commit visibility
+from a second session, behavior outside a background report, error injection,
+and restart of A4H itself were not measured. These results guide the shared
+OSD BAL subset; they do not make the current in-memory stand-in persistent.
+Database-writing ABAP Unit tests belong at `RISK LEVEL DANGEROUS`; the
+existing fleet audit tests remain harmless because they only read fleet rows.
 
 Background-job event delivery and the optional doctor daemon are separate
 gates after this BAL slice. The [job API readout](fleet-operations-trace.md#a4h-job-api-readout-2026-09-28)
