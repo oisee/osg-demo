@@ -73,9 +73,10 @@ implemented.
 The job and daemon gates are future work. The current open-steamgate runtime
 does not provide the required persistent business log, job scheduler, or
 daemon lifecycle as a complete public interface.
-It does have a [persisted one-shot batch runner](https://github.com/oisee/open-steamgate/pull/201)
-for supported converted reports. That runner saves a synchronous run and its
-output across process restarts; it does not schedule jobs or deliver events.
+It has a [persisted one-shot batch runner](https://github.com/oisee/open-steamgate/pull/201)
+for supported converted reports and a [durable queue with one BGR worker](https://github.com/oisee/open-steamgate/pull/202).
+These save runs and output across process restarts; they do not yet provide
+the schedule and event contracts this scenario needs.
 
 ### A4H job API readout, 2026-09-28
 

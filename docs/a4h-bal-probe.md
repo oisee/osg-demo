@@ -23,7 +23,8 @@ alone does not prove that a chosen `Z*` descriptor can be saved there.
 ## Smallest executable slice
 
 Keep `ZCL_OSD_FLEET_AUDIT=>INSPECT` as the read-only calculation. The first
-runtime-backed slice runs it synchronously with a unique external run ID and
+runtime-backed slice runs it synchronously with a freshly generated run ID in
+the external-ID field (which is not a database uniqueness constraint) and
 persists three items in one log: `started`, the observed ship/voyage counts,
 and `finished` with success or error severity. The existing seed expects six
 ships and twenty voyages. A forced mismatch (expect seven ships) supplies a
@@ -53,8 +54,8 @@ Record whether save requires an explicit `COMMIT WORK`, how a rollback affects
 the saved log, duplicate external IDs, message order/severity, and whether
 `use_2nd_db_connection` changes the transaction boundary. This probe writes
 SAP application logs and customizing, so it has not been run as part of the
-read-only API check. A persistent-log ABAP Unit test must not be declared
-`RISK LEVEL HARMLESS`; the current audit tests remain harmless because they
+read-only API check. A persistent-log ABAP Unit test belongs at
+`RISK LEVEL DANGEROUS`; the current audit tests remain harmless because they
 only read fleet rows.
 
 Background-job event delivery and the optional doctor daemon are separate
