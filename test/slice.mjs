@@ -207,6 +207,45 @@ await check("1b fleet audit result and ABAP Unit", async () => {
   return "6 ships, 20 voyages; success and mismatch paths passed";
 });
 
+await check("1b1 fleet BAL: two success logs and one error", async () => {
+  const headers = await csrf(`${base}/sap/bc/adt/discovery`);
+  const run = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_BAL`, {method: "POST", headers});
+  const written = await run.text();
+  expect(run.ok, `BAL classrun: HTTP ${run.status}: ${written.slice(0, 200)}`);
+  const batch = /BAL batch ([A-F0-9]{32}): 2 success, 1 error/.exec(written)?.[1];
+  expect(batch, `BAL writer failed: ${written}`);
+
+  const view = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_BAL_VIEW`,
+    {method: "POST", headers: await csrf(`${base}/sap/bc/adt/discovery`)});
+  const shown = await view.text();
+  expect(view.ok, `BAL viewer: HTTP ${view.status}: ${shown.slice(0, 200)}`);
+  for (const suffix of ["OK1", "OK2", "ERR"]) {
+    expect(shown.includes(`Run ${batch}-${suffix};`), `BAL viewer lacks ${suffix}: ${shown}`);
+  }
+  expect((shown.match(/1 S Fleet audit started/g) ?? []).length === 3, `BAL start items: ${shown}`);
+  expect((shown.match(/2 I Observed 6 ships and 20 voyages/g) ?? []).length === 3,
+    `BAL count items: ${shown}`);
+  expect((shown.match(/3 S Fleet audit OK: 6 ships, 20 voyages/g) ?? []).length === 2,
+    `BAL success items: ${shown}`);
+  expect(shown.includes("3 E Fleet audit failed: 6 ships, 20 voyages; expected 7 and 20"),
+    `BAL error item: ${shown}`);
+
+  const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
+    headers: {...await csrf(`${base}/sap/bc/adt/discovery`), "content-type": "application/xml"},
+    body: `<?xml version="1.0" encoding="UTF-8"?>
+<aunit:runConfiguration xmlns:aunit="http://www.sap.com/adt/aunit" xmlns:adtcore="http://www.sap.com/adt/core">
+  <external><coverage active="false"/></external>
+  <adtcore:objectReferences>
+    <adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_osd_fleet_bal"/>
+  </adtcore:objectReferences>
+</aunit:runConfiguration>`});
+  const xml = await unit.text();
+  expect(unit.ok, `BAL ABAP Unit: HTTP ${unit.status}`);
+  expect(/testMethod adtcore:name="ERROR_FILTER_READS_MESSAGES"/.test(xml), "BAL filter test did not run");
+  expect(!/<alert[\s>]/.test(xml), `BAL test has alerts:\n${xml}`);
+  return "3 persisted logs, 9 ordered messages, error filter ABAP Unit green";
+});
+
 await check("1c service tree: chapter labels", async () => {
   const res = await fetch(`${base}/sap/bc/adt/core/http/services`);
   expect(res.ok, `service tree: HTTP ${res.status}`);
