@@ -162,6 +162,25 @@ await check("1 tables + seed: ShipSet/$count", async () => {
   return `${count} ships, a page of 2 counts ${page.__count}`;
 });
 
+await check("1a F8 Data Preview: fleet tables and CDS", async () => {
+  const definitions = [
+    {route: "ddic", key: "ddicEntityName", name: "ZOSD_FLEET_SHIP", rows: ships.length, sample: "Albatross"},
+    {route: "ddic", key: "ddicEntityName", name: "ZOSD_FLEET_VOY", rows: seed("zosd_fleet_voy").length, sample: "V00001"},
+    {route: "ddic", key: "ddicEntityName", name: "ZOSD_FLEET_STAT", rows: seed("zosd_fleet_stat").length, sample: "Aloft"},
+    {route: "cds", key: "ddlSourceName", name: "ZC_OSD_FLEETCUBE", rows: seed("zosd_fleet_voy").length, sample: "V00001"},
+  ];
+  const headers = await csrf(`${base}/sap/bc/adt/discovery`);
+  for (const {route, key, name, rows, sample} of definitions) {
+    const url = `${base}/sap/bc/adt/datapreview/${route}?rowNumber=100&${key}=${name}`;
+    const res = await fetch(url, {method: "POST", headers, body: ""});
+    const xml = await res.text();
+    expect(res.ok, `${name}: HTTP ${res.status}: ${xml.slice(0, 200)}`);
+    expect(xml.includes(`<dataPreview:totalRows>${rows}</dataPreview:totalRows>`), `${name}: expected ${rows} rows`);
+    expect(xml.includes(`<dataPreview:data>${sample}</dataPreview:data>`), `${name}: missing ${sample}`);
+  }
+  return "6 ships, 20 voyages, 3 statuses, 20 cube rows";
+});
+
 await check("2 classrun ZCL_OSD_FLEET_REPORT prints S001", async () => {
   const headers = await csrf(`${base}/sap/bc/adt/discovery`);
   const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, {method: "POST", headers});
