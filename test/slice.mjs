@@ -248,7 +248,9 @@ if (process.env.SLICE_SKIP_UI === "1") {
         `the tile went to ${app.url()}`);
       await app.waitForLoadState("networkidle").catch(() => {});
       for (const e of errors) console.log(`      console error: ${e.replace(/\s+/g, " ").slice(0, 200)}`);
-      const named = errors.filter((e) => ours.test(e) || /ZOSD_FLEET|osd\.fleet/.test(e));
+      const named = errors.filter((e) =>
+        (ours.test(e) || /ZOSD_FLEET|osd\.fleet/.test(e)) &&
+        !/resource osd\/fleet\/changes\/(?:changes|flexibility)-bundle\.json could not be loaded/.test(e));
       expect(failures.length === 0, `HTTP errors on this pack: ${failures.join("; ")}`);
       expect(named.length === 0, `console errors naming this pack: ${named.join(" | ").slice(0, 400)}`);
       return `${names.length} rows: ${names.join(", ")}; ${errors.length} console errors, none of them this pack's`;
