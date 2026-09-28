@@ -181,6 +181,30 @@ await check("1a F8 Data Preview: fleet tables and CDS", async () => {
   return "6 ships, 20 voyages, 3 statuses, 20 cube rows";
 });
 
+await check("1b fleet audit result and ABAP Unit", async () => {
+  const headers = await csrf(`${base}/sap/bc/adt/discovery`);
+  const run = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_AUDIT`, {method: "POST", headers});
+  const output = await run.text();
+  expect(run.ok, `classrun: HTTP ${run.status}: ${output.slice(0, 200)}`);
+  expect(output.includes("Fleet audit OK: 6 ships, 20 voyages"), `unexpected audit output: ${output}`);
+
+  const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
+    headers: {...headers, "content-type": "application/xml"},
+    body: `<?xml version="1.0" encoding="UTF-8"?>
+<aunit:runConfiguration xmlns:aunit="http://www.sap.com/adt/aunit" xmlns:adtcore="http://www.sap.com/adt/core">
+  <external><coverage active="false"/></external>
+  <adtcore:objectReferences>
+    <adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_osd_fleet_audit"/>
+  </adtcore:objectReferences>
+</aunit:runConfiguration>`});
+  const xml = await unit.text();
+  expect(unit.ok, `ABAP Unit: HTTP ${unit.status}`);
+  expect(/testMethod adtcore:name="SEEDED_FLEET"/.test(xml), "seeded audit test did not run");
+  expect(/testMethod adtcore:name="MISMATCH_IS_ERROR"/.test(xml), "failure-path audit test did not run");
+  expect(!/<alert[\s>]/.test(xml), `audit has alerts:\n${xml}`);
+  return "6 ships, 20 voyages; success and mismatch paths passed";
+});
+
 await check("2 classrun ZCL_OSD_FLEET_REPORT prints S001", async () => {
   const headers = await csrf(`${base}/sap/bc/adt/discovery`);
   const res = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_REPORT`, {method: "POST", headers});
