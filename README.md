@@ -28,6 +28,15 @@ The chapters run on one small domain this repository owns: a fleet of airships a
 
 The rest of the guide uses the Airship fleet: six ships and their voyages, seeded into `ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY` and `ZOSD_FLEET_STAT` every time the system starts (see [the contract](docs/fleet-contract.md)).
 
+To inspect the data, open a definition below and press **F8**. The extension opens Data Preview; it reads the rows seeded from `data/` when the system starts. Leave an active debug session first, since F8 controls execution while debugging ABAP.
+
+| Definition | Expected rows |
+| --- | ---: |
+| [ZOSD_FLEET_SHIP](src/ddic/zosd_fleet_ship.tabl.xml) | 6 ships |
+| [ZOSD_FLEET_VOY](src/ddic/zosd_fleet_voy.tabl.xml) | 20 voyages |
+| [ZOSD_FLEET_STAT](src/ddic/zosd_fleet_stat.tabl.xml) | 3 statuses |
+| [ZC_OSD_FLEETCUBE](src/cds/zc_osd_fleetcube.ddls.asddls) | 20 voyage rows (chapter 5) |
+
 1. Open [ZCL_OSD_FLEET_REPORT](src/zcl_osd_fleet_report.clas.abap) and press **F9**. Expected: the console shows `Airship fleet` and one line per ship, starting with `S001 Albatross (Aloft): 6 voyages, 305 passengers` and ending with `S006 Old Boiler (Maintenance): 0 voyages, 0 passengers`.
 2. In `ship_lines`, set a breakpoint on `steam_check( ls_ship-steam_pct ).` with **Ctrl+Shift+B** and run **osd: Run as ABAP Application with debugger**. The debugger attaches automatically. Expected: VS Code stops on that line with the first ship, `S001`, in `ls_ship`. Continue with **F8**; the console prints the same six lines as in step 1.
 3. Break a test on purpose. In [the test class](src/zcl_osd_fleet_report.clas.testclasses.abap), remove the leading `*` from the `broken_on_purpose` declaration (line 11) and from its method (lines 40-44), press **Ctrl+F3**, and run the tests of `ZCL_OSD_FLEET_REPORT` in Testing. Expected: `counts_voyages` is green and `broken_on_purpose` is red with a failed assertion: it expects `1 voyages` for S006, and the report says `0 voyages`. Put the six `*` back, activate, and rerun: only `counts_voyages` is left, green.
@@ -91,6 +100,13 @@ What can leave this repository for a real system is listed, object by object, in
 1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report class, the cube `DDLS zc_osd_fleetcube`, the AMDP class `zcl_osd_fleet_fuel`, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
+
+## Next: fleet operations trace
+
+[Fleet operations trace](docs/fleet-operations-trace.md) sketches a small
+business-log viewer, two event-connected job chains, and an optional doctor
+daemon. It is a proposed scenario with explicit runtime dependencies, not a
+step in the runnable chapters above.
 
 ## Run the checks
 
