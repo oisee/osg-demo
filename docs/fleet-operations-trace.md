@@ -24,6 +24,8 @@ not implement a private log database or a UI-only imitation in this pack.
 Validate the chosen BAL calls and persistence behavior on A4H before naming
 them SAP-compatible. The currently available `CL_BALI_LOG_DB` library stand-in
 only remembers the last log in memory; it does not satisfy this slice.
+The [A4H BAL API readout](a4h-bal-probe.md) confirms the modern class and
+interface signatures, but leaves the write, commit and reload behavior open.
 
 ## Next slice: connected jobs
 
@@ -33,6 +35,14 @@ Schedule two short chains over the same fleet:
    publish a tail event only after successful completion.
 2. **Readiness chain:** wait for that event, inspect ship status and the
    voyage summary, then write a final business-log result.
+
+For the first job experiment, use one run ID as the event parameter and log
+external ID for both chains. Give the voyage work one short step and the
+readiness work one short step. The voyage step records the twenty-row count
+and emits the success event after that result is durable. The readiness step
+records the six-ship count and final outcome. A forced voyage-count mismatch
+must leave readiness waiting. The scheduler or a durable run record, not the
+event alone, must prevent a replay from producing a second final result.
 
 Every step has a run ID, chain ID, state, start and finish time, and a link
 to its business log. A failed voyage step leaves the readiness chain waiting;
@@ -63,3 +73,17 @@ implemented.
 The job and daemon gates are future work. The current open-steamgate runtime
 does not provide the required persistent business log, job scheduler, or
 daemon lifecycle as a complete public interface.
+
+### A4H job API readout, 2026-09-28
+
+Read-only ADT requests to the A4H sandbox found `JOB_OPEN`, `JOB_SUBMIT`,
+`JOB_CLOSE` and `BP_EVENT_RAISE` in function group `SBTI`. `JOB_OPEN` takes a
+job name and returns a job count. `JOB_CLOSE` accepts that pair plus
+`event_id` and `event_param`, and returns `job_was_released`.
+`BP_EVENT_RAISE` accepts `eventid` and optional `eventparm` and declares
+exceptions including `eventid_does_not_exist`. The modern `CL_APJ_RT_API`
+also exists, but no job has been scheduled through either API for this demo.
+This readout proves availability and signatures only: event registration,
+step submission, release, commit, delivery, replay and failure behavior still
+need an A4H probe. It does not justify implementing those behaviors inside
+`osg-demo` ahead of a shared runtime contract.
