@@ -1,0 +1,59 @@
+name: demo smoke
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fleet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the demo
+        uses: actions/checkout@v4
+        with:
+          path: demo
+      - name: Check out current OSD main
+        uses: actions/checkout@v4
+        with:
+          repository: oisee/open-steamgate
+          ref: main
+          path: osd
+      - name: Record the runtime under test
+        run: git -C osd rev-parse HEAD
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: osd/package-lock.json
+      - name: Install and bootstrap OSD
+        working-directory: osd
+        run: |
+          npm ci
+          npm run bootstrap
+      - name: Fleet smoke on SQLite
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+          SLICE_SKIP_UI: "1"
+        run: node test/slice.mjs
+      - name: Fleet smoke on DuckDB
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+          SLICE_SKIP_UI: "1"
+          STG_DB: duckdb
+        run: node test/slice.mjs

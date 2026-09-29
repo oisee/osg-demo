@@ -126,8 +126,9 @@ jobs and the optional doctor as later steps.
    viewer again: the same logs and message UTC timestamps remain. `RENDER` also
    accepts an exact run ID, `IV_SEVERITY`, or `IV_ERRORS_ONLY` for filtered reads.
 3. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
-   `DANGEROUS`: it checks the error filter and ordered messages, and rolls
-   its own rows back. `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
+   `DANGEROUS`: it checks the error filter and ordered messages. OSD runs it
+   against an isolated test database; its cleanup on A4H has not been tested.
+   `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
    node test/slice.mjs` runs the broader pack check against that runtime.
 
 ## Run the checks
