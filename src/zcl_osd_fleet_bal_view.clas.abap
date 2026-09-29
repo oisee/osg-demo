@@ -5,6 +5,7 @@ CLASS zcl_osd_fleet_bal_view DEFINITION PUBLIC FINAL CREATE PUBLIC.
     TYPES tt_line TYPE STANDARD TABLE OF string WITH EMPTY KEY.
     CLASS-METHODS render
       IMPORTING iv_run_id TYPE ty_run_id OPTIONAL
+                iv_severity TYPE symsgty OPTIONAL
                 iv_errors_only TYPE abap_bool DEFAULT abap_false
       RETURNING VALUE(rt_lines) TYPE tt_line
       RAISING cx_bali_runtime.
@@ -13,6 +14,12 @@ ENDCLASS.
 CLASS zcl_osd_fleet_bal_view IMPLEMENTATION.
   METHOD render.
     DATA lv_count TYPE i.
+    DATA lv_filter_severity TYPE symsgty.
+    DATA lv_matches TYPE abap_bool.
+    lv_filter_severity = iv_severity.
+    IF iv_errors_only = abap_true.
+      lv_filter_severity = 'E'.
+    ENDIF.
     DATA(lo_filter) = cl_bali_log_filter=>create( ).
     lo_filter = lo_filter->set_descriptor(
       object = 'ZOSD_FLEET' subobject = 'AUDIT'
@@ -22,13 +29,25 @@ CLASS zcl_osd_fleet_bal_view IMPLEMENTATION.
     LOOP AT lt_logs INTO DATA(lo_log).
       DATA(lo_loaded) = lo_db->load_log( handle = lo_log->get_handle( ) ).
       DATA(lo_header) = lo_loaded->get_header( ).
-      IF iv_errors_only = abap_true AND lo_header->number_error_items = 0.
+      DATA(lt_items) = lo_loaded->get_all_items( ).
+      IF lv_filter_severity IS NOT INITIAL.
+        lv_matches = abap_false.
+        LOOP AT lt_items INTO DATA(ls_filter_item).
+          IF ls_filter_item-item->severity = lv_filter_severity.
+            lv_matches = abap_true.
+            EXIT.
+          ENDIF.
+        ENDLOOP.
+      ELSE.
+        lv_matches = abap_true.
+      ENDIF.
+      IF lv_matches = abap_false.
         CONTINUE.
       ENDIF.
       lv_count = lv_count + 1.
       APPEND |Run { lo_header->external_id }; handle { lo_loaded->get_handle( ) }; errors { lo_header->number_error_items }| TO rt_lines.
-      LOOP AT lo_loaded->get_all_items( ) INTO DATA(ls_entry).
-        APPEND |{ ls_entry-log_item_number } { ls_entry-item->severity } { ls_entry-item->get_message_text( ) }| TO rt_lines.
+      LOOP AT lt_items INTO DATA(ls_entry).
+        APPEND |{ ls_entry-log_item_number } { ls_entry-item->severity } { ls_entry-item->get_message_text( ) }; UTC { ls_entry-item->timestamp }| TO rt_lines.
       ENDLOOP.
     ENDLOOP.
     INSERT |Fleet audit logs: { lv_count }| INTO rt_lines INDEX 1.

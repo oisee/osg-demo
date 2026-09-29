@@ -229,6 +229,8 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
     `BAL success items: ${shown}`);
   expect(shown.includes("3 E Fleet audit failed: 6 ships, 20 voyages; expected 7 and 20"),
     `BAL error item: ${shown}`);
+  expect((shown.match(/; UTC 20\d{12}/g) ?? []).length === 9,
+    `BAL item UTC timestamps: ${shown}`);
 
   const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
     headers: {...await csrf(`${base}/sap/bc/adt/discovery`), "content-type": "application/xml"},

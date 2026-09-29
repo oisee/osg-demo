@@ -14,6 +14,9 @@ CLASS ltcl_bal IMPLEMENTATION.
 
     DATA(lt_lines) = zcl_osd_fleet_bal_view=>render(
       iv_run_id = lv_run_id iv_errors_only = abap_true ).
+    DATA(lt_info) = zcl_osd_fleet_bal_view=>render(
+      iv_run_id = lv_run_id iv_severity = 'I' ).
+    cl_abap_unit_assert=>assert_equals( act = lines( lt_info ) exp = 9 ).
     cl_abap_unit_assert=>assert_equals( act = lines( lt_lines ) exp = 5 ).
     READ TABLE lt_lines INDEX 1 INTO DATA(lv_count).
     READ TABLE lt_lines INDEX 2 INTO DATA(lv_header).
@@ -22,8 +25,8 @@ CLASS ltcl_bal IMPLEMENTATION.
     READ TABLE lt_lines INDEX 5 INTO DATA(lv_finished).
     cl_abap_unit_assert=>assert_equals( act = lv_count exp = 'Fleet audit logs: 1' ).
     cl_abap_unit_assert=>assert_char_cp( act = lv_header exp = '*errors 1*' ).
-    cl_abap_unit_assert=>assert_equals( act = lv_started exp = '1 S Fleet audit started' ).
-    cl_abap_unit_assert=>assert_equals( act = lv_observed exp = '2 I Observed 6 ships and 20 voyages' ).
-    cl_abap_unit_assert=>assert_char_cp( act = lv_finished exp = '3 E Fleet audit failed:*' ).
+    cl_abap_unit_assert=>assert_char_cp( act = lv_started exp = '1 S Fleet audit started; UTC 20*' ).
+    cl_abap_unit_assert=>assert_char_cp( act = lv_observed exp = '2 I Observed 6 ships and 20 voyages; UTC 20*' ).
+    cl_abap_unit_assert=>assert_char_cp( act = lv_finished exp = '3 E Fleet audit failed:*; UTC 20*' ).
   ENDMETHOD.
 ENDCLASS.

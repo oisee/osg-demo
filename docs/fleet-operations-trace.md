@@ -10,14 +10,13 @@ classic ALV report independently.
 `ZCL_OSD_FLEET_AUDIT` provides the read-only count and success/error result.
 `ZCL_OSD_FLEET_BAL` now records two successful audits and one forced error
 through `CL_BALI_*`; `ZCL_OSD_FLEET_BAL_VIEW` reads the persisted messages.
-This branch requires the BAL subset in
+This branch requires the BAL subset merged from
 [open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
 
 Run a fleet audit synchronously. Give each run an ID. Record the start,
 ship and voyage counts, a validation outcome, and the finish or failure as
-business-log messages with severity. The current read-only class viewer can
-filter by exact run ID or error presence and shows each run's messages.
-Per-item UTC time and arbitrary severity filters remain a later viewer step.
+business-log messages with severity and UTC timestamps. The read-only class
+viewer can filter by exact run ID or severity and shows each run's messages.
 Two runs must remain distinct. A failed audit must show its error, and saved
 messages must still be visible after restarting the local system.
 
@@ -25,8 +24,8 @@ The implementation belongs in open-steamgate's shared logging/runtime layer.
 The demo supplies the fleet audit, read-only view and assertions against that
 API. The [A4H BAL probe](a4h-bal-probe.md) measured ordinary save, rollback,
 reload, repeated external IDs and second-connection behavior. PR #207 covers
-the ordinary caller transaction path; second-connection save, wildcard
-filters and UTC item timestamps are not part of that first runtime subset.
+the ordinary caller transaction path; second-connection save and wildcard
+filters are not part of that first runtime subset.
 
 ## Next slice: connected jobs
 
@@ -71,9 +70,9 @@ implemented.
   BAL, job-event and daemon behavior on A4H. Record any semantic difference
   as an open-steamgate issue rather than masking it in the demo.
 
-The job and daemon gates are future work. PR #207 provides the first
-persistent BAL subset, but the runtime does not yet offer the scheduler,
-event and daemon lifecycle needed by the full scenario.
+The fleet job and daemon gates are future work. PR #207 provides the first
+persistent BAL subset. The runtime has narrow job, event and doctor APIs,
+but this two-chain fleet scenario has not been built or validated against them.
 It has a [persisted one-shot batch runner](https://github.com/oisee/open-steamgate/pull/201)
 for supported converted reports and a [durable queue with one BGR worker](https://github.com/oisee/open-steamgate/pull/202).
 These save runs and output across process restarts; they do not yet provide

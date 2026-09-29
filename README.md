@@ -109,9 +109,10 @@ What can leave this repository for a real system is listed, object by object, in
 
 ## Next: fleet operations trace
 
-The first business-log slice is on this branch and requires the BAL API in
-[open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
-Until that PR is merged and included in a VSIX, use its branch as `OSD_HOME`.
+The first business-log slice is on this branch and requires the BAL API merged
+from [open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
+Use a current `open-steamgate/main` checkout as `OSD_HOME`; an installed VSIX
+must include that merge to run this slice.
 The [fleet operations trace](docs/fleet-operations-trace.md) keeps connected
 jobs and the optional doctor as later steps.
 
@@ -122,8 +123,8 @@ jobs and the optional doctor as later steps.
    press **F9**. Find the three run IDs ending `OK1`, `OK2` and `ERR`. Each has
    `started`, `Observed 6 ships and 20 voyages`, then a success or error item;
    `ERR` has one error. Restart OSD with the same database file and run the
-   viewer again: the same logs remain. `RENDER` also accepts an exact run ID
-   and `IV_ERRORS_ONLY` for callers that need a filtered read.
+   viewer again: the same logs and message UTC timestamps remain. `RENDER` also
+   accepts an exact run ID, `IV_SEVERITY`, or `IV_ERRORS_ONLY` for filtered reads.
 3. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
    `DANGEROUS`: it checks the error filter and ordered messages, and rolls
    its own rows back. `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
