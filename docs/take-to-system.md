@@ -17,10 +17,10 @@ unzip -Z1 /tmp/osg-demo.zip
 rm -rf "$(dirname "$STAGE")"
 ```
 
-Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: 42 files, ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
+Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
 
 ```
-CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_fuel, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_fuel, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
 DDLS  zc_osd_fleetcube
 IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
@@ -46,6 +46,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | Search help `ZOSD_FLEET_STATUS_SH` | yes | Elementary, over `ZOSD_FLEET_STAT`. |
 | `ZCL_OSD_FLEET_REPORT` and `ltcl_fleet` | yes | The test reads the tables, so it passes only once the seed rows are there. |
 | `ZCL_OSD_FLEET_AUDIT` and `ltcl_audit` | yes | Read-only counts and a result; neither writes nor displays a BAL log. Its tests need the seed rows. |
+| `ZCL_OSD_FLEET_BAL` and `ZCL_OSD_FLEET_BAL_VIEW` | yes | Call the standard `CL_BALI_*` surface. Register BAL object `ZOSD_FLEET` and subobject `AUDIT` on the target system before running. The writer commits three logs; its ABAP Unit test writes rows and is `DANGEROUS`. Seed rows are needed for the expected counts. |
 | SEGW project `ZOSD_FLEET`, service `ZOSD_FLEET_SRV 0001`, model `ZOSD_FLEET_MDL 0001` | yes (IWPR, IWSV, IWMO) | Compiled from the YAML. The service still has to be activated in the gateway hub (`/IWFND/MAINT_SERVICE`) before `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` answers. |
 | `ZCL_ZOSD_FLEET_MPC`, `_MPC_EXT`, `_MPC_ANN`, `_DPC`, `_DPC_EXT` | yes | The generated classes, and the hand-written `_DPC_EXT`. `VoyageSet` is served by SADL over `ZOSD_FLEET_VOY` through the generated `_DPC`. |
 | Fiori app | yes, as BSP `ZOSG_DEMO` (WAPA) | Its manifest's data source is rebased for the BSP location, `../../../../opu/odata/sap/ZOSD_FLEET_SRV/`, which is `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` seen from `/sap/bc/ui5_ui5/sap/zosg_demo/`. SAPUI5 still loads from ui5.sap.com (`index.html`), so the browser needs to reach it. |

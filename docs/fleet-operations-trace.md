@@ -7,25 +7,25 @@ classic ALV report independently.
 
 ## First slice: business log and viewer
 
-`ZCL_OSD_FLEET_AUDIT` now provides the read-only count and success/error
-result. It is runnable with F9 and has ABAP Unit checks for both outcomes.
-It does not yet write a business log.
+`ZCL_OSD_FLEET_AUDIT` provides the read-only count and success/error result.
+`ZCL_OSD_FLEET_BAL` now records two successful audits and one forced error
+through `CL_BALI_*`; `ZCL_OSD_FLEET_BAL_VIEW` reads the persisted messages.
+This branch requires the BAL subset merged from
+[open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
 
 Run a fleet audit synchronously. Give each run an ID. Record the start,
 ship and voyage counts, a validation outcome, and the finish or failure as
-business-log messages with severity and time. Show the log in a read-only
-viewer that can filter by run ID and severity and open the messages for a run.
+business-log messages with severity and UTC timestamps. The read-only class
+viewer can filter by exact run ID or severity and shows each run's messages.
 Two runs must remain distinct. A failed audit must show its error, and saved
 messages must still be visible after restarting the local system.
 
 The implementation belongs in open-steamgate's shared logging/runtime layer.
-The demo supplies the fleet audit and assertions against the public API. Do
-not implement a private log database or a UI-only imitation in this pack.
-Validate the chosen BAL calls and persistence behavior on A4H before naming
-them SAP-compatible. The currently available `CL_BALI_LOG_DB` library stand-in
-only remembers the last log in memory; it does not satisfy this slice.
-The [A4H BAL API readout](a4h-bal-probe.md) confirms the modern class and
-interface signatures, but leaves the write, commit and reload behavior open.
+The demo supplies the fleet audit, read-only view and assertions against that
+API. The [A4H BAL probe](a4h-bal-probe.md) measured ordinary save, rollback,
+reload, repeated external IDs and second-connection behavior. PR #207 covers
+the ordinary caller transaction path; second-connection save and wildcard
+filters are not part of that first runtime subset.
 
 ## Next slice: connected jobs
 
@@ -70,9 +70,9 @@ implemented.
   BAL, job-event and daemon behavior on A4H. Record any semantic difference
   as an open-steamgate issue rather than masking it in the demo.
 
-The job and daemon gates are future work. The current open-steamgate runtime
-does not provide the required persistent business log, job scheduler, or
-daemon lifecycle as a complete public interface.
+The fleet job and daemon gates are future work. PR #207 provides the first
+persistent BAL subset. The runtime has narrow job, event and doctor APIs,
+but this two-chain fleet scenario has not been built or validated against them.
 It has a [persisted one-shot batch runner](https://github.com/oisee/open-steamgate/pull/201)
 for supported converted reports and a [durable queue with one BGR worker](https://github.com/oisee/open-steamgate/pull/202).
 These save runs and output across process restarts; they do not yet provide

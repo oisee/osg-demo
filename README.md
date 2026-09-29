@@ -103,19 +103,34 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report class, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report and BAL classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
 ## Next: fleet operations trace
 
-[Fleet operations trace](docs/fleet-operations-trace.md) sketches a small
-business-log viewer, two event-connected job chains, and an optional doctor
-daemon. It is a proposed scenario with explicit runtime dependencies, not a
-step in the runnable chapters above. The read-only
-[ZCL_OSD_FLEET_AUDIT](src/zcl_osd_fleet_audit.clas.abap) already runs with F9:
-`Fleet audit OK: 6 ships, 20 voyages`. Its ABAP Unit tests cover that result
-and a forced count mismatch. Persistent BAL logging is still pending.
+The first business-log slice is on this branch and requires the BAL API merged
+from [open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
+Use a current `open-steamgate/main` checkout as `OSD_HOME`; an installed VSIX
+must include that merge to run this slice.
+The [fleet operations trace](docs/fleet-operations-trace.md) keeps connected
+jobs and the optional doctor as later steps.
+
+1. On a seeded system, open [ZCL_OSD_FLEET_BAL](src/zcl_osd_fleet_bal.clas.abap)
+   and press **F9**. It writes two successful audits and one deliberate error,
+   commits them, and prints one batch ID and three different log handles.
+2. Open [ZCL_OSD_FLEET_BAL_VIEW](src/zcl_osd_fleet_bal_view.clas.abap) and
+   press **F9**. Find the three run IDs ending `OK1`, `OK2` and `ERR`. Each has
+   `started`, `Observed 6 ships and 20 voyages`, then a success or error item;
+   `ERR` has one error. Restart OSD with the same database file and run the
+   viewer again: the same logs and message UTC timestamps remain. `RENDER` also
+   accepts an exact run ID, `IV_SEVERITY`, or `IV_ERRORS_ONLY` for filtered reads.
+3. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
+   `DANGEROUS`: it checks the error filter and ordered messages. OSD gives
+   SQLite/DuckDB tests a disposable database; for HANA/Postgres, choose a
+   dedicated schema/database. Its cleanup on A4H has not been tested.
+   `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
+   node test/slice.mjs` runs the broader pack check against that runtime.
 
 ## Run the checks
 
