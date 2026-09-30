@@ -1,13 +1,17 @@
 CLASS zcl_osd_fleet_chain DEFINITION PUBLIC FINAL CREATE PUBLIC.
-* Two background jobs as one chain over the fleet. ZOSD_FLEET_VOYAGE counts
-* the voyages and records BAL log <run>-VOY; ZOSD_FLEET_READY starts only
-* after that job finished successfully (a standard predecessor start
-* condition), checks that log and the ships, and records <run>-READY. A
-* voyage count that differs from the expected one fails the first job, so the
-* second one keeps waiting (measured on open-steamgate only).
-* On a system the voyage job is released for an immediate start before the
-* readiness job is closed, so it may finish first; a job already started is
-* not undone by the caller's ROLLBACK either. See docs/take-to-system.md.
+* Two background jobs as one chain over the fleet. ZOSD_FLEET_READY is
+* scheduled first and waits for the named event ZOSD_FLEET_VOYAGE_DONE with
+* the run ID as its parameter; then ZOSD_FLEET_VOYAGE is released. The voyage
+* step counts the voyages, records BAL log <run>-VOY and, only when the count
+* matches and the log is committed, raises that event (BP_EVENT_RAISE). The
+* readiness step checks the log and the ships and records <run>-READY. A
+* count that differs from the expected one fails the voyage job and raises
+* nothing, so the readiness job keeps waiting.
+* The waiter exists before the raiser can run, so a fast voyage job cannot
+* finish first; SAP and open-steamgate both drop a raise that comes before
+* the waiting job was closed. Measured on open-steamgate; on a system this
+* follows SAP's documented event pattern, not measured there. A job already
+* started is not undone by the caller's ROLLBACK.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
     TYPES ty_run_id TYPE c LENGTH 32.
@@ -21,13 +25,14 @@ CLASS zcl_osd_fleet_chain DEFINITION PUBLIC FINAL CREATE PUBLIC.
            END OF ty_chain.
     CONSTANTS c_voyage_job TYPE tbtcjob-jobname VALUE 'ZOSD_FLEET_VOYAGE'.
     CONSTANTS c_ready_job TYPE tbtcjob-jobname VALUE 'ZOSD_FLEET_READY'.
+    CONSTANTS c_event TYPE c LENGTH 32 VALUE 'ZOSD_FLEET_VOYAGE_DONE'.
 * Schedules both jobs; the caller commits. FAILED names the call that failed.
     CLASS-METHODS schedule
       IMPORTING iv_run_id TYPE ty_run_id
                 iv_expected_voyages TYPE i DEFAULT 20
       RETURNING VALUE(rs_chain) TYPE ty_chain.
 * The voyage step: returns abap_false when the count does not match. The
-* log is saved either way; the caller commits it.
+* log is saved either way; the caller commits it, then raises the event.
     CLASS-METHODS voyage_step
       IMPORTING iv_run_id TYPE ty_run_id
                 iv_expected_voyages TYPE i
@@ -54,12 +59,42 @@ ENDCLASS.
 CLASS zcl_osd_fleet_chain IMPLEMENTATION.
   METHOD schedule.
     DATA lv_released TYPE btch0000-char1.
+    DATA lv_event_param TYPE c LENGTH 64.
 * SUBMIT ... VIA JOB takes its job name and count as strings in OSD
     DATA lv_jobname TYPE string.
     DATA lv_jobcount TYPE string.
     rs_chain-run_id = iv_run_id.
     rs_chain-voyage_jobname = c_voyage_job.
     rs_chain-ready_jobname = c_ready_job.
+    lv_event_param = iv_run_id.
+
+* the waiter first: it must exist before the voyage job can raise the event
+    CALL FUNCTION 'JOB_OPEN'
+      EXPORTING jobname = rs_chain-ready_jobname
+      IMPORTING jobcount = rs_chain-ready_count
+      EXCEPTIONS OTHERS = 1.
+    IF sy-subrc <> 0.
+      rs_chain-failed = `JOB_OPEN ready`.
+      RETURN.
+    ENDIF.
+    lv_jobname = rs_chain-ready_jobname.
+    lv_jobcount = rs_chain-ready_count.
+    SUBMIT zosd_fleet_ready
+      WITH p_run = iv_run_id
+      VIA JOB lv_jobname NUMBER lv_jobcount AND RETURN.
+    IF sy-subrc <> 0.
+      rs_chain-failed = `SUBMIT ready`.
+      RETURN.
+    ENDIF.
+    CALL FUNCTION 'JOB_CLOSE'
+      EXPORTING jobname = rs_chain-ready_jobname jobcount = rs_chain-ready_count
+                event_id = c_event event_param = lv_event_param
+      IMPORTING job_was_released = lv_released
+      EXCEPTIONS OTHERS = 1.
+    IF sy-subrc <> 0 OR lv_released <> 'X'.
+      rs_chain-failed = `JOB_CLOSE ready`.
+      RETURN.
+    ENDIF.
 
     CALL FUNCTION 'JOB_OPEN'
       EXPORTING jobname = rs_chain-voyage_jobname
@@ -79,6 +114,7 @@ CLASS zcl_osd_fleet_chain IMPLEMENTATION.
       rs_chain-failed = `SUBMIT voyage`.
       RETURN.
     ENDIF.
+    CLEAR lv_released.
     CALL FUNCTION 'JOB_CLOSE'
       EXPORTING jobname = rs_chain-voyage_jobname jobcount = rs_chain-voyage_count
                 strtimmed = 'X'
@@ -86,36 +122,6 @@ CLASS zcl_osd_fleet_chain IMPLEMENTATION.
       EXCEPTIONS OTHERS = 1.
     IF sy-subrc <> 0 OR lv_released <> 'X'.
       rs_chain-failed = `JOB_CLOSE voyage`.
-      RETURN.
-    ENDIF.
-
-    CALL FUNCTION 'JOB_OPEN'
-      EXPORTING jobname = rs_chain-ready_jobname
-      IMPORTING jobcount = rs_chain-ready_count
-      EXCEPTIONS OTHERS = 1.
-    IF sy-subrc <> 0.
-      rs_chain-failed = `JOB_OPEN ready`.
-      RETURN.
-    ENDIF.
-    lv_jobname = rs_chain-ready_jobname.
-    lv_jobcount = rs_chain-ready_count.
-    SUBMIT zosd_fleet_ready
-      WITH p_run = iv_run_id
-      VIA JOB lv_jobname NUMBER lv_jobcount AND RETURN.
-    IF sy-subrc <> 0.
-      rs_chain-failed = `SUBMIT ready`.
-      RETURN.
-    ENDIF.
-    CLEAR lv_released.
-    CALL FUNCTION 'JOB_CLOSE'
-      EXPORTING jobname = rs_chain-ready_jobname jobcount = rs_chain-ready_count
-                pred_jobname = rs_chain-voyage_jobname
-                pred_jobcount = rs_chain-voyage_count
-                predjob_checkstat = 'X'
-      IMPORTING job_was_released = lv_released
-      EXCEPTIONS OTHERS = 1.
-    IF sy-subrc <> 0 OR lv_released <> 'X'.
-      rs_chain-failed = `JOB_CLOSE ready`.
     ENDIF.
   ENDMETHOD.
 
@@ -210,7 +216,7 @@ CLASS zcl_osd_fleet_chain IMPLEMENTATION.
       ENDIF.
       COMMIT WORK.
       out->write( |Fleet chain { lv_label }: run { lv_run }; voyage job { ls_chain-voyage_count }; |
-               && |ready job { ls_chain-ready_count } waits for it; expecting { lv_expected } voyages| ).
+               && |ready job { ls_chain-ready_count } waits for { c_event }; expecting { lv_expected } voyages| ).
     ENDDO.
   ENDMETHOD.
 ENDCLASS.
