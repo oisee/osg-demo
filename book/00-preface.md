@@ -20,6 +20,14 @@ statuses.
 `S006 Old Boiler` has no voyages, which several chapters use on purpose. The
 [fleet contract](../docs/fleet-contract.md) fixes names and shapes.
 
+## This edition
+
+Written against open-steamgate 0.4 (its `main` of 2026-10-01): the job
+worker command `node tools/osd-batch-runs.mjs`, `BP_JOB_SELECT` with SAP's
+`BTCSELECT` fields, F9 and Ctrl+Shift+F10 as described, and the DSL layers up
+to L2 slice 2. Where the extension 0.3.1370 behaves differently, the chapter
+says so.
+
 ## Before you start
 
 1. Install the **open-steamgate** extension (`oisee.open-steamgate`,
@@ -46,9 +54,9 @@ use port 8099.
 
 The extension uses ADT's keys: **F9** runs a class (its classrun), **F8** runs
 a report or previews a table or CDS view, **Ctrl+F2** checks, **Ctrl+F3**
-activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the test include you are in,
-**Ctrl+Shift+B** toggles a breakpoint. Chapter 1 says what to do when F9 toggles a
-breakpoint instead.
+activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you are in (0.4; on 0.3.1370 only the test include),
+**Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys only while execution stands
+at a breakpoint (0.4); chapter 1 says what to do on 0.3.1370.
 
 ## How the book is organised
 

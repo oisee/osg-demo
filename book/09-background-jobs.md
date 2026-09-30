@@ -94,7 +94,10 @@ not been measured there ([Take it to a system](../docs/take-to-system.md)).
 ## Why is a chain stuck?
 
 [ZCL_OSD_FLEET_DOCTOR](../src/zcl_osd_fleet_doctor.clas.abap) answers that for
-every readiness job that still waits. It selects them with `BP_JOB_SELECT`,
+every readiness job that still waits. It selects them with `BP_JOB_SELECT`
+(from open-steamgate 0.4 with SAP's `BTCSELECT` fields `PRELIM`, `SCHEDUL`
+and so on; a filter the local system cannot honour, such as a date range,
+raises `SELECTION_CANCELED` instead of being ignored),
 asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR` about the waiting job
 and about the voyage job of the same run (found by its `P_RUN`), and adds the
 voyage step's BAL log for that run. The job doctor has no link to the business log; the run ID in
