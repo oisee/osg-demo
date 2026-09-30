@@ -9,8 +9,9 @@
 //     in a temporary directory, and stops only that PID at the end;
 //  3. J0: the classrun of ZCL_OSD_FLEET_JOB opens job ZOSD_FLEET_AUDIT, submits
 //     report ZOSD_FLEET_JOB with a fresh run ID VIA JOB and releases it;
-//  4. test/job-worker.mjs, run against the same databases, imports the job
-//     and runs its step to COMPLETED; the step prints the run ID;
+//  4. the engine's worker, `node tools/osd-batch-runs.mjs work` against the
+//     same databases, imports the job and runs its step to COMPLETED; the
+//     step prints the run ID; a second `work` finds the queue empty;
 //  5. ZCL_OSD_FLEET_BAL_VIEW shows the step's BAL log under that run ID, with
 //     the handle the step printed, the audit's three messages and no error.
 import {spawn, spawnSync} from "node:child_process";
@@ -108,31 +109,38 @@ for (;;) {
 }
 
 let run;
+let jobCount;
 let handle;
 await check("J0a schedule: ZCL_OSD_FLEET_JOB releases ZOSD_FLEET_AUDIT", async () => {
   const text = await classrun("ZCL_OSD_FLEET_JOB");
   const match = /Fleet job ZOSD_FLEET_AUDIT (\S+) released; run ([A-F0-9]{32})/.exec(text);
   expect(match, `not released: ${text}`);
+  jobCount = match[1];
   run = match[2];
   return `job count ${match[1]}, run ${run}`;
 });
 
 await check("J0b worker: the step runs to COMPLETED", async () => {
   expect(run, "nothing was scheduled");
-  const worker = spawnSync(process.execPath, [join(repo, "test", "job-worker.mjs")],
-    {cwd: home, env, encoding: "utf8", timeout: 120_000});
-  expect(worker.status === 0, `worker exited ${worker.status}: ${worker.stderr || worker.stdout}`);
-  const done = worker.stdout.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line))
-    .filter((line) => ["completed", "failed", "advanced"].includes(line.kind));
-  expect(done.length === 1, `expected one worked step, got ${done.length}: ${worker.stdout}`);
-  const [step] = done;
-  expect(step.kind === "completed" && step.job === "ZOSD_FLEET_AUDIT" && step.state === "COMPLETED",
-    `step: ${JSON.stringify(step)}`);
-  const printed = (step.output ?? []).map((line) => new RegExp(`Fleet audit job ${run}: BAL (\\S+)`).exec(line))
-    .find(Boolean);
-  expect(printed, `step output lacks the run ID: ${JSON.stringify(step.output)}`);
+  // the engine's own worker, on the instance's databases; without OSD_PACKS,
+  // which would make its initializeABAP reseed the pack's tables
+  const {OSD_PACKS: _packs, ...workerEnv} = env;
+  const cli = (...args) => spawnSync(process.execPath, ["tools/osd-batch-runs.mjs", ...args],
+    {cwd: home, env: workerEnv, encoding: "utf8", timeout: 120_000});
+  const worked = cli("work");
+  expect(worked.status === 0, `work exited ${worked.status}: ${worked.stderr || worked.stdout}`);
+  const step = JSON.parse(worked.stdout);
+  expect(step.kind === "completed" && step.run?.jobName === "ZOSD_FLEET_AUDIT" && step.run?.jobCount === jobCount
+    && step.run?.state === "COMPLETED", `work: ${worked.stdout.slice(0, 400)}`);
+  const shown = cli("show", step.run.id);
+  expect(shown.status === 0, `show exited ${shown.status}: ${shown.stderr || shown.stdout}`);
+  const lines = JSON.parse(shown.stdout).output?.lines ?? [];
+  const printed = lines.map((line) => new RegExp(`Fleet audit job ${run}: BAL (\\S+)`).exec(line)).find(Boolean);
+  expect(printed, `step output lacks the run ID: ${JSON.stringify(lines)}`);
   handle = printed[1];
-  return `run ${step.id} COMPLETED`;
+  const idle = cli("work");
+  expect(idle.status === 0 && JSON.parse(idle.stdout).kind === "empty", `queue not empty after the step: ${idle.stdout}`);
+  return `job ${jobCount}, run ${step.run.id} COMPLETED`;
 });
 
 await check("J0c BAL: the job's log carries the run ID and no error", async () => {
