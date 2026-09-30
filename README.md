@@ -178,27 +178,32 @@ system. The job-chain steps from the
 
 ### A chain of two jobs
 
-Two jobs run as one chain: a voyage job, then a readiness job that starts only
-after the voyage job finished successfully. The readiness job uses SAP's
-standard predecessor start condition on `JOB_CLOSE` (`PRED_JOBNAME`,
-`PRED_JOBCOUNT`, `PREDJOB_CHECKSTAT = 'X'`), which open-steamgate ties to the
-voyage job's retained intent; no private `TAIL_EVENT_*` extension is used.
+Two jobs run as one chain: a readiness job that waits, then a voyage job that
+starts it. `ZCL_OSD_FLEET_CHAIN` closes the readiness job first with a named
+event, `EVENT_ID = 'ZOSD_FLEET_VOYAGE_DONE'` and the run ID as
+`EVENT_PARAM`, and only then releases the voyage job. The voyage step commits
+its business log and, only when the count is right, raises that event with
+`BP_EVENT_RAISE` as its last action. Because the waiting job exists before the
+voyage job can run, a fast voyage job cannot finish first: SAP and
+open-steamgate both ignore a raise that comes before the waiting job was
+closed. The run ID as event parameter keeps concurrent chains apart. Only
+standard function modules are used; no private `TAIL_EVENT_*` extension.
 Same setup as above: OSD on `STG_DB=file` and the engine's worker.
 
 1. Open [ZCL_OSD_FLEET_CHAIN](src/zcl_osd_fleet_chain.clas.abap) and press
    **F9**. It schedules two chains and prints both: `Fleet chain ok: run <A>`
    expects 20 voyages, `Fleet chain forced failure: run <B>` expects 21. Each
-   line gives the job counts of the voyage job and of the readiness job that
-   waits for it.
+   line gives the job counts of the voyage job and of the readiness job, which
+   `waits for ZOSD_FLEET_VOYAGE_DONE`.
 2. Run `node tools/osd-batch-runs.mjs work` until it answers
    `"kind": "empty"` (four times). Expected, in some order: voyage `A`
    `COMPLETED`, readiness `A` `COMPLETED` (always after voyage `A`), and
    voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
    `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
-   `WAITING`: on open-steamgate a failed predecessor never releases it. It
-   stays in the local operations store until you remove that store
-   (`OSD_OPERATIONS_DB`, or `osd-operations.sqlite` next to `STG_DB_PATH`) or
-   use a fresh directory; the facade has no `BP_JOB_DELETE` yet.
+   `WAITING`: its event was never raised. It stays in the local operations
+   store until you remove that store (`OSD_OPERATIONS_DB`, or
+   `osd-operations.sqlite` next to `STG_DB_PATH`) or use a fresh directory;
+   the facade has no `BP_JOB_DELETE` yet.
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
@@ -209,27 +214,32 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
 What this shows is a scheduling guarantee, not exactly-once execution: a
 restart or a replayed import does not start a job twice, but a crash after a
 step's business commit and before its result is recorded leaves the job
-`RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`).
-The chain is measured on open-steamgate only. On a system the voyage job is
-released for an immediate start before the readiness job is closed and may
-finish first; what SAP then does with the predecessor condition, and with a
-successor whose predecessor aborted, has not been measured
-([Take it to a system](docs/take-to-system.md)).
+`RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`). The
+event is raised when the voyage step's business work is committed, just
+before open-steamgate records the step as finished. So a crash or abort after
+a successful raise still starts the readiness job while the voyage job shows
+`FAILED` or `RUNNING`; and a raise that fails (on a system: the event is not
+defined in SM64, or the job's user may not raise it) aborts the voyage job
+after its log already says OK. The portable `BP_EVENT_RAISE` is used on
+purpose; open-steamgate's private tail event would tie the event to the
+recorded result but does not exist on a system. The chain is measured on
+open-steamgate; on a system it follows SAP's documented event pattern but has
+not been measured there ([Take it to a system](docs/take-to-system.md)).
 
 ### Why is a chain stuck?
 
 [ZCL_OSD_FLEET_DOCTOR](src/zcl_osd_fleet_doctor.clas.abap) answers that for
 every readiness job that still waits. It selects them with `BP_JOB_SELECT`,
 asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR` about the waiting job
-and about the voyage job it waits for, and adds the voyage step's BAL log for
-the same run. The job doctor has no link to the business log; the run ID in
+and about the voyage job of the same run (found by its `P_RUN`), and adds the
+voyage step's BAL log for that run. The job doctor has no link to the business log; the run ID in
 the step input (`P_RUN`) is that link.
 
 1. After the chain steps above on a fresh store, press **F9** on the class.
    Expected: `Fleet chains waiting: 1` (one per failing chain you scheduled;
    they stay until the operations store is removed), then
-   `Waiting chain <B>: ZOSD_FLEET_READY/... waits for ZOSD_FLEET_VOYAGE/...`, the job doctor's view of the readiness
-   job (`OPERATIONS WAITING`, `Wait: predecessor ...`, `P_RUN=<B>`), of the
+   `Waiting chain <B>: ZOSD_FLEET_READY/... waits for event ZOSD_FLEET_VOYAGE_DONE`, the job doctor's view of the readiness
+   job (`OPERATIONS WAITING`, `Wait: event ZOSD_FLEET_VOYAGE_DONE`, `P_RUN=<B>`), of the
    voyage job (`OPERATIONS FAILED result=INCOMPLETE`,
    `REVIEW: failed or interrupted; no automatic replay`, `P_VOYS=21`), and the
    business log `<B>-VOY` with `Voyage step failed: 20 voyages, expected 21`.

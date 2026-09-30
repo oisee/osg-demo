@@ -15,8 +15,8 @@
 //  5. ZCL_OSD_FLEET_BAL_VIEW shows the step's BAL log under that run ID, with
 //     the handle the step printed, the audit's three messages and no error;
 //  6. J1/J2: the classrun of ZCL_OSD_FLEET_CHAIN schedules two chains, each a
-//     voyage job and a readiness job that starts only after the voyage job
-//     succeeded (PRED_JOBNAME/PRED_JOBCOUNT/PREDJOB_CHECKSTAT). The worker
+//     readiness job waiting for the named event ZOSD_FLEET_VOYAGE_DONE with the
+//     run ID, then a voyage job that raises it only on success. The worker
 //     runs until the queue is empty: in the chain expecting 20 voyages both
 //     jobs complete; in the one expecting 21 the voyage job fails and the
 //     readiness job stays WAITING. BAL holds <run>-VOY for both chains (the
@@ -187,7 +187,7 @@ const chains = {};
 await check("J1a schedule: ZCL_OSD_FLEET_CHAIN schedules a good and a failing chain", async () => {
   const text = await classrun("ZCL_OSD_FLEET_CHAIN");
   for (const [label, key] of [["ok", "good"], ["forced failure", "failing"]]) {
-    const match = new RegExp(`Fleet chain ${label}: run ([A-F0-9]{32}); voyage job (\\S+); ready job (\\S+) waits`).exec(text);
+    const match = new RegExp(`Fleet chain ${label}: run ([A-F0-9]{32}); voyage job (\\S+); ready job (\\S+) waits for ZOSD_FLEET_VOYAGE_DONE`).exec(text);
     expect(match, `no ${label} chain: ${text}`);
     chains[key] = {run: match[1], voyage: match[2], ready: match[3]};
   }
@@ -256,13 +256,13 @@ await check("Doc1 doctor: the failing chain is stuck, with job doctor and BAL", 
   const got = mask(text).split("\n").map((l) => l.trimEnd());
   const want = [
     "Fleet chains waiting: 1",
-    "Waiting chain <RUN>: ZOSD_FLEET_READY/<READY> waits for ZOSD_FLEET_VOYAGE/<VOYAGE>",
+    "Waiting chain <RUN>: ZOSD_FLEET_READY/<READY> waits for event ZOSD_FLEET_VOYAGE_DONE",
     "-- job doctor, readiness job",
     "Job ZOSD_FLEET_READY/<READY>: OPERATIONS WAITING result=",
-    "Wait: predecessor ZOSD_FLEET_VOYAGE/<VOYAGE>",
+    "Wait: event ZOSD_FLEET_VOYAGE_DONE",
     "Step 1: ZOSD_FLEET_READY PENDING result= start= end=",
     "  P_RUN=<RUN>",
-    "-- job doctor, voyage job it waits for",
+    "-- job doctor, voyage job ZOSD_FLEET_VOYAGE/<VOYAGE> of the same run",
     "Job ZOSD_FLEET_VOYAGE/<VOYAGE>: OPERATIONS FAILED result=INCOMPLETE",
     "REVIEW: failed or interrupted; no automatic replay",
     "Step 1: ZOSD_FLEET_VOYAGE FAILED result=INCOMPLETE start=<T> end=<T>",
