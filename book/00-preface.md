@@ -20,12 +20,24 @@ statuses.
 `S006 Old Boiler` has no voyages, which several chapters use on purpose. The
 [fleet contract](../docs/fleet-contract.md) fixes names and shapes.
 
+## This edition
+
+Written against open-steamgate 0.4.0 (`main` at 17ac360b, before the tag):
+`BP_JOB_SELECT` with SAP's `BTCSELECT` fields, F9 and Ctrl+Shift+F10 as
+described, and the DSL layers up to L2 slice 2. **This demo needs
+open-steamgate 0.4 or later.** On the extension 0.3.1370 the pack does not
+build: `ZCL_OSD_FLEET_DOCTOR` uses the SAP field names `PRELIM` and `SCHEDUL`,
+which 0.3.1370 does not have. The notes on 0.3.1370 in chapters 1 and 2 are
+for readers who meet its key behaviour elsewhere.
+
 ## Before you start
 
 1. Install the **open-steamgate** extension (`oisee.open-steamgate`,
    pre-release): search for it in the Extensions view, or take the `.vsix`
    from the latest
-   [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and
+   [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
+   (0.4 or later; until the 0.4 release is out, run the pack from an
+   open-steamgate checkout of `main` with `OSD_PACKS`, as shown below) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
@@ -46,9 +58,9 @@ use port 8099.
 
 The extension uses ADT's keys: **F9** runs a class (its classrun), **F8** runs
 a report or previews a table or CDS view, **Ctrl+F2** checks, **Ctrl+F3**
-activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the test include you are in,
-**Ctrl+Shift+B** toggles a breakpoint. Chapter 1 says what to do when F9 toggles a
-breakpoint instead.
+activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you are in (0.4; on 0.3.1370 only the test include),
+**Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys only while execution is paused
+at a line (0.4); chapter 1 says what to do on 0.3.1370.
 
 ## How the book is organised
 

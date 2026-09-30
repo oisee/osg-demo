@@ -102,6 +102,17 @@ a test class with one method per example. The trace goes all the way down: the
 `where:` line. A rule must carry examples, and open-steamgate's own test flips
 `>` to `>=` to prove the examples would catch it.
 
+Slice 2 (open-steamgate #317) makes `check` one Open SQL statement, an
+`INNER JOIN` of the two tables on the rule's equalities, where slice 1 read the
+second table once per row of the first; the generated test class keeps the direct
+form as a private `check_reference` and compares the two on every example and
+derived case. With
+`boundaries: auto` in the rule, the compiler also derives boundary cases from
+the DDIC types of the compared fields (for the example rule: a day before, on
+and after the check date; the same, another and a blank status; a matching and
+a missing related row; zero and two related rows) and emits a case only if a
+mutant of its own condition changes the alerts.
+
 This demo does not have an L2 rule of its own yet; its tables would fit one
 (`ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY`). The specification is open-steamgate's
 [docs/dsl-l2.md](https://github.com/oisee/open-steamgate/blob/main/docs/dsl-l2.md).
