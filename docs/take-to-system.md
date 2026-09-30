@@ -63,7 +63,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | `ZCL_OSD_FLEET_DOCTOR` | no | It asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR`; on a system, SM37 and the job log answer the same question. |
 | `ZCL_OSD_FLEET_TPL` | no | It renders through `ZCL_OSD_TPL` and `ZCL_AJSON` of the open-steamgate runtime; a system has neither unless both are imported first. |
 | Transaction `ZOSD_FLEET` and `ZCL_OSD_FLEET_TRAN` | no | The class implements `ZIF_OSD_TRANSACTION`, an interface of the open-steamgate runtime that a system does not have, so neither is in the deploy unit. |
-| `test/slice.mjs`, `docs/`, the README | no | Files for this repository, not ABAP objects. |
+| `test/*.mjs`, `docs/`, `book/`, the README | no | Files for this repository, not ABAP objects. |
 
 ## Offline abapGit import
 

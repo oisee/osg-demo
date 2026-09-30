@@ -15,7 +15,7 @@ Open SQL and the local OData runtime can use HANA for the same demo flow. eAMDP 
 
 ## Chapter 6 on HANA
 
-README chapter 5 runs the CDS cube; chapter 6 runs both AMDP examples on DuckDB and states what HANA should give. On a HANA Express, with the system started on HANA as above:
+Book chapter 5 runs the CDS cube; chapter 6 runs both AMDP examples on DuckDB and states what HANA should give. On a HANA Express, with the system started on HANA as above:
 
 1. Run `ZCL_OSD_FLEET_FUEL` (F9, or `POST /sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_FUEL`). Expected: `Fuel per 100 km (HDB)`, then the same five lines as on DuckDB, S001 `225.94` through S005 `290.48`. The procedure runs on HANA as written.
 2. The one place HANA could differ is the division. On HANA, `/` over two INTEGER columns gives a decimal (measured on a HANA Express, open-steamgate's `docs/sqlscript-hana-observed.md`: `I / I` is `DECIMAL(16,6)`), not an integer, so nothing is cut to a whole number. Narrowing that decimal into the two-decimal result column could truncate; the body therefore rounds in SQL, `ROUND( ..., 2 )`. S002 is the line that shows it: 106.428571 becomes `106.43` on the HXE test below.

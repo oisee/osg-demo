@@ -4,7 +4,7 @@ CLASS zcl_osd_fleet_lift DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * per row; AFTER reads all the names with one SELECT ... FOR ALL ENTRIES into
 * a hashed table. The region between the lift markers in AFTER is generated:
 * tools/lift.mjs reads the model out of BEFORE, and ZCL_OSD_TPL renders
-* recipes/r1-lookup-enrich/template.tpl from it (README, "Lift a legacy
+* recipes/r1-lookup-enrich/template.tpl from it (book chapter 11, "Lift a legacy
 * routine"). The test class runs both on the same rows and compares them.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
