@@ -5,8 +5,8 @@ REPORT zosd_fleet_balv.
 *
 * Written for the open-steamgate report converter, which runs it as
 * transaction ZGUI_OSD_FLEET_BALV; like ZOSD_FLEET_ALV it uses built-in row
-* types and MODIFY ... INDEX (see that report's header). On a system it runs
-* as it is.
+* types and no global field-symbol (see that report's header). On a system
+* it runs as it is.
 
 TYPES: BEGIN OF ty_row,
          run_id   TYPE c LENGTH 40,
@@ -28,9 +28,14 @@ START-OF-SELECTION.
   TRY.
       gt_messages = zcl_osd_fleet_bal_view=>messages( ).
     CATCH cx_bali_runtime INTO gx_bal.
+* open-steamgate raises when no log matches; a system may return none
       WRITE: / |No fleet business log to show: { gx_bal->get_text( ) }|.
       RETURN.
   ENDTRY.
+  IF gt_messages IS INITIAL.
+    WRITE: / 'No fleet business log to show'.
+    RETURN.
+  ENDIF.
   LOOP AT gt_messages INTO gs_message.
     CLEAR gs_row.
     gs_row-run_id = gs_message-run_id.

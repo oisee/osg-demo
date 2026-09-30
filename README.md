@@ -132,7 +132,8 @@ jobs and the optional doctor as later steps.
    with `RUN_ID`, `ITEM`, `SEVERITY`, `TEXT` and `UTC`, sorted by run and
    item; `ZCL_OSD_FLEET_BAL_VIEW=>MESSAGES` supplies the rows. It is a demo
    view of the fleet's log, not SLG1. With no log yet it says
-   `No fleet business log to show`.
+   `No fleet business log to show` (on open-steamgate followed by the BAL
+   reason, since its read raises when no log matches).
 4. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
    `DANGEROUS`: it checks the error filter and ordered messages. OSD gives
    SQLite/DuckDB tests a disposable database; for HANA/Postgres, choose a

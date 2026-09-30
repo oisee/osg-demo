@@ -606,10 +606,14 @@ await check("15 B1 fleet business log as ALV ZGUI_OSD_FLEET_BALV", async () => {
     ["ERR", 3, "E", "Fleet audit failed: 6 ships, 20 voyages; expected 7 and 20"],
   ];
   const missing = rows.filter(([run, item, sev, msg]) =>
-    !new RegExp(` \\| ${balBatch}-${run} \\| ${item} \\| ${sev} \\| ${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| \\d{14} \\| `).test(text));
+    !new RegExp(` \\| ${balBatch}-${run} \\| ${item} \\| ${sev} \\| ${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| 20\\d{12} \\| `).test(text));
   expect(missing.length === 0, `rows missing: ${missing.map((r) => `${r[0]}/${r[1]}`).join(", ")}`);
   const batchRows = text.match(new RegExp(` \\| ${balBatch}-(OK1|OK2|ERR) \\| `, "g")) ?? [];
   expect(batchRows.length === 9, `batch ${balBatch}: ${batchRows.length} grid rows, expected 9`);
+  // sorted by run and item: ERR 1-3, OK1 1-3, OK2 1-3
+  const order = [...text.matchAll(new RegExp(` \\| ${balBatch}-(OK1|OK2|ERR) \\| (\\d) \\| `, "g"))].map((m) => `${m[1]}${m[2]}`);
+  const sorted = ["ERR1", "ERR2", "ERR3", "OK11", "OK12", "OK13", "OK21", "OK22", "OK23"];
+  expect(order.join() === sorted.join(), `grid order: ${order.join()}`);
   return `9 rows of batch ${balBatch}, ERR item 3 with severity E`;
 });
 
