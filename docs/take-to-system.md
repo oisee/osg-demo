@@ -20,12 +20,12 @@ rm -rf "$(dirname "$STAGE")"
 Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
 
 ```
-CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_chain, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
 DDLS  zc_osd_fleetcube
 IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
 IWSV  zosd_fleet_srv 0001
-PROG  zosd_fleet_alv, zosd_fleet_job
+PROG  zosd_fleet_alv, zosd_fleet_job, zosd_fleet_ready, zosd_fleet_voyage
 SHLP  zosd_fleet_status_sh
 SICF  zosg_demo <node id>
 TABL  zosd_fleet_ship, zosd_fleet_stat, zosd_fleet_voy
@@ -51,6 +51,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | `ZCL_ZOSD_FLEET_MPC`, `_MPC_EXT`, `_MPC_ANN`, `_DPC`, `_DPC_EXT` | yes | The generated classes, and the hand-written `_DPC_EXT`. `VoyageSet` is served by SADL over `ZOSD_FLEET_VOY` through the generated `_DPC`. |
 | Fiori app | yes, as BSP `ZOSG_DEMO` (WAPA) | Its manifest's data source is rebased for the BSP location, `../../../../opu/odata/sap/ZOSD_FLEET_SRV/`, which is `/sap/opu/odata/sap/ZOSD_FLEET_SRV/` seen from `/sap/bc/ui5_ui5/sap/zosg_demo/`. SAPUI5 still loads from ui5.sap.com (`index.html`), so the browser needs to reach it. |
 | Report `ZOSD_FLEET_JOB` and `ZCL_OSD_FLEET_JOB` | yes (PROG, CLAS) | The job step and its scheduler use only the standard `JOB_OPEN`, `SUBMIT ... VIA JOB` and `JOB_CLOSE`. The step writes a BAL log through `ZCL_OSD_FLEET_BAL`, so the BAL object must be registered first. On a system the released job runs through the regular background processing (SM37); the local worker (`tools/osd-batch-runs.mjs`) is the engine's and does not travel. |
+| Reports `ZOSD_FLEET_VOYAGE`, `ZOSD_FLEET_READY` and `ZCL_OSD_FLEET_CHAIN` | yes (PROG, CLAS), not measured there | The chain uses the standard `JOB_OPEN`, `SUBMIT ... VIA JOB` and `JOB_CLOSE` with the standard predecessor start condition (`PRED_JOBNAME`, `PRED_JOBCOUNT`, `PREDJOB_CHECKSTAT`), no private extension; both steps write BAL logs under `ZOSD_FLEET/AUDIT`. Its behaviour is measured on open-steamgate only. On a system the voyage job is released for an immediate start before the readiness job is closed, so a fast voyage job may finish first; whether SAP then refuses the condition or leaves the successor scheduled is not measured, nor what happens to a successor whose predecessor aborted. A caller `ROLLBACK` after a failed second `JOB_CLOSE` does not undo a voyage job that already started. |
 | Report `ZOSD_FLEET_ALV` | yes (PROG) | Plain ABAP with `CL_SALV_TABLE`; on a system it runs as a report (SE38/SA38). Its transaction `ZGUI_OSD_FLEET_ALV` is the engine's own wrapper and does not travel. |
 | Cube `ZC_OSD_FLEETCUBE` | yes (DDLS) | The CDS source; a system creates its SQL view `ZVOSDFLEETCUBE` on activation, and, because of `@OData.publish: true`, the service `ZC_OSD_FLEETCUBE_CDS`, which still has to be activated in the gateway hub. There its properties keep the CDS aliases (`VoyageId`, `ShipId`, ...), where the local engine serves them in upper case (`VOYAGEID`, `SHIPID`, ...). |
 | AMDP classes `ZCL_OSD_FLEET_FUEL`, `ZCL_OSD_FLEET_SUMMARY` | yes | Real AMDP on a HANA-based system: the source is not rewritten for the local engine. The classruns need seed rows to show the expected totals. |
