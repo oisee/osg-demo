@@ -48,7 +48,10 @@
 //        texts;
 //    14. R1: ZCL_OSD_FLEET_TPL renders the fleet report from a model through
 //        ZCL_OSD_TPL, and each ship line is traced to its template line and
-//        its model path.
+//        its model path;
+//    15. B1: the classic ALV report ZOSD_FLEET_BALV, run as transaction
+//        ZGUI_OSD_FLEET_BALV, shows the BAL messages written in check 1b1 as
+//        grid rows.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -83,6 +86,7 @@ const env = {...process.env, OSD_PACKS: repo, STG_PORT: String(port)};
 
 const results = [];
 let server;
+let balBatch;
 
 function stop() {
   if (server?.pid !== undefined && server.exitCode === null) {
@@ -217,6 +221,7 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
   expect(run.ok, `BAL classrun: HTTP ${run.status}: ${written.slice(0, 200)}`);
   const batch = /BAL batch ([A-F0-9]{32}): 2 success, 1 error/.exec(written)?.[1];
   expect(batch, `BAL writer failed: ${written}`);
+  balBatch = batch;
 
   const view = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_BAL_VIEW`,
     {method: "POST", headers: await csrf(`${base}/sap/bc/adt/discovery`)});
@@ -582,6 +587,34 @@ await check("14 R1 fleet report from a model, with its trace", async () => {
   const traced = ships.filter((s, i) => !lines.includes(`${i + 2} <- fleet:3 /airships/${i + 1}/id`));
   expect(traced.length === 0, `no trace to the model for: ${traced.map((s) => s.ship_id).join(", ")}`);
   return `${ships.length} ship lines, each traced to fleet:3 and its /airships/<n>`;
+});
+
+await check("15 B1 fleet business log as ALV ZGUI_OSD_FLEET_BALV", async () => {
+  expect(balBatch, "check 1b1 wrote no BAL batch");
+  const res = await fetch(`${base}/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_BALV`);
+  const page = await res.text();
+  expect(res.ok, `HTTP ${res.status}: ${page.slice(0, 200)}`);
+  let text = page;
+  for (let i = 0; i < 2; i++) {
+    text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  }
+  text = text.replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " | ").replace(/(\s*\|\s*)+/g, " | ");
+  for (const h of ["RUN_ID", "ITEM", "SEVERITY", "TEXT", "UTC"]) expect(text.includes(` ${h} `), `no column ${h}`);
+  const rows = [
+    ["OK1", 1, "S", "Fleet audit started"], ["OK1", 2, "I", "Observed 6 ships and 20 voyages"],
+    ["OK1", 3, "S", "Fleet audit OK: 6 ships, 20 voyages"],
+    ["ERR", 3, "E", "Fleet audit failed: 6 ships, 20 voyages; expected 7 and 20"],
+  ];
+  const missing = rows.filter(([run, item, sev, msg]) =>
+    !new RegExp(` \\| ${balBatch}-${run} \\| ${item} \\| ${sev} \\| ${msg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| 20\\d{12} \\| `).test(text));
+  expect(missing.length === 0, `rows missing: ${missing.map((r) => `${r[0]}/${r[1]}`).join(", ")}`);
+  const batchRows = text.match(new RegExp(` \\| ${balBatch}-(OK1|OK2|ERR) \\| `, "g")) ?? [];
+  expect(batchRows.length === 9, `batch ${balBatch}: ${batchRows.length} grid rows, expected 9`);
+  // sorted by run and item: ERR 1-3, OK1 1-3, OK2 1-3
+  const order = [...text.matchAll(new RegExp(` \\| ${balBatch}-(OK1|OK2|ERR) \\| (\\d) \\| `, "g"))].map((m) => `${m[1]}${m[2]}`);
+  const sorted = ["ERR1", "ERR2", "ERR3", "OK11", "OK12", "OK13", "OK21", "OK22", "OK23"];
+  expect(order.join() === sorted.join(), `grid order: ${order.join()}`);
+  return `9 rows of batch ${balBatch}, ERR item 3 with severity E`;
 });
 
 stop();
