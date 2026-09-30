@@ -1,9 +1,11 @@
 CLASS zcl_osd_fleet_doctor DEFINITION PUBLIC FINAL CREATE PUBLIC.
-* Which fleet chains are stuck, and why. Finds every readiness job
+* Which fleet chains wait, and why. Finds every readiness job
 * (ZCL_OSD_FLEET_CHAIN) that still waits, asks open-steamgate's job doctor
 * ZCL_OSD_JOB_DOCTOR about it and about the voyage job it waits for, and puts
 * the voyage step's BAL log for the same run next to that. The job doctor
 * has no BAL link of its own; the run ID from the step input is the link.
+* Whether a waiting chain is stuck is the voyage job's state: FAILED means it
+* will not move; QUEUED or RUNNING means it is still on its way.
 * ZCL_OSD_JOB_DOCTOR is open-steamgate's, so this class stays local.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
@@ -61,7 +63,11 @@ CLASS zcl_osd_fleet_doctor IMPLEMENTATION.
     DATA(lv_run) = value_after( it_lines = lt_ready iv_prefix = `  P_RUN=` ).
     lv_wait = value_after( it_lines = lt_ready iv_prefix = `Wait: predecessor ` ).
     SPLIT lv_wait AT '/' INTO lv_pred_name lv_pred_count.
-    APPEND |Stuck chain { lv_run }: { is_job-jobname }/{ is_job-jobcount } waits for { lv_wait }| TO rt_lines.
+    APPEND |Waiting chain { lv_run }: { is_job-jobname }/{ is_job-jobcount }|
+        && | waits for { lv_wait }| TO rt_lines.
+    IF lv_run IS INITIAL.
+      APPEND `No run ID (P_RUN) in the readiness job's step input` TO rt_lines.
+    ENDIF.
     APPEND `-- job doctor, readiness job` TO rt_lines.
     APPEND LINES OF lt_ready TO rt_lines.
     IF lv_pred_name IS NOT INITIAL.
@@ -70,8 +76,14 @@ CLASS zcl_osd_fleet_doctor IMPLEMENTATION.
       APPEND LINES OF lt_voyage TO rt_lines.
     ENDIF.
     APPEND |-- business log { lv_run }-VOY| TO rt_lines.
+    IF lv_run IS INITIAL.
+      RETURN.
+    ENDIF.
     TRY.
         DATA(lt_bal) = zcl_osd_fleet_bal_view=>render( iv_run_id = CONV #( |{ lv_run }-VOY| ) ).
+        IF lines( lt_bal ) <= 1.
+          APPEND `No business log for this run` TO rt_lines.
+        ENDIF.
         APPEND LINES OF lt_bal TO rt_lines.
       CATCH cx_bali_runtime INTO DATA(lx_bal).
         APPEND |No business log: { lx_bal->get_text( ) }| TO rt_lines.

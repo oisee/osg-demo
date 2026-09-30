@@ -256,7 +256,7 @@ await check("Doc1 doctor: the failing chain is stuck, with job doctor and BAL", 
   const got = mask(text).split("\n").map((l) => l.trimEnd());
   const want = [
     "Fleet chains waiting: 1",
-    "Stuck chain <RUN>: ZOSD_FLEET_READY/<READY> waits for ZOSD_FLEET_VOYAGE/<VOYAGE>",
+    "Waiting chain <RUN>: ZOSD_FLEET_READY/<READY> waits for ZOSD_FLEET_VOYAGE/<VOYAGE>",
     "-- job doctor, readiness job",
     "Job ZOSD_FLEET_READY/<READY>: OPERATIONS WAITING result=",
     "Wait: predecessor ZOSD_FLEET_VOYAGE/<VOYAGE>",
@@ -277,7 +277,7 @@ await check("Doc1 doctor: the failing chain is stuck, with job doctor and BAL", 
     expect(i >= 0, `missing, or out of order: "${line}"\n--- got (masked):\n${got.join("\n")}`);
     at = i + 1;
   }
-  expect(!text.includes(chains.good.run), "the good chain is listed as stuck");
+  expect(!text.includes(chains.good.run), "the good chain is listed as waiting");
   return "1 stuck chain: readiness WAITING on a FAILED voyage job, BAL error alongside";
 });
 

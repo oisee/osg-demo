@@ -216,14 +216,18 @@ and about the voyage job it waits for, and adds the voyage step's BAL log for
 the same run. The job doctor has no link to the business log; the run ID in
 the step input (`P_RUN`) is that link.
 
-1. After the chain steps above, press **F9** on the class. Expected:
-   `Fleet chains waiting: 1`, then `Stuck chain <B>: ZOSD_FLEET_READY/...
-   waits for ZOSD_FLEET_VOYAGE/...`, the job doctor's view of the readiness
+1. After the chain steps above on a fresh store, press **F9** on the class.
+   Expected: `Fleet chains waiting: 1` (one per failing chain you scheduled;
+   they stay until the operations store is removed), then
+   `Waiting chain <B>: ZOSD_FLEET_READY/... waits for ZOSD_FLEET_VOYAGE/...`, the job doctor's view of the readiness
    job (`OPERATIONS WAITING`, `Wait: predecessor ...`, `P_RUN=<B>`), of the
    voyage job (`OPERATIONS FAILED result=INCOMPLETE`,
    `REVIEW: failed or interrupted; no automatic replay`, `P_VOYS=21`), and the
    business log `<B>-VOY` with `Voyage step failed: 20 voyages, expected 21`.
-   Chain `A` is not listed: nothing of it waits.
+   Chain `A` is not listed: nothing of it waits. The voyage job's state
+   decides whether a waiting chain is stuck: `FAILED` will not move, while
+   `QUEUED` or `RUNNING` (F9 pressed between the chain's steps) is still on
+   its way.
 2. Job counts, times and handles change with every run; the job doctor also
    says that each read is a separate snapshot, not an atomic report.
 
