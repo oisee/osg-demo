@@ -568,9 +568,17 @@ await check("14 R1 fleet report from a model, with its trace", async () => {
   expect(lines[0] === `Fleet report: ${ships.length} airships`, `header: ${lines[0]}`);
   const texts = new Map(seed("zosd_fleet_stat").map((s) => [s.status, s.text]));
   ships.forEach((s, i) => {
-    const want = `${s.ship_id} ${s.name.padEnd(12)} ${texts.get(s.status).padEnd(11)} steam ${s.steam_pct}%`;
+    const want = `${s.ship_id} ${s.name.padEnd(12)} ${(texts.get(s.status) ?? "").padEnd(11)} steam ${s.steam_pct}%`;
     expect(lines[i + 1] === want, `line ${i + 2}: "${lines[i + 1]}", expected "${want}"`);
   });
+  const footer = ships.length + 1;
+  expect(lines[footer] === "End of fleet report", `footer: ${lines[footer]}`);
+  const traceAt = lines.indexOf("Trace: output line <- template:line model path");
+  expect(traceAt === footer + 2, `trace header at line ${traceAt + 1}`);
+  const rows = lines.slice(traceAt + 1).filter((line) => / <- /.test(line));
+  expect(rows.length === footer + 1, `trace rows: ${rows.length}, expected ${footer + 1}`);
+  expect(rows[0] === "1 <- fleet:1 /count" && rows[footer] === `${footer + 1} <- fleet:5 /`,
+    `header/footer trace: ${rows[0]} / ${rows[footer]}`);
   const traced = ships.filter((s, i) => !lines.includes(`${i + 2} <- fleet:3 /airships/${i + 1}/id`));
   expect(traced.length === 0, `no trace to the model for: ${traced.map((s) => s.ship_id).join(", ")}`);
   return `${ships.length} ship lines, each traced to fleet:3 and its /airships/<n>`;

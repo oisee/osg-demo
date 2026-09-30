@@ -2,7 +2,8 @@ CLASS zcl_osd_fleet_tpl DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * The fleet report generated from a model: the ships and their status texts
 * become a JSON model, and ZCL_OSD_TPL renders the template below over it.
 * Every output line keeps a trace: the template line and the model path it
-* came from. ZCL_OSD_TPL is open-steamgate's, so this class stays local.
+* came from. ZCL_OSD_TPL (open-steamgate) and ZCL_AJSON are not in this
+* unit, so the class stays local.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
     CONSTANTS c_template_name TYPE string VALUE `fleet`.
@@ -42,7 +43,7 @@ CLASS zcl_osd_fleet_tpl IMPLEMENTATION.
       ri_model->set_string( iv_path = |/airships/{ lv_index }/name| iv_val = ls_ship-name ).
       ri_model->set_string( iv_path = |/airships/{ lv_index }/status| iv_val = ls_ship-status ).
       ri_model->set_string( iv_path = |/airships/{ lv_index }/status_text| iv_val = ls_ship-text ).
-      ri_model->set_integer( iv_path = |/airships/{ lv_index }/steam_pct| iv_val = CONV i( ls_ship-steam_pct ) ).
+      ri_model->set_integer( iv_path = |/airships/{ lv_index }/steam_pct| iv_val = ls_ship-steam_pct ).
     ENDLOOP.
   ENDMETHOD.
 

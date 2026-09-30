@@ -22,6 +22,6 @@ CLASS ltcl_fleet_tpl IMPLEMENTATION.
     cl_abap_unit_assert=>assert_subrc( exp = 0 ).
     cl_abap_unit_assert=>assert_equals( exp = `fleet` act = ls_trace-template ).
     cl_abap_unit_assert=>assert_equals( exp = 3 act = ls_trace-template_line ).
-    cl_abap_unit_assert=>assert_char_cp( exp = `/airships/3/*` act = ls_trace-path ).
+    cl_abap_unit_assert=>assert_equals( exp = `/airships/3/id` act = ls_trace-path ).
   ENDMETHOD.
 ENDCLASS.

@@ -180,15 +180,19 @@ Every output line keeps a trace to where it came from.
    line per ship such as `S001 Albatross    Aloft       steam 82%`, and
    `End of fleet report`; then a trace, one row per output line, such as
    `2 <- fleet:3 /airships/1/id`: output line 2 came from line 3 of the
-   template `fleet`, for the first airship of the model.
+   template `fleet`, for the first airship of the model. The path is the first
+   value on the line; a line without a value, like the last one, shows the
+   section it is in (`/`).
 2. Change the template in `TEMPLATE` (for example add `{{status}}` to line 3)
    and press **F9** again: every ship line changes, and the trace still points
    at template line 3.
 3. Run the class in Testing. Its two HARMLESS tests read the seed rows and
    check a ship line and the trace of the third ship.
 
-The class stays local: `ZCL_OSD_TPL` and `ZCL_AJSON` are part of the
-open-steamgate runtime.
+The class stays local because what it needs is not in this unit:
+`ZCL_OSD_TPL` comes with open-steamgate (on a system it is an ordinary Z class
+that would have to be imported first) and `ZCL_AJSON` is the ajson library,
+which a system may or may not have.
 
 ## Run the checks
 
