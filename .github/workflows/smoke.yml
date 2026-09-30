@@ -58,6 +58,7 @@ jobs:
           STG_DB: duckdb
         run: node test/slice.mjs
       - name: Fleet jobs on SQLite file
+        if: success() || failure()
         working-directory: demo
         env:
           OSD_HOME: ${{ github.workspace }}/osd

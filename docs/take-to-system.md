@@ -20,12 +20,12 @@ rm -rf "$(dirname "$STAGE")"
 Given the folder itself, the tool treats it as a pack: it compiles `src/zosd_fleet.stg.yaml` into the SEGW objects, lets the hand-written `ZCL_ZOSD_FLEET_DPC_EXT` win over the generated one, and turns `webapp/` into a BSP application with its ICF node. Expected: `/tmp/osg-demo.zip: ... deploy unit "osg-demo"`, then what it carried, by object type (the tool pads IWSV/IWMO names before their version, and the SICF line ends with the node's id; both shortened here):
 
 ```
-CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_fuel, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
 DDLS  zc_osd_fleetcube
 IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
 IWSV  zosd_fleet_srv 0001
-PROG  zosd_fleet_alv
+PROG  zosd_fleet_alv, zosd_fleet_job
 SHLP  zosd_fleet_status_sh
 SICF  zosg_demo <node id>
 TABL  zosd_fleet_ship, zosd_fleet_stat, zosd_fleet_voy

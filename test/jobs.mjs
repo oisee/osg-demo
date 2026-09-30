@@ -12,7 +12,7 @@
 //  4. test/job-worker.mjs, run against the same databases, imports the job
 //     and runs its step to COMPLETED; the step prints the run ID;
 //  5. ZCL_OSD_FLEET_BAL_VIEW shows the step's BAL log under that run ID, with
-//     the audit's three messages and no error.
+//     the handle the step printed, the audit's three messages and no error.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -108,6 +108,7 @@ for (;;) {
 }
 
 let run;
+let handle;
 await check("J0a schedule: ZCL_OSD_FLEET_JOB releases ZOSD_FLEET_AUDIT", async () => {
   const text = await classrun("ZCL_OSD_FLEET_JOB");
   const match = /Fleet job ZOSD_FLEET_AUDIT (\S+) released; run ([A-F0-9]{32})/.exec(text);
@@ -121,13 +122,16 @@ await check("J0b worker: the step runs to COMPLETED", async () => {
   const worker = spawnSync(process.execPath, [join(repo, "test", "job-worker.mjs")],
     {cwd: home, env, encoding: "utf8", timeout: 120_000});
   expect(worker.status === 0, `worker exited ${worker.status}: ${worker.stderr || worker.stdout}`);
-  const done = worker.stdout.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
+  const done = worker.stdout.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line))
+    .filter((line) => ["completed", "failed", "advanced"].includes(line.kind));
   expect(done.length === 1, `expected one worked step, got ${done.length}: ${worker.stdout}`);
   const [step] = done;
   expect(step.kind === "completed" && step.job === "ZOSD_FLEET_AUDIT" && step.state === "COMPLETED",
     `step: ${JSON.stringify(step)}`);
-  expect((step.output ?? []).some((line) => line.includes(`Fleet audit job ${run}: BAL `)),
-    `step output lacks the run ID: ${JSON.stringify(step.output)}`);
+  const printed = (step.output ?? []).map((line) => new RegExp(`Fleet audit job ${run}: BAL (\\S+)`).exec(line))
+    .find(Boolean);
+  expect(printed, `step output lacks the run ID: ${JSON.stringify(step.output)}`);
+  handle = printed[1];
   return `run ${step.id} COMPLETED`;
 });
 
@@ -137,7 +141,8 @@ await check("J0c BAL: the job's log carries the run ID and no error", async () =
   const at = shown.indexOf(`Run ${run};`);
   expect(at >= 0, `no BAL log for run ${run}: ${shown}`);
   const log = shown.slice(at).split("\n").slice(0, 4).join("\n");
-  expect(log.split("\n")[0].endsWith("errors 0"), `errors in the log: ${log}`);
+  expect(log.split("\n")[0] === `Run ${run}; handle ${handle}; errors 0`,
+    `not the step's log (handle ${handle}) or errors in it: ${log}`);
   for (const text of ["1 S Fleet audit started", "2 I Observed 6 ships and 20 voyages",
     "3 S Fleet audit OK: 6 ships, 20 voyages"]) {
     expect(log.includes(text), `BAL lacks "${text}": ${log}`);

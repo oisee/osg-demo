@@ -14,6 +14,5 @@ START-OF-SELECTION.
       COMMIT WORK.
       WRITE: / |Fleet audit job { p_run }: BAL { lv_handle }|.
     CATCH cx_bali_runtime INTO DATA(lx_bal).
-      ROLLBACK WORK.
       MESSAGE lx_bal->get_text( ) TYPE 'A'.
   ENDTRY.

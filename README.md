@@ -150,9 +150,12 @@ and, for now, SQLite in a file: other backends refuse to schedule jobs.
 3. Nothing in OSD works queued jobs on its own. In the same checkout and with
    the same `STG_DB` and `STG_DB_PATH`, run
    `node /path/to/osg-demo/test/job-worker.mjs` (add `--loop` to keep it
-   running). Expected: one line with `"kind":"completed"`, job
-   `ZOSD_FLEET_AUDIT`, and the step's output
-   `Fleet audit job <ID>: BAL <handle>`.
+   running). Expected: `"kind":"imported"`, then a line with
+   `"kind":"completed"`, job `ZOSD_FLEET_AUDIT` and the step's output
+   `Fleet audit job <ID>: BAL <handle>`, then `"kind":"empty"` when the queue
+   is done. With nothing worked it exits 1 and says why: nothing queued (also
+   what a wrong `STG_DB_PATH` looks like) or a `RUNNING` run blocking the queue.
+   Leave `OSD_PACKS` out of its environment; the worker ignores it.
 4. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: a log for `Run <ID>`
    with `errors 0` and the three audit messages.
 
