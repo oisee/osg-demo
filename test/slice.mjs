@@ -643,7 +643,7 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
   expect(unit.ok, `ABAP Unit: HTTP ${unit.status}: ${report.slice(0, 200)}`);
   const methods = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1]);
   expect(methods.length === 4, `ABAP Unit ran ${methods.length} methods: ${methods.join(", ")}`);
-  expect(!/<alert /.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
+  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
   return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
 });
 

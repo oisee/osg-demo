@@ -15,8 +15,8 @@ import {dirname, join, resolve} from "node:path";
 import {fileURLToPath, pathToFileURL} from "node:url";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const home = process.env.OSD_HOME;
-if (home === undefined || home === "") {
+const home = process.env.OSD_HOME ? resolve(process.env.OSD_HOME) : "";
+if (home === "") {
   console.error("lift: set OSD_HOME to an open-steamgate checkout");
   process.exit(2);
 }
@@ -25,9 +25,13 @@ const load = (file) => import(pathToFileURL(join(home, file)).href);
 
 process.chdir(home);
 const {modelR1} = await load("tools/lift.mjs");
-const model = modelR1(CLASS, "before", [join(repo, "src", "ddic"), join(home, ".local/lars/open-abap-core/src")]);
-if (!model || model.refused) {
-  console.error(`lift: no R1 model out of BEFORE: ${JSON.stringify(model)}`);
+let model;
+try {
+  model = modelR1(CLASS, "before", [join(repo, "src", "ddic"), join(home, ".local/lars/open-abap-core/src")]);
+} catch (e) {
+  // the lift refuses by throwing, with the obligation it could not close
+  if (e.name !== "Refusal" && e.constructor?.name !== "Refusal") throw e;
+  console.error(`lift: R1 refused -- ${e.message}`);
   process.exit(1);
 }
 const {initializeABAP} = await load("output/init.mjs");
@@ -39,7 +43,8 @@ const result = await globalThis.abap.Classes.ZCL_OSD_TPL.render({
 const rendered = (await globalThis.abap.Classes.ZCL_OSD_TPL.to_string({is_result: result})).get();
 
 const source = readFileSync(CLASS, "utf8");
-const lines = source.split("\n");
+const eol = source.includes("\r\n") ? "\r\n" : "\n";
+const lines = source.split(/\r?\n/);
 const begin = lines.findIndex((l) => l.trim() === `" lift:R1 begin`);
 const end = lines.findIndex((l) => l.trim() === `" lift:R1 end`);
 if (begin < 0 || end < begin) {
@@ -54,7 +59,7 @@ console.log(`lift: model ${model.source.table} by ${model.source.keys.map((k) =>
   + `fields ${model.fields.map((f) => `${f.column} -> ${f.component}`).join(", ")}`);
 for (const open of model.open ?? []) console.log(`lift: open obligation: ${open}`);
 if (process.argv.includes("--write")) {
-  writeFileSync(CLASS, [...lines.slice(0, begin + 1), ...generated, ...lines.slice(end)].join("\n"));
+  writeFileSync(CLASS, [...lines.slice(0, begin + 1), ...generated, ...lines.slice(end)].join(eol));
   console.log(`lift: wrote ${generated.length} generated lines into AFTER`);
 } else if (current.join("\n") !== generated.join("\n")) {
   console.error("lift: the region in AFTER is not what the template renders; run with --write and review");

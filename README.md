@@ -285,8 +285,8 @@ which a system may or may not have.
 [ZCL_OSD_FLEET_LIFT](src/zcl_osd_fleet_lift.clas.abap) holds a routine as it
 is often found: `BEFORE` loops over the voyages and reads each ship's name
 with its own `SELECT SINGLE`. `AFTER` is the lifted form from open-steamgate's
-verified lift, recipe R1
-([open-steamgate PR #271](https://github.com/oisee/open-steamgate/pull/271)):
+verified lift, recipe R1 as on open-steamgate main
+([PR #271](https://github.com/oisee/open-steamgate/pull/271) and later):
 one `SELECT ... FOR ALL ENTRIES` into a hashed table, then a `READ TABLE` per
 voyage that sets the name only on a hit. The code between
 `" lift:R1 begin` and `" lift:R1 end` is generated, not written by hand.
@@ -304,9 +304,16 @@ voyage that sets the name only on a hit. The code between
 3. Run the class in Testing. Its four HARMLESS tests run both methods on the
    same rows: the seeded voyages, an unknown ship that keeps its old name,
    the same ship twice with a stale name, and no voyages at all.
-4. Change `BEFORE` so that its `WHERE` no longer names the whole key, or
-   reads into a component typed by hand, and run step 1 again: the lift
-   refuses and says why.
+4. Try it on a copy of `BEFORE`: add a condition that is not a key column
+   to its `WHERE` (for example `AND status = 'A'`), or type the key
+   component `ship_id` differently from the column (for example
+   `TYPE c LENGTH 10`), and run step 1 again: `lift: R1 refused -- ...`
+   says which obligation it could not close. The lift checks the key's
+   types; a hand-typed target like `ship_name` is not checked.
+
+The tests compare results, not cost: the `IS NOT INITIAL` guard before the
+`FOR ALL ENTRIES` only matters for the database calls (an empty table would
+otherwise read every ship), and only the drift check in step 1 protects it.
 
 ## Run the checks
 
