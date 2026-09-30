@@ -104,11 +104,14 @@ a test class with one method per example. The trace goes all the way down: the
 
 Slice 2 (open-steamgate #317) makes `check` one Open SQL statement, an
 `INNER JOIN` of the two tables on the rule's equalities, where slice 1 read the
-second table once per row of the first; the direct form stays in the class as
-`check_reference`, and the tests prove the two agree. The compiler also
-derives boundary cases from the DDIC types (a day before, on and after the
-check date, equal and different status, blank, a matching and a missing related
-row) and keeps a case only if it fails when its own condition is mutated.
+second table once per row of the first; the generated test class keeps the direct
+form as a private `check_reference` and compares the two on every example and
+derived case. With
+`boundaries: auto` in the rule, the compiler also derives boundary cases from
+the DDIC types of the compared fields (for the example rule: a day before, on
+and after the check date; the same, another and a blank status; a matching and
+a missing related row; zero and two related rows) and emits a case only if a
+mutant of its own condition changes the alerts.
 
 This demo does not have an L2 rule of its own yet; its tables would fit one
 (`ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY`). The specification is open-steamgate's
