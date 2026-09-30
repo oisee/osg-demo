@@ -46,7 +46,7 @@ CLASS zcl_osd_fleet_doctor IMPLEMENTATION.
     DATA lt_found TYPE STANDARD TABLE OF tbtcjob WITH DEFAULT KEY.
     ls_select-jobname = zcl_osd_fleet_chain=>c_ready_job.
     ls_select-username = sy-uname.
-    ls_select-scheduled = 'X'.
+    ls_select-schedul = 'X'.
     CALL FUNCTION 'BP_JOB_SELECT'
       EXPORTING jobselect_dialog = 'N' jobsel_param_in = ls_select
       TABLES jobselect_joblist = lt_found
@@ -103,8 +103,8 @@ CLASS zcl_osd_fleet_doctor IMPLEMENTATION.
     DATA lt_lines TYPE ty_lines.
     ls_select-jobname = zcl_osd_fleet_chain=>c_voyage_job.
     ls_select-username = sy-uname.
-    ls_select-preliminary = 'X'.
-    ls_select-scheduled = 'X'.
+    ls_select-prelim = 'X'.
+    ls_select-schedul = 'X'.
     ls_select-ready = 'X'.
     ls_select-running = 'X'.
     ls_select-finished = 'X'.
