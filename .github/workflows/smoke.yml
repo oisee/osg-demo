@@ -57,3 +57,8 @@ jobs:
           SLICE_SKIP_UI: "1"
           STG_DB: duckdb
         run: node test/slice.mjs
+      - name: Fleet jobs on SQLite file
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+        run: node test/jobs.mjs

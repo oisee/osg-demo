@@ -103,7 +103,7 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the three fleet tables, the search help, the report and BAL classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job report `PROG zosd_fleet_job`, the three fleet tables, the search help, the report, BAL and job classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
@@ -132,6 +132,34 @@ jobs and the optional doctor as later steps.
    `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
    node test/slice.mjs` runs the broader pack check against that runtime.
 
+### The audit as a background job
+
+The audit also runs as a background job step. This needs the job API merged
+up to [open-steamgate PR #246](https://github.com/oisee/open-steamgate/pull/246)
+and, for now, SQLite in a file: other backends refuse to schedule jobs.
+
+1. Start OSD with a file database, for example
+   `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
+   in the open-steamgate checkout.
+2. Open [ZCL_OSD_FLEET_JOB](src/zcl_osd_fleet_job.clas.abap) and press **F9**.
+   It calls `JOB_OPEN`, submits the report
+   [ZOSD_FLEET_JOB](src/zosd_fleet_job.prog.abap) `VIA JOB` with a fresh run ID
+   (`P_RUN`) and the expected ship count (`P_SHIPS`), releases the job with
+   `JOB_CLOSE`, and prints `Fleet job ZOSD_FLEET_AUDIT <count> released; run <ID>`.
+   Nothing runs yet: the job waits for a worker.
+3. Nothing in OSD works queued jobs on its own. In the same checkout and with
+   the same `STG_DB` and `STG_DB_PATH`, run
+   `node /path/to/osg-demo/test/job-worker.mjs` (add `--loop` to keep it
+   running). Expected: one line with `"kind":"completed"`, job
+   `ZOSD_FLEET_AUDIT`, and the step's output
+   `Fleet audit job <ID>: BAL <handle>`.
+4. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: a log for `Run <ID>`
+   with `errors 0` and the three audit messages.
+
+The job uses only the standard function modules, so both objects travel to a
+system. The job-chain steps from the
+[fleet operations trace](docs/fleet-operations-trace.md) come next.
+
 ## Run the checks
 
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails.
+In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails. `OSD_HOME=/path/to/open-steamgate node test/jobs.mjs` checks the background job the same way on a temporary SQLite file: schedule, work, and the BAL log with the run ID.
