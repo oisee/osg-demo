@@ -82,13 +82,26 @@ function expect(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function classrun(name) {
-  const token = await fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
+// The worker steps between two requests can take longer than the engine's
+// keep-alive timeout, and fetch may then reuse a socket the engine just
+// closed ("fetch failed", other side closed). The CSRF fetch and read-only
+// classruns retry once; a classrun that schedules jobs does not.
+async function once(url, init, retry) {
+  try {
+    return await fetch(url, init);
+  } catch (e) {
+    if (!retry) throw new Error(`${e.message}: ${e.cause?.code ?? e.cause?.message ?? "no cause"}`);
+    return fetch(url, init);
+  }
+}
+
+async function classrun(name, {readOnly = false} = {}) {
+  const token = await once(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}}, true);
   const headers = {
     "x-csrf-token": token.headers.get("x-csrf-token"),
     cookie: (token.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; "),
   };
-  const res = await fetch(`${base}/sap/bc/adt/oo/classrun/${name}`, {method: "POST", headers});
+  const res = await once(`${base}/sap/bc/adt/oo/classrun/${name}`, {method: "POST", headers}, readOnly);
   const text = await res.text();
   expect(res.ok, `${name}: HTTP ${res.status}: ${text.slice(0, 200)}`);
   return text;
@@ -153,7 +166,7 @@ await check("J0b worker: the step runs to COMPLETED", async () => {
 
 await check("J0c BAL: the job's log carries the run ID and no error", async () => {
   expect(run, "nothing was scheduled");
-  const shown = await classrun("ZCL_OSD_FLEET_BAL_VIEW");
+  const shown = await classrun("ZCL_OSD_FLEET_BAL_VIEW", {readOnly: true});
   const at = shown.indexOf(`Run ${run};`);
   expect(at >= 0, `no BAL log for run ${run}: ${shown}`);
   const log = shown.slice(at).split("\n").slice(0, 4).join("\n");
@@ -210,7 +223,7 @@ await check("J1b/J2 worker: good chain completes; failing chain stops before rea
 
 await check("J1c/J2 BAL: voyage logs for both chains, readiness only for the good one", async () => {
   expect(chains.good && chains.failing, "nothing was scheduled");
-  const shown = await classrun("ZCL_OSD_FLEET_BAL_VIEW");
+  const shown = await classrun("ZCL_OSD_FLEET_BAL_VIEW", {readOnly: true});
   const log = (id) => {
     const at = shown.indexOf(`Run ${id};`);
     return at < 0 ? undefined : shown.slice(at).split("\n").slice(0, 4).join("\n");
