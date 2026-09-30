@@ -103,7 +103,7 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job report `PROG zosd_fleet_job`, the three fleet tables, the search help, the report, BAL and job classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the three local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
@@ -167,6 +167,37 @@ The job uses only the standard function modules, so both objects travel to a
 system. The job-chain steps from the
 [fleet operations trace](docs/fleet-operations-trace.md) come next.
 
+### A chain of two jobs
+
+Two jobs run as one chain: a voyage job, then a readiness job that starts only
+after the voyage job finished successfully. The readiness job uses SAP's
+standard predecessor start condition on `JOB_CLOSE` (`PRED_JOBNAME`,
+`PRED_JOBCOUNT`, `PREDJOB_CHECKSTAT = 'X'`), which open-steamgate ties to the
+voyage job's retained intent; no private `TAIL_EVENT_*` extension is used.
+Same setup as above: OSD on `STG_DB=file` and the engine's worker.
+
+1. Open [ZCL_OSD_FLEET_CHAIN](src/zcl_osd_fleet_chain.clas.abap) and press
+   **F9**. It schedules two chains and prints both: `Fleet chain ok: run <A>`
+   expects 20 voyages, `Fleet chain forced failure: run <B>` expects 21. Each
+   line names the voyage job and the readiness job that waits for it.
+2. Run `node tools/osd-batch-runs.mjs work` until it answers
+   `"kind": "empty"` (four times). Expected, in some order: voyage `A`
+   `COMPLETED`, readiness `A` `COMPLETED` (always after voyage `A`), and
+   voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
+   `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
+   `WAITING`: a failed predecessor never releases it.
+3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
+   `Voyage step OK: 20 voyages`, `<A>-READY` with
+   `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
+   `errors 1` and `Voyage step failed: 20 voyages, expected 21`. The failed
+   voyage job commits its log before it aborts, so the error stays readable;
+   there is no `<B>-READY`.
+
+What this shows is a scheduling guarantee, not exactly-once execution: a
+restart or a replayed import does not start a job twice, but a crash after a
+step's business commit and before its result is recorded leaves the job
+`RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`).
+
 ### The fleet report from a model
 
 [ZCL_OSD_FLEET_TPL](src/zcl_osd_fleet_tpl.clas.abap) generates the fleet
@@ -196,4 +227,4 @@ which a system may or may not have.
 
 ## Run the checks
 
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails. `OSD_HOME=/path/to/open-steamgate node test/jobs.mjs` checks the background job the same way on a temporary SQLite file: schedule, work, and the BAL log with the run ID.
+In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails. `OSD_HOME=/path/to/open-steamgate node test/jobs.mjs` checks the background jobs the same way on a temporary SQLite file: the single job with its BAL log, and both chains (the good one completes, the failing one leaves readiness waiting).
