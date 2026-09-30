@@ -1,6 +1,6 @@
 REPORT zosd_fleet_alv.
 * The Airship fleet as a classic ALV (CL_SALV_TABLE): one row per ship with
-* its status text (README chapter 2, step 6).
+* its status text (book chapter 2, step 6).
 *
 * Written for the open-steamgate report converter, which turns a classic
 * report into a class and runs it as transaction ZGUI_OSD_FLEET_ALV. Three

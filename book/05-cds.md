@@ -1,0 +1,6 @@
+# 5. The CDS cube
+
+The voyages form an analytical CDS cube on the default SQLite system too. Its names and current limits are fixed in [the contract](../docs/fleet-contract.md#cds-cube-chapter-5).
+
+1. The cube. [zc_osd_fleetcube.ddls.asddls](../src/cds/zc_osd_fleetcube.ddls.asddls) is a CDS view over `ZOSD_FLEET_VOY` with `@Analytics.dataCategory: #CUBE` and `@OData.publish: true`; the engine publishes it as its own service. Open `http://localhost:8099/sap/opu/odata/sap/ZC_OSD_FLEETCUBE_CDS/ZC_OSD_FLEETCUBE?$format=json`. Expected: 20 rows, one per voyage, each with `SHIPID`, `DEPMONTH` (e.g. `202601`), `PASSENGERS`, `FUELKG` and `DISTANCEKM`. `...ZC_OSD_FLEETCUBE?$filter=SHIPID eq 'S001'&$format=json` gives S001's six voyages.
+2. What the cube does not do here yet: `...ZC_OSD_FLEETCUBE?$select=SHIPID,PASSENGERS,FUELKG&$format=json`. Expected on this engine: still 20 rows with every column, not one per ship: `$select` is not applied to this service yet. A system groups a cube on `$select` (the dimensions you select become the grouping, the measures are summed); the engine does that only for its own reference services so far, not for a service published from a CDS view. The month is a column, `DEP_MONTH`, because the engine's CDS support keeps plain columns and does not compute `substring( dep_date, 1, 6 )`.

@@ -1,320 +1,74 @@
-ABAP running locally in VS Code, no SAP or ADT connection.
+# The Airship Fleet: an open-steamgate demo
 
-# open-steamgate demo
+ABAP running locally in VS Code, with no SAP system and no ADT connection. One small application, six airships and twenty voyages, shows the whole path: from a first class through OData, Fiori, CDS and AMDP to business logs, background jobs, generated code and a lifted legacy routine.
 
-This folder is an abapGit repository and an open-steamgate workspace pack. The extension carries a whole local ABAP system; this repository adds its own objects on top of it.
+This folder is an abapGit repository and an [open-steamgate](https://github.com/oisee/open-steamgate) workspace pack. The extension carries a whole local ABAP system; this repository adds its own objects on top of it.
 
-## Install
+**Read it as a book:** [book/](book/00-preface.md), chapter by chapter below, or as a PDF or EPUB built with [`book/build.sh`](book/build.sh).
 
-1. Install the **open-steamgate** extension (`oisee.open-steamgate`, pre-release). Search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX…**.
+## Quick start
+
+1. Install the **open-steamgate** extension (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
-3. Run **osd: Start (build + run this system)**. The bundled system starts. Because this folder has an `osd-pack.json`, it is layered on top as a full pack: its classes, tables, seed rows and page, in package `$ZOSD_DEMO`. The folder shows up under **Workspace layers** in Test Explorer.
+3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
+4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **osd console**. Chapter 1 goes on from there.
 
-To add this folder to a multi-folder workspace, add it before you start.
+From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`.
 
-From an open-steamgate checkout, the same pack runs in a terminal: `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`, with a free port. The editable ABAP is in `src/`; activating an object loads it into the running system.
+## The book
 
-## The story
+| # | Chapter | You will see | Main objects |
+|---|---|---|---|
+| | [Preface](book/00-preface.md) | the fleet, setup, keys | |
+| 1 | [Hello](book/01-hello.md) | a classrun, a green unit test, edit and activate | `ZOSD_DEMO_HELLO` |
+| 2 | [Debug, tests, and dumps](book/02-debug-tests-dumps.md) | a breakpoint, a red test, a short dump, a classic ALV grid | `ZCL_OSD_FLEET_REPORT`, `ZOSD_FLEET_ALV` |
+| 3 | [The OData ladder](book/03-odata.md) | `$metadata`, `$filter`, a MERGE, navigation, value help | `ZOSD_FLEET_SRV` |
+| 4 | [Fiori apps](book/04-fiori.md) | a launchpad tile, list report and object page | app `ZOSG_DEMO` |
+| 5 | [The CDS cube](book/05-cds.md) | voyages by ship and month | `ZC_OSD_FLEETCUBE` |
+| 6 | [AMDP on the fleet](book/06-amdp.md) | SQLScript on DuckDB and HANA, checked against Open SQL | `ZCL_OSD_FLEET_FUEL`, `ZCL_OSD_FLEET_SUMMARY` |
+| 7 | [Take it to a system](book/07-take-to-system.md) | an abapGit zip of exactly what may travel | [deploy/manifest.json](deploy/manifest.json) |
+| 8 | [The business log](book/08-business-log.md) | BAL logs per run, a viewer, an ALV grid of messages | `ZCL_OSD_FLEET_BAL`, `ZOSD_FLEET_BALV` |
+| 9 | [Background jobs](book/09-background-jobs.md) | a job, a chain of two, a failing chain that waits, a doctor | `ZCL_OSD_FLEET_JOB`, `ZCL_OSD_FLEET_CHAIN`, `ZCL_OSD_FLEET_DOCTOR` |
+| 10 | [Generated code](book/10-generated-code.md) | a report from a template with a trace per line; the L0/L1/L2 layers | `ZCL_OSD_FLEET_TPL` |
+| 11 | [Lift a legacy routine](book/11-lift.md) | a SELECT in a loop rewritten from a model, proven equal | `ZCL_OSD_FLEET_LIFT` |
+| A | [Run the checks](book/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
+| B | [Take it to a system](docs/take-to-system.md) | what travels, what stays, how to import | |
+| C | [Limits and glossary](book/92-limits-glossary.md) | the fine print, the terms | |
 
-The chapters run on one small domain this repository owns: a fleet of airships and their voyages. Chapter 1 needs nothing but a class. From chapter 2 on, the fleet's tables, service and app are used; [the fleet contract](docs/fleet-contract.md) fixes their names and shapes.
+## Code that writes code
 
-## 1. Hello
+Chapters 10 and 11 use open-steamgate's generation layers, in which a generated line can keep the way back to what made it.
 
-1. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap), place the cursor in the class and press **F9**. Expected: the **osd console** shows `Hello from ZOSD_DEMO_HELLO.` If F9 toggles a breakpoint instead, the ABAP debugger is attached: the extension attaches the debug session **OSD: ABAP (<port>)** when the running system has an enabled breakpoint in any `.abap` file (or was started with `osd.debug`), and while that session runs F9 toggles a breakpoint and F8 continues. Remove the ABAP breakpoints (**Run > Remove All Breakpoints**), then stop the session (**Run > Stop Debugging**, Shift+F5), and press F9 again; if it still toggles, check that the setting `osd.keymap` is `abap`.
-2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there (the class file itself has no test items: `No test found in this file`). Expected: one green ABAP Unit test.
-3. Change the text returned by `greeting( )`, press **Ctrl+F2** to check, **Ctrl+F3** to save and activate, then **F9** again. Expected: the console shows your new text. Restore the original text, activate, and rerun the test to leave it green.
+| Layer | You write | You get | Here |
+|---|---|---|---|
+| **L0** templates | a template and a JSON model | text, each line traced to template line and model path | chapter 10; chapter 11's lift renders its recipe this way |
+| **L1** typed model | nothing: a generator fills it | ABAP from recipes, typed literals, a trace per line | chapter 10 (overview; the demo has no L1 generator of its own) |
+| **L2** domain rules | a rule in the domain's words | a check class and its tests, traced to the rule's lines | chapter 10 (overview; no rule of its own yet) |
 
-## 2. Debug, tests, and dumps
+## Check it
 
-The rest of the guide uses the Airship fleet: six ships and their voyages, seeded into `ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY` and `ZOSD_FLEET_STAT` every time the system starts (see [the contract](docs/fleet-contract.md)).
+In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then:
 
-To inspect the data, open a definition below and press **F8**. The extension opens Data Preview; it reads the rows seeded from `data/` when the system starts. Leave an active debug session first, since F8 controls execution while debugging ABAP.
+```
+OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 21 checks, SQLite; 20 run, the UI one is skipped
+OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
+OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
+OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
+```
 
-| Definition | Expected rows |
-| --- | ---: |
-| [ZOSD_FLEET_SHIP](src/ddic/zosd_fleet_ship.tabl.xml) | 6 ships |
-| [ZOSD_FLEET_VOY](src/ddic/zosd_fleet_voy.tabl.xml) | 20 voyages |
-| [ZOSD_FLEET_STAT](src/ddic/zosd_fleet_stat.tabl.xml) | 3 statuses |
-| [ZC_OSD_FLEETCUBE](src/cds/zc_osd_fleetcube.ddls.asddls) | 20 voyage rows (chapter 5) |
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
-1. Open [ZCL_OSD_FLEET_REPORT](src/zcl_osd_fleet_report.clas.abap) and press **F9**. Expected: the console shows `Airship fleet` and one line per ship, starting with `S001 Albatross (Aloft): 6 voyages, 305 passengers` and ending with `S006 Old Boiler (Maintenance): 0 voyages, 0 passengers`.
-2. In `ship_lines`, set a breakpoint on `steam_check( ls_ship-steam_pct ).` with **Ctrl+Shift+B** and run **osd: Run as ABAP Application with debugger**. The debugger attaches automatically. Expected: VS Code stops on that line with the first ship, `S001`, in `ls_ship`. Continue with **F8**; the console prints the same six lines as in step 1. Afterwards remove the breakpoint (**Ctrl+Shift+B** again) and stop the debug session (**Run > Stop Debugging**): while the session runs, F9 toggles breakpoints and F8 continues instead of running, and with a breakpoint left the next start attaches it again.
-3. Break a test on purpose. In [the test class](src/zcl_osd_fleet_report.clas.testclasses.abap), remove the leading `*` from the `broken_on_purpose` declaration (line 11) and from its method (lines 40-44), press **Ctrl+F3**, and run the tests of `ZCL_OSD_FLEET_REPORT` in Testing. Expected: `counts_voyages` is green and `broken_on_purpose` is red with a failed assertion: it expects `1 voyages` for S006, and the report says `0 voyages`. Put the six `*` back, activate, and rerun: only `counts_voyages` is left, green.
-4. Make the report dump. A ship cannot have less than no steam, and `steam_check` says so with `ASSERT iv_steam_pct >= 0`. Give a ship negative steam through OData (chapter 3 explains the calls):
+## Repository map
 
-   ```
-   B=http://localhost:8099/sap/opu/odata/sap/ZOSD_FLEET_SRV
-   T=$(curl -s -c jar -D - -o /dev/null -H "x-csrf-token: fetch" "$B/" | grep -i '^x-csrf-token' | tr -d '\r' | cut -d' ' -f2)
-   curl -s -b jar -X MERGE -H "x-csrf-token: $T" -H "Content-Type: application/json" -d '{"SteamPct":-5}' "$B/ShipSet('S004')"
-   ```
+| Where | What |
+|---|---|
+| `src/` | the ABAP objects, DDIC, SEGW model, CDS |
+| `data/` | seed rows for the local system (not carried to a system) |
+| `webapp/` | the Fiori Elements app |
+| `book/` | the book; `book/build.sh` renders EPUB, PDF and HTML |
+| `docs/` | the fleet contract, measurements and design notes |
+| `deploy/manifest.json` | the objects allowed to travel to a system |
+| `test/` | end-to-end checks against a real engine |
+| `osd-pack.json` | the pack: package, layer, launchpad tile |
 
-   Run the report again with **F9**. Expected: the console shows `Airship fleet` and then `Runtime error: ASSERTION_FAILED` with `zcl_osd_fleet_report.clas.abap` and the line `ASSERT iv_steam_pct >= 0.`; no ship line is printed: the report collects all lines before it writes any, and S004's check stops it first. Set `SteamPct` back to `15` with the same MERGE, or restart the system: the seed replaces the rows at every start.
-5. Run the transaction. Open the launchpad's **WEBGUI** tile and enter `ZOSD_FLEET` (or open `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET` directly). Expected: the screen is titled `ZOSD_FLEET - Airship fleet` and lists the same six lines. The transaction is [ZCL_OSD_FLEET_TRAN](src/zcl_osd_fleet_tran.clas.abap): it implements the engine's `ZIF_OSD_TRANSACTION` and calls `ship_lines( )`; it does not `SUBMIT` a report.
-6. The fleet in a classic ALV. [ZOSD_FLEET_ALV](src/zosd_fleet_alv.prog.abap) is a report that reads the ships, adds each status text and shows them with `CL_SALV_TABLE=>FACTORY` and `display( )`. The engine converts a classic report into a class and runs it as a transaction named `ZGUI_` plus the program name without its `Z`: enter `ZGUI_OSD_FLEET_ALV` in **WEBGUI** (or open `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_ALV`). Expected: a grid with the columns `SHIP_ID`, `NAME`, `STATUS`, `TEXT`, `STEAM_PCT`, `HOME_PORT` and one row per ship, from `S001 Albatross A Aloft 82 Port Aurel` to `S006 Old Boiler M Maintenance 0 Tinmere`. The headers are the field names because the row type uses built-in types; the report's comment says why.
-
-## 3. OData ladder
-
-`ZOSD_FLEET_SRV` is defined in one file, [zosd_fleet.stg.yaml](src/zosd_fleet.stg.yaml); the engine compiles it into the SEGW project, the model and the data provider at start. [ZCL_ZOSD_FLEET_DPC_EXT](src/zcl_zosd_fleet_dpc_ext.clas.abap) is the hand-written part. The URLs below assume port 8099; any browser shows the `GET`s.
-
-1. `$metadata`: open `http://localhost:8099/sap/opu/odata/sap/ZOSD_FLEET_SRV/$metadata`. Expected: three entity sets, `ShipSet`, `VoyageSet` and `StatusVHSet`; `Ship` has the navigation property `Voyages`, and the annotations give `Ship/Status` a value list.
-2. Query: `.../ShipSet?$format=json`. Expected: six ships, each with `StatusText` (`Aloft`, `Docked` or `Maintenance`) next to its `Status`. `ShipSet/$count` answers `6`. `StatusText` is not a column of `ZOSD_FLEET_SHIP`; `shipset_get_entityset` fills it from `ZOSD_FLEET_STAT`.
-3. Filter: `.../ShipSet?$filter=Status eq 'A'&$format=json`. Expected: S001 Albatross and S003 Brass Heron, the two aloft ships. Try `$orderby=SteamPct desc` and `$top=2&$inlinecount=allpages`: the page has two rows and `__count` stays `6`.
-4. Change a ship with MERGE, using the commands of chapter 2 step 4 with `-d '{"SteamPct":55}'` on `ShipSet('S002')`. Expected: HTTP 204; `.../ShipSet('S002')?$format=json` then reads `"SteamPct":55`, and `Name` is still `Nimbus`, because MERGE changes only the fields it sends. `shipset_update_entity` writes the row.
-5. Value help: `.../StatusVHSet?$format=json`. Expected: three rows, `A` Aloft, `D` Docked, `M` Maintenance, served by the elementary search help `ZOSD_FLEET_STATUS_SH`. `.../StatusVHSet('A')` answers the single row.
-6. Navigation: `.../ShipSet('S001')/Voyages?$format=json`. Expected: S001's six voyages, from `V00001` in January to later in the year. `.../ShipSet('S006')/Voyages` is empty: Old Boiler never left port. `voyageset_get_entityset` serves this navigation, because a `table:` source has no association binding yet.
-
-## 4. Fiori apps
-
-The pack's [webapp/](webapp/) is a Fiori Elements list report and object page over `ZOSD_FLEET_SRV`. It has no controller code: the columns, filters and facets come from the annotations in the YAML. SAPUI5 loads from ui5.sap.com, so the browser needs to reach it.
-
-1. Open the launchpad (`http://localhost:8099/app/flp.html`) and click the **Airship fleet** tile. Expected: the address ends in `#AirshipFleet-display`, and the list report opens inside the launchpad and shows the six ships with Ship, Name, Status (text first, e.g. `Aloft (A)`), Steam (%) and Home port.
-2. In the filter bar, open the value help of **Status**, pick `Maintenance`, and press **Go**. Expected: Cumulus and Old Boiler. The value help lists the three statuses from `StatusVHSet`.
-3. Click **Old Boiler**. Expected: the object page shows its general data and an empty **Voyages** table. Go back and open **Albatross**: its **Voyages** table lists six voyages.
-4. The tile goes through the launchpad the way a system's does: `#AirshipFleet-display` is the intent the app's [manifest](webapp/manifest.json) declares in `crossNavigation.inbounds`, and the launchpad opens the component `osd.fleet` from the app's BSP copy, `/sap/bc/ui5_ui5/sap/zosg_demo/`. The same app also runs standalone at `http://localhost:8099/app/osg-demo/`; see [the contract](docs/fleet-contract.md#app).
-
-## 5. CDS cube
-
-The voyages form an analytical CDS cube on the default SQLite system too. Its names and current limits are fixed in [the contract](docs/fleet-contract.md#cds-cube-chapter-5).
-
-1. The cube. [zc_osd_fleetcube.ddls.asddls](src/cds/zc_osd_fleetcube.ddls.asddls) is a CDS view over `ZOSD_FLEET_VOY` with `@Analytics.dataCategory: #CUBE` and `@OData.publish: true`; the engine publishes it as its own service. Open `http://localhost:8099/sap/opu/odata/sap/ZC_OSD_FLEETCUBE_CDS/ZC_OSD_FLEETCUBE?$format=json`. Expected: 20 rows, one per voyage, each with `SHIPID`, `DEPMONTH` (e.g. `202601`), `PASSENGERS`, `FUELKG` and `DISTANCEKM`. `...ZC_OSD_FLEETCUBE?$filter=SHIPID eq 'S001'&$format=json` gives S001's six voyages.
-2. What the cube does not do here yet: `...ZC_OSD_FLEETCUBE?$select=SHIPID,PASSENGERS,FUELKG&$format=json`. Expected on this engine: still 20 rows with every column, not one per ship: `$select` is not applied to this service yet. A system groups a cube on `$select` (the dimensions you select become the grouping, the measures are summed); the engine does that only for its own reference services so far, not for a service published from a CDS view. The month is a column, `DEP_MONTH`, because the engine's CDS support keeps plain columns and does not compute `substring( dep_date, 1, 6 )`.
-
-## 6. AMDP on the fleet
-
-This optional chapter runs SQLScript from ABAP classes. The default SQLite system shows why these methods need another database. DuckDB runs the supported portable subset; HANA runs the original SQLScript. See [the contract](docs/fleet-contract.md#amdp-chapter-6).
-
-1. Open [ZCL_OSD_FLEET_FUEL](src/zcl_osd_fleet_fuel.clas.abap): `fuel_per_100km` is `BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT`, one `SELECT` with `SUM` and `GROUP BY ship_id`, leaving out voyages without a distance so nothing divides by zero. Press **F9**. Expected on SQLite: `AMDP needs DuckDB or HANA; this system runs on sqlite. Start it with STG_DB=duckdb.`
-2. DuckDB needs an open-steamgate checkout (the packaged extension has no DuckDB module): stop the system and start it again with `STG_DB=duckdb OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`, then run the class again. Expected:
-
-   ```
-   Fuel per 100 km (duckdb)
-   S001: 5513 kg over 2440 km = 225.94 kg/100 km
-   S002: 1788 kg over 1680 km = 106.43 kg/100 km
-   S003: 5494 kg over 2440 km = 225.16 kg/100 km
-   S004: 1114 kg over 980 km = 113.67 kg/100 km
-   S005: 3021 kg over 1040 km = 290.48 kg/100 km
-   ```
-
-   Old Boiler has no voyages, so it has no line. The engine translated the SQLScript into DuckDB SQL; the source in `src/` is unchanged.
-3. Open [ZCL_OSD_FLEET_SUMMARY](src/zcl_osd_fleet_summary.clas.abap) and press **F9**. Its second read-only AMDP joins ships to voyages, groups by ship and keeps ships with no voyages through a `LEFT OUTER JOIN`. The classrun reads the same tables through Open SQL and checks every result. Expected on DuckDB: `Fleet summary (duckdb); checked against Open SQL`, six ship lines, from `S001 A: 6 voyages, 305 passengers, 2440 km` to `S006 M: 0 voyages, 0 passengers, 0 km`, then `MATCH: 6 ships`. On SQLite it prints the same database requirement as step 1.
-4. On HANA Express, run both classes as [Running on HANA](docs/hana.md) describes (`STG_DB=hana`, or `osd.database.system` = `hana`). Expected: both headings say `(HDB)`; the fuel lines and six summary lines match DuckDB. Here the SQLScript runs on HANA as written. [The HANA checklist](docs/hana.md#chapter-6-on-hana) lists what to check.
-
-## 7. Take it to a system
-
-What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
-
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the business-log ALV `PROG zosd_fleet_balv`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the lift example, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
-2. Leave the four local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
-3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
-
-## Next: fleet operations trace
-
-The first business-log slice is on this branch and requires the BAL API merged
-from [open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207).
-Use a current `open-steamgate/main` checkout as `OSD_HOME`; an installed VSIX
-must include that merge to run this slice.
-The [fleet operations trace](docs/fleet-operations-trace.md) keeps connected
-jobs and the optional doctor as later steps.
-
-1. On a seeded system, open [ZCL_OSD_FLEET_BAL](src/zcl_osd_fleet_bal.clas.abap)
-   and press **F9**. It writes two successful audits and one deliberate error,
-   commits them, and prints one batch ID and three different log handles.
-2. Open [ZCL_OSD_FLEET_BAL_VIEW](src/zcl_osd_fleet_bal_view.clas.abap) and
-   press **F9**. Find the three run IDs ending `OK1`, `OK2` and `ERR`. Each has
-   `started`, `Observed 6 ships and 20 voyages`, then a success or error item;
-   `ERR` has one error. Restart OSD with the same database file and run the
-   viewer again: the same logs and message UTC timestamps remain. `RENDER` also
-   accepts an exact run ID, `IV_SEVERITY`, or `IV_ERRORS_ONLY` for filtered reads.
-3. See the same messages as a grid: enter `ZGUI_OSD_FLEET_BALV` in
-   **WEBGUI** (or open
-   `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_BALV`).
-   [ZOSD_FLEET_BALV](src/zosd_fleet_balv.prog.abap) shows one row per message
-   with `RUN_ID`, `ITEM`, `SEVERITY`, `TEXT` and `UTC`, sorted by run and
-   item; `ZCL_OSD_FLEET_BAL_VIEW=>MESSAGES` supplies the rows. It is a demo
-   view of the fleet's log, not SLG1. With no log yet it says
-   `No fleet business log to show` (on open-steamgate followed by the BAL
-   reason, since its read raises when no log matches).
-4. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
-   `DANGEROUS`: it checks the error filter and ordered messages. OSD gives
-   SQLite/DuckDB tests a disposable database; for HANA/Postgres, choose a
-   dedicated schema/database. Its cleanup on A4H has not been tested.
-   `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
-   node test/slice.mjs` runs the broader pack check against that runtime.
-
-### The audit as a background job
-
-The audit also runs as a background job step. This needs the job API merged
-up to [open-steamgate PR #246](https://github.com/oisee/open-steamgate/pull/246)
-and, for now, SQLite in a file: other backends refuse to schedule jobs.
-
-1. Start OSD with a file database, for example
-   `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
-   in the open-steamgate checkout.
-2. Open [ZCL_OSD_FLEET_JOB](src/zcl_osd_fleet_job.clas.abap) and press **F9**.
-   It calls `JOB_OPEN`, submits the report
-   [ZOSD_FLEET_JOB](src/zosd_fleet_job.prog.abap) `VIA JOB` with a fresh run ID
-   (`P_RUN`) and the expected ship count (`P_SHIPS`), releases the job with
-   `JOB_CLOSE`, and prints `Fleet job ZOSD_FLEET_AUDIT <count> released; run <ID>`.
-   Nothing runs yet: the job waits for a worker.
-3. Nothing in OSD works queued jobs on its own. In the same checkout and with
-   the same `STG_DB` and `STG_DB_PATH`, but without `OSD_PACKS` (with it, the
-   worker reseeds the pack's tables), run
-   `node tools/osd-batch-runs.mjs work` (or `worker` to keep it running).
-   Expected: JSON with `"kind": "completed"` and a `run` with its own `"id"`
-   (a UUID), `"jobName": "ZOSD_FLEET_AUDIT"`, the job count from step 2 and
-   `"state": "COMPLETED"`. `node tools/osd-batch-runs.mjs show <that run id>`
-   shows the step's output `Fleet audit job <ID>: BAL <handle>`. Another `work`
-   answers `"kind": "empty"`; so does a `work` pointed at a wrong
-   `STG_DB_PATH`, which quietly starts a fresh database. `"kind": "busy"`
-   means a `RUNNING` run blocks the queue until it is interrupted. `worker`
-   prints one compact line per worked step. This needs open-steamgate
-   [#302](https://github.com/oisee/open-steamgate/pull/302) or later.
-4. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: a log for `Run <ID>`
-   with `errors 0` and the three audit messages.
-
-The job uses only the standard function modules, so both objects travel to a
-system. The job-chain steps from the
-[fleet operations trace](docs/fleet-operations-trace.md) come next.
-
-### A chain of two jobs
-
-Two jobs run as one chain: a readiness job that waits, then a voyage job that
-starts it. `ZCL_OSD_FLEET_CHAIN` closes the readiness job first with a named
-event, `EVENT_ID = 'ZOSD_FLEET_VOYAGE_DONE'` and the run ID as
-`EVENT_PARAM`, and only then releases the voyage job. The voyage step commits
-its business log and, only when the count is right, raises that event with
-`BP_EVENT_RAISE` as its last action. Because the waiting job exists before the
-voyage job can run, a fast voyage job cannot finish first: SAP and
-open-steamgate both ignore a raise that comes before the waiting job was
-closed. The run ID as event parameter keeps concurrent chains apart. Only
-standard function modules are used; no private `TAIL_EVENT_*` extension.
-Same setup as above: OSD on `STG_DB=file` and the engine's worker.
-
-1. Open [ZCL_OSD_FLEET_CHAIN](src/zcl_osd_fleet_chain.clas.abap) and press
-   **F9**. It schedules two chains and prints both: `Fleet chain ok: run <A>`
-   expects 20 voyages, `Fleet chain forced failure: run <B>` expects 21. Each
-   line gives the job counts of the voyage job and of the readiness job, which
-   `waits for ZOSD_FLEET_VOYAGE_DONE`.
-2. Run `node tools/osd-batch-runs.mjs work` until it answers
-   `"kind": "empty"` (four times). Expected, in some order: voyage `A`
-   `COMPLETED`, readiness `A` `COMPLETED` (always after voyage `A`), and
-   voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
-   `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
-   `WAITING`: its event was never raised. It stays in the local operations
-   store until you remove that store (`OSD_OPERATIONS_DB`, or
-   `osd-operations.sqlite` next to `STG_DB_PATH`) or use a fresh directory;
-   the facade has no `BP_JOB_DELETE` yet.
-3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
-   `Voyage step OK: 20 voyages`, `<A>-READY` with
-   `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
-   `errors 1` and `Voyage step failed: 20 voyages, expected 21`. The failed
-   voyage job commits its log before it aborts, so the error stays readable;
-   there is no `<B>-READY`.
-
-What this shows is a scheduling guarantee, not exactly-once execution: a
-restart or a replayed import does not start a job twice, but a crash after a
-step's business commit and before its result is recorded leaves the job
-`RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`). The
-event is raised when the voyage step's business work is committed, just
-before open-steamgate records the step as finished. So a crash or abort after
-a successful raise still starts the readiness job while the voyage job shows
-`FAILED` or `RUNNING`; and a raise that fails (on a system: the event is not
-defined in SM64, or the job's user may not raise it) aborts the voyage job
-after its log already says OK. The portable `BP_EVENT_RAISE` is used on
-purpose; open-steamgate's private tail event would tie the event to the
-recorded result but does not exist on a system. The chain is measured on
-open-steamgate; on a system it follows SAP's documented event pattern but has
-not been measured there ([Take it to a system](docs/take-to-system.md)).
-
-### Why is a chain stuck?
-
-[ZCL_OSD_FLEET_DOCTOR](src/zcl_osd_fleet_doctor.clas.abap) answers that for
-every readiness job that still waits. It selects them with `BP_JOB_SELECT`,
-asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR` about the waiting job
-and about the voyage job of the same run (found by its `P_RUN`), and adds the
-voyage step's BAL log for that run. The job doctor has no link to the business log; the run ID in
-the step input (`P_RUN`) is that link.
-
-1. After the chain steps above on a fresh store, press **F9** on the class.
-   Expected: `Fleet chains waiting: 1` (one per failing chain you scheduled;
-   they stay until the operations store is removed), then
-   `Waiting chain <B>: ZOSD_FLEET_READY/... waits for event ZOSD_FLEET_VOYAGE_DONE`, the job doctor's view of the readiness
-   job (`OPERATIONS WAITING`, `Wait: event ZOSD_FLEET_VOYAGE_DONE`, `P_RUN=<B>`), of the
-   voyage job (`OPERATIONS FAILED result=INCOMPLETE`,
-   `REVIEW: failed or interrupted; no automatic replay`, `P_VOYS=21`), and the
-   business log `<B>-VOY` with `Voyage step failed: 20 voyages, expected 21`.
-   Chain `A` is not listed: nothing of it waits. The voyage job's state
-   decides whether a waiting chain is stuck: `FAILED` will not move, while
-   `QUEUED` or `RUNNING` (F9 pressed between the chain's steps) is still on
-   its way.
-2. Job counts, times and handles change with every run; the job doctor also
-   says that each read is a separate snapshot, not an atomic report.
-
-The class stays local: `ZCL_OSD_JOB_DOCTOR` is open-steamgate's. On a system,
-SM37 and the job log answer the same question.
-
-### The fleet report from a model
-
-[ZCL_OSD_FLEET_TPL](src/zcl_osd_fleet_tpl.clas.abap) generates the fleet
-report instead of writing it by hand: it reads the ships and their status
-texts into a JSON model and renders a Mustache-style template over it with
-open-steamgate's template engine `ZCL_OSD_TPL`
-([open-steamgate PR #266](https://github.com/oisee/open-steamgate/pull/266)).
-Every output line keeps a trace to where it came from.
-
-1. Open the class and press **F9**. Expected: `Fleet report: 6 airships`, one
-   line per ship such as `S001 Albatross    Aloft       steam 82%`, and
-   `End of fleet report`; then a trace, one row per output line, such as
-   `2 <- fleet:3 /airships/1/id`: output line 2 came from line 3 of the
-   template `fleet`, for the first airship of the model. The path is the first
-   value on the line; a line without a value, like the last one, shows the
-   section it is in (`/`).
-2. Change the template in `TEMPLATE` (for example add `{{status}}` to line 3)
-   and press **F9** again: every ship line changes, and the trace still points
-   at template line 3.
-3. Run the class in Testing. Its two HARMLESS tests read the seed rows and
-   check a ship line and the trace of the third ship.
-
-The class stays local because what it needs is not in this unit:
-`ZCL_OSD_TPL` comes with open-steamgate (on a system it is an ordinary Z class
-that would have to be imported first) and `ZCL_AJSON` is the ajson library,
-which a system may or may not have.
-
-### Lift a legacy routine
-
-[ZCL_OSD_FLEET_LIFT](src/zcl_osd_fleet_lift.clas.abap) holds a routine as it
-is often found: `BEFORE` loops over the voyages and reads each ship's name
-with its own `SELECT SINGLE`. `AFTER` is the lifted form from open-steamgate's
-verified lift, recipe R1 as on open-steamgate main
-([PR #271](https://github.com/oisee/open-steamgate/pull/271) and later):
-one `SELECT ... FOR ALL ENTRIES` into a hashed table, then a `READ TABLE` per
-voyage that sets the name only on a hit. The code between
-`" lift:R1 begin` and `" lift:R1 end` is generated, not written by hand.
-
-1. In an open-steamgate checkout with a build, run
-   `OSD_HOME=/path/to/open-steamgate node test/lift.mjs`. Expected: the model
-   it read out of `BEFORE` (`zosd_fleet_ship by ship_id; fields name ->
-   ship_name`), three open obligations the recipe leaves to you (no
-   concurrent writes during the loop, one client, `sy-subrc`/`sy-dbcnt` not
-   read afterwards), and `AFTER's 14 generated lines match the template`.
-   `--write` regenerates the region after a change to `BEFORE`.
-2. Open the class and press **F9**. Expected:
-   `BEFORE and AFTER agree on 20 voyages.` and the first three voyages with
-   their ship names, from `V00001 S001 Albatross`.
-3. Run the class in Testing. Its four HARMLESS tests run both methods on the
-   same rows: the seeded voyages, an unknown ship that keeps its old name,
-   the same ship twice with a stale name, and no voyages at all.
-4. Try it on a copy of `BEFORE`: add a condition that is not a key column
-   to its `WHERE` (for example `AND status = 'A'`), or type the key
-   component `ship_id` differently from the column (for example
-   `TYPE c LENGTH 10`), and run step 1 again: `lift: R1 refused -- ...`
-   says which obligation it could not close. The lift checks the key's
-   types; a hand-typed target like `ship_name` is not checked.
-
-The tests compare results, not cost: the `IS NOT INITIAL` guard before the
-`FOR ALL ENTRIES` only matters for the database calls (an empty table would
-otherwise read every ship), and only the drift check in step 1 protects it.
-
-## Run the checks
-
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then `OSD_HOME=/path/to/open-steamgate node test/slice.mjs` builds that engine checkout with this folder as a pack, starts it on a free port and checks the Airship fleet end to end: six ships in `ShipSet`, the fleet report's classrun, a `$filter` on status, a MERGE that reads back, the launchpad tile opening the list report (this one needs a browser that reaches ui5.sap.com; `SLICE_SKIP_UI=1` skips it and says so, `SLICE_CHROMIUM=<path>` picks the browser), and the report's ABAP Unit test. Use the engine's main branch at `0ba17ed` or later: the tile opens the app through the launchpad intent, which older engines do not resolve for a pack. It stops the engine it started, and exits non-zero if any check fails. `OSD_HOME=/path/to/open-steamgate node test/jobs.mjs` checks the background jobs the same way on a temporary SQLite file: the single job with its BAL log, and both chains (the good one completes, the failing one leaves readiness waiting).
+Releases: [v0.1](https://github.com/oisee/osg-demo/releases/tag/v0.1) and later.
