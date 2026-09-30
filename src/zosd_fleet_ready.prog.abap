@@ -6,8 +6,9 @@ REPORT zosd_fleet_ready.
 PARAMETERS p_run TYPE c LENGTH 32 OBLIGATORY.
 
 START-OF-SELECTION.
+  DATA lv_ok TYPE abap_bool.
   TRY.
-      DATA(lv_ok) = zcl_osd_fleet_chain=>ready_step( CONV #( p_run ) ).
+      lv_ok = zcl_osd_fleet_chain=>ready_step( CONV #( p_run ) ).
       COMMIT WORK.
     CATCH cx_bali_runtime INTO DATA(lx_bal).
       MESSAGE lx_bal->get_text( ) TYPE 'A'.

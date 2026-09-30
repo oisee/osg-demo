@@ -179,13 +179,16 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
 1. Open [ZCL_OSD_FLEET_CHAIN](src/zcl_osd_fleet_chain.clas.abap) and press
    **F9**. It schedules two chains and prints both: `Fleet chain ok: run <A>`
    expects 20 voyages, `Fleet chain forced failure: run <B>` expects 21. Each
-   line names the voyage job and the readiness job that waits for it.
+   line gives the job counts of the voyage job and of the readiness job that
+   waits for it.
 2. Run `node tools/osd-batch-runs.mjs work` until it answers
    `"kind": "empty"` (four times). Expected, in some order: voyage `A`
    `COMPLETED`, readiness `A` `COMPLETED` (always after voyage `A`), and
    voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
    `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
-   `WAITING`: a failed predecessor never releases it.
+   `WAITING`: on open-steamgate a failed predecessor never releases it. It
+   stays in the local operations store until you start with a fresh
+   `STG_DB_PATH` (the facade has no `BP_JOB_DELETE` yet).
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
@@ -197,6 +200,11 @@ What this shows is a scheduling guarantee, not exactly-once execution: a
 restart or a replayed import does not start a job twice, but a crash after a
 step's business commit and before its result is recorded leaves the job
 `RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`).
+The chain is measured on open-steamgate only. On a system the voyage job is
+released for an immediate start before the readiness job is closed and may
+finish first; what SAP then does with the predecessor condition, and with a
+successor whose predecessor aborted, has not been measured
+([Take it to a system](docs/take-to-system.md)).
 
 ### The fleet report from a model
 

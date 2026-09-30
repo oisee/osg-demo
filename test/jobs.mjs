@@ -191,7 +191,9 @@ await check("J1b/J2 worker: good chain completes; failing chain stops before rea
     expect(out.status === (result.kind === "failed" ? 1 : 0), `work exited ${out.status} for ${result.kind}`);
     worked.push(result);
   }
-  const byCount = (count) => worked.find((w) => w.run?.jobCount === count);
+  const job = (name, count) => worked.find((w) => w.run?.jobName === name && w.run?.jobCount === count);
+  const V = "ZOSD_FLEET_VOYAGE", R = "ZOSD_FLEET_READY";
+  const byCount = (count) => job(count === chains.good.voyage || count === chains.failing.voyage ? V : R, count);
   const state = (count) => byCount(count)?.run?.state;
   expect(worked.length === 3, `worked ${worked.length} steps, expected 3: ${worked.map((w) => `${w.run?.jobName} ${w.run?.state}`).join(", ")}`);
   expect(state(chains.good.voyage) === "COMPLETED" && state(chains.good.ready) === "COMPLETED",
@@ -201,7 +203,7 @@ await check("J1b/J2 worker: good chain completes; failing chain stops before rea
   expect(state(chains.failing.voyage) === "FAILED", `failing voyage: ${state(chains.failing.voyage)}`);
   expect(!byCount(chains.failing.ready), "the failing chain's readiness job ran");
   const listed = JSON.parse(cli("list").stdout);
-  const waiting = listed.find((r) => r.jobCount === chains.failing.ready);
+  const waiting = listed.find((r) => r.jobName === R && r.jobCount === chains.failing.ready);
   expect(waiting?.state === "WAITING", `failing chain's readiness job: ${waiting?.state}`);
   return "good: voyage then ready COMPLETED; failing: voyage FAILED, ready WAITING";
 });

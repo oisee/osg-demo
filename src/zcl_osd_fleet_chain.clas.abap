@@ -4,7 +4,10 @@ CLASS zcl_osd_fleet_chain DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * after that job finished successfully (a standard predecessor start
 * condition), checks that log and the ships, and records <run>-READY. A
 * voyage count that differs from the expected one fails the first job, so the
-* second one keeps waiting.
+* second one keeps waiting (measured on open-steamgate only).
+* On a system the voyage job is released for an immediate start before the
+* readiness job is closed, so it may finish first; a job already started is
+* not undone by the caller's ROLLBACK either. See docs/take-to-system.md.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
     TYPES ty_run_id TYPE c LENGTH 32.
@@ -149,23 +152,24 @@ CLASS zcl_osd_fleet_chain IMPLEMENTATION.
       external_id = CONV #( |{ iv_run_id }-VOY| ) ).
     DATA(lo_db) = cl_bali_log_db=>get_instance( ).
     DATA(lt_logs) = lo_db->load_logs_via_filter( filter = lo_filter ).
-    LOOP AT lt_logs INTO DATA(lo_found).
-      DATA(lo_voyage) = lo_db->load_log( handle = lo_found->get_handle( ) ).
+* exactly one voyage log per run; a repeated voyage job makes it ambiguous
+    IF lines( lt_logs ) = 1.
+      DATA(lo_voyage) = lo_db->load_log( handle = lt_logs[ 1 ]->get_handle( ) ).
       DATA(lo_header) = lo_voyage->get_header( ).
       lv_voyage_errors = lo_header->number_error_items.
-    ENDLOOP.
+    ENDIF.
     SELECT COUNT( * ) FROM zosd_fleet_ship INTO lv_ships.
     DATA(lo_log) = new_log( |{ iv_run_id }-READY| ).
     add( io_log = lo_log iv_text = `Readiness step started` iv_severity = 'S' ).
     add( io_log = lo_log iv_severity = 'I'
-         iv_text = |Voyage log errors { lv_voyage_errors }; { lv_ships } ships| ).
+         iv_text = |Voyage logs { lines( lt_logs ) }, errors { lv_voyage_errors }; { lv_ships } ships| ).
     rv_ok = xsdbool( lv_voyage_errors = 0 AND lv_ships = 6 ).
     IF rv_ok = abap_true.
       add( io_log = lo_log iv_severity = 'S'
            iv_text = |Fleet ready: { lv_ships } ships after a clean voyage step| ).
     ELSE.
       add( io_log = lo_log iv_severity = 'E'
-           iv_text = `Fleet not ready: voyage log missing or with errors, or not 6 ships` ).
+           iv_text = `Fleet not ready: not exactly one clean voyage log, or not 6 ships` ).
     ENDIF.
     cl_bali_log_db=>get_instance( )->save_log( log = lo_log ).
   ENDMETHOD.
