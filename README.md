@@ -151,11 +151,14 @@ and, for now, SQLite in a file: other backends refuse to schedule jobs.
    the same `STG_DB` and `STG_DB_PATH`, but without `OSD_PACKS` (with it, the
    worker reseeds the pack's tables), run
    `node tools/osd-batch-runs.mjs work` (or `worker` to keep it running).
-   Expected: JSON with `"kind": "completed"`, `"jobName": "ZOSD_FLEET_AUDIT"`,
-   the job count from step 2 and `"state": "COMPLETED"`;
-   `node tools/osd-batch-runs.mjs show <id>` shows the step's output
-   `Fleet audit job <ID>: BAL <handle>`. Another `work` answers
-   `"kind": "empty"`. This needs open-steamgate
+   Expected: JSON with `"kind": "completed"` and a `run` with its own `"id"`
+   (a UUID), `"jobName": "ZOSD_FLEET_AUDIT"`, the job count from step 2 and
+   `"state": "COMPLETED"`. `node tools/osd-batch-runs.mjs show <that run id>`
+   shows the step's output `Fleet audit job <ID>: BAL <handle>`. Another `work`
+   answers `"kind": "empty"`; so does a `work` pointed at a wrong
+   `STG_DB_PATH`, which quietly starts a fresh database. `"kind": "busy"`
+   means a `RUNNING` run blocks the queue until it is interrupted. `worker`
+   prints one compact line per worked step. This needs open-steamgate
    [#302](https://github.com/oisee/open-steamgate/pull/302) or later.
 4. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: a log for `Run <ID>`
    with `errors 0` and the three audit messages.

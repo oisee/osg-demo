@@ -124,7 +124,8 @@ await check("J0b worker: the step runs to COMPLETED", async () => {
   expect(run, "nothing was scheduled");
   // the engine's own worker, on the instance's databases; without OSD_PACKS,
   // which would make its initializeABAP reseed the pack's tables
-  const {OSD_PACKS: _packs, ...workerEnv} = env;
+  const workerEnv = {...env};
+  delete workerEnv.OSD_PACKS;
   const cli = (...args) => spawnSync(process.execPath, ["tools/osd-batch-runs.mjs", ...args],
     {cwd: home, env: workerEnv, encoding: "utf8", timeout: 120_000});
   const worked = cli("work");
