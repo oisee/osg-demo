@@ -103,8 +103,8 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
-2. Leave the three local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+2. Leave the four local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
 ## Next: fleet operations trace
@@ -206,6 +206,33 @@ released for an immediate start before the readiness job is closed and may
 finish first; what SAP then does with the predecessor condition, and with a
 successor whose predecessor aborted, has not been measured
 ([Take it to a system](docs/take-to-system.md)).
+
+### Why is a chain stuck?
+
+[ZCL_OSD_FLEET_DOCTOR](src/zcl_osd_fleet_doctor.clas.abap) answers that for
+every readiness job that still waits. It selects them with `BP_JOB_SELECT`,
+asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR` about the waiting job
+and about the voyage job it waits for, and adds the voyage step's BAL log for
+the same run. The job doctor has no link to the business log; the run ID in
+the step input (`P_RUN`) is that link.
+
+1. After the chain steps above on a fresh store, press **F9** on the class.
+   Expected: `Fleet chains waiting: 1` (one per failing chain you scheduled;
+   they stay until the operations store is removed), then
+   `Waiting chain <B>: ZOSD_FLEET_READY/... waits for ZOSD_FLEET_VOYAGE/...`, the job doctor's view of the readiness
+   job (`OPERATIONS WAITING`, `Wait: predecessor ...`, `P_RUN=<B>`), of the
+   voyage job (`OPERATIONS FAILED result=INCOMPLETE`,
+   `REVIEW: failed or interrupted; no automatic replay`, `P_VOYS=21`), and the
+   business log `<B>-VOY` with `Voyage step failed: 20 voyages, expected 21`.
+   Chain `A` is not listed: nothing of it waits. The voyage job's state
+   decides whether a waiting chain is stuck: `FAILED` will not move, while
+   `QUEUED` or `RUNNING` (F9 pressed between the chain's steps) is still on
+   its way.
+2. Job counts, times and handles change with every run; the job doctor also
+   says that each read is a separate snapshot, not an atomic report.
+
+The class stays local: `ZCL_OSD_JOB_DOCTOR` is open-steamgate's. On a system,
+SM37 and the job log answer the same question.
 
 ### The fleet report from a model
 

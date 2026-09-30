@@ -4,13 +4,13 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout whose `segw:zip` accepts `--unit` and `--manifest` (main at `3048c59`, oisee/open-steamgate#168, or later: from there the app's manifest is rebased for its BSP location). The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the two objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout whose `segw:zip` accepts `--unit` and `--manifest` (main at `3048c59`, oisee/open-steamgate#168, or later: from there the app's manifest is rebased for its BSP location). The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the four objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zosd_fleet.tran.xml
+rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the three local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
+and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the four local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
 
 ## What travels and what does not
 
@@ -58,6 +58,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | The app's ICF node | yes, as SICF `/sap/bc/ui5_ui5/sap/zosg_demo` | A customer name under the path where a system keeps its UI5 applications. |
 | The launchpad tile | no | The tile is `osd-pack.json`, which only the open-steamgate launchpad reads. On a system, the inbound `AirshipFleet-display` in the manifest is what a launchpad catalog and target mapping would point at; neither is in the zip. |
 | Seed rows (`data/*.tabu.json`) | no | Two things would be needed and neither is here: a `.conf.json` beside each `.tabu.json` (abapGit's instruction: which table, which condition), and a `TABU <table>` entry in the deploy unit (without it the tool refuses the rows as `not-in-manifest`). With both, the rows would be written into the logon client, whatever their `MANDT` says. |
+| `ZCL_OSD_FLEET_DOCTOR` | no | It asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR`; on a system, SM37 and the job log answer the same question. |
 | `ZCL_OSD_FLEET_TPL` | no | It renders through `ZCL_OSD_TPL` and `ZCL_AJSON` of the open-steamgate runtime; a system has neither unless both are imported first. |
 | Transaction `ZOSD_FLEET` and `ZCL_OSD_FLEET_TRAN` | no | The class implements `ZIF_OSD_TRANSACTION`, an interface of the open-steamgate runtime that a system does not have, so neither is in the deploy unit. |
 | `test/slice.mjs`, `docs/`, the README | no | Files for this repository, not ABAP objects. |

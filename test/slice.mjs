@@ -33,7 +33,7 @@
 //        (ASSERTION_FAILED), and prints again once the value is restored;
 //     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
 //        S001 and S006 through ShipSet(..)/Voyages match the seed;
-//    10. ch7: segw:zip of this folder refuses exactly the three local objects,
+//    10. ch7: segw:zip of this folder refuses exactly the four local objects,
 //        and of a copy without them carries every object the deploy unit
 //        lists and no seed rows (docs/take-to-system.md);
 //    11. ch5: the cube service ZC_OSD_FLEETCUBE_CDS answers one row per
@@ -440,11 +440,11 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
     const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
     const refusedKeys = [...new Set(keys)].sort().join(", ");
-    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
-      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
     // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,

@@ -20,7 +20,11 @@
 //     runs until the queue is empty: in the chain expecting 20 voyages both
 //     jobs complete; in the one expecting 21 the voyage job fails and the
 //     readiness job stays WAITING. BAL holds <run>-VOY for both chains (the
-//     failed one with its error) and <run>-READY only for the good one.
+//     failed one with its error) and <run>-READY only for the good one;
+//  7. Doc1: ZCL_OSD_FLEET_DOCTOR lists exactly the failing chain as stuck,
+//     with the job doctor's view of both jobs and the voyage BAL log; the
+//     check compares its output with a masked expectation (job counts and
+//     times vary from run to run).
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -239,6 +243,42 @@ await check("J1c/J2 BAL: voyage logs for both chains, readiness only for the goo
     `failing voyage log: ${badVoy}`);
   expect(log(`${chains.failing.run}-READY`) === undefined, "the failing chain has a readiness log");
   return "good: VOY and READY clean; failing: VOY with its error, no READY";
+});
+
+await check("Doc1 doctor: the failing chain is stuck, with job doctor and BAL", async () => {
+  expect(chains.failing, "nothing was scheduled");
+  const text = await classrun("ZCL_OSD_FLEET_DOCTOR", {readOnly: true});
+  const f = chains.failing;
+  // job counts, run IDs, handles and times differ per run; mask them
+  const mask = (t) => t.replaceAll(f.run, "<RUN>").replaceAll(f.voyage, "<VOYAGE>").replaceAll(f.ready, "<READY>")
+    .replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z/g, "<T>").replace(/UTC \d{14}/g, "UTC <T>")
+    .replace(/handle [A-F0-9]{32}/g, "handle <H>");
+  const got = mask(text).split("\n").map((l) => l.trimEnd());
+  const want = [
+    "Fleet chains waiting: 1",
+    "Waiting chain <RUN>: ZOSD_FLEET_READY/<READY> waits for ZOSD_FLEET_VOYAGE/<VOYAGE>",
+    "-- job doctor, readiness job",
+    "Job ZOSD_FLEET_READY/<READY>: OPERATIONS WAITING result=",
+    "Wait: predecessor ZOSD_FLEET_VOYAGE/<VOYAGE>",
+    "Step 1: ZOSD_FLEET_READY PENDING result= start= end=",
+    "  P_RUN=<RUN>",
+    "-- job doctor, voyage job it waits for",
+    "Job ZOSD_FLEET_VOYAGE/<VOYAGE>: OPERATIONS FAILED result=INCOMPLETE",
+    "REVIEW: failed or interrupted; no automatic replay",
+    "Step 1: ZOSD_FLEET_VOYAGE FAILED result=INCOMPLETE start=<T> end=<T>",
+    "  P_VOYS=21",
+    "-- business log <RUN>-VOY",
+    "Run <RUN>-VOY; handle <H>; errors 1",
+    "3 E Voyage step failed: 20 voyages, expected 21; UTC <T>",
+  ];
+  let at = 0;
+  for (const line of want) {
+    const i = got.indexOf(line, at);
+    expect(i >= 0, `missing, or out of order: "${line}"\n--- got (masked):\n${got.join("\n")}`);
+    at = i + 1;
+  }
+  expect(!text.includes(chains.good.run), "the good chain is listed as waiting");
+  return "1 stuck chain: readiness WAITING on a FAILED voyage job, BAL error alongside";
 });
 
 stop();
