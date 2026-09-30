@@ -9,6 +9,9 @@ langs=${1:-all}
 out=${2:-$here/out}
 out=$(mkdir -p "$out" && cd "$out" && pwd)
 [ "$langs" = all ] && langs="en ru"
+for lang in $langs; do
+  case $lang in en|ru) ;; *) echo "usage: book/build.sh [en|ru|all] [out-dir]" >&2; exit 2;; esac
+done
 cd "$here"
 names=(00-preface.md 01-hello.md 02-debug-tests-dumps.md 03-odata.md 04-fiori.md 05-cds.md \
   06-amdp.md 07-take-to-system.md 08-business-log.md 09-background-jobs.md 10-generated-code.md \
