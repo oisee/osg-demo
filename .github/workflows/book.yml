@@ -1,0 +1,58 @@
+name: book
+
+# Builds the book in English and Russian, attaches EPUB and PDF to the
+# release, and mails the EPUBs to a Kindle through Gmail when the repository
+# has the secrets GMAIL_ADDRESS, GMAIL_APP_PASSWORD and KINDLE_EMAIL.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and attach to (empty: build only, no upload)"
+        required: false
+      kindle:
+        description: "Mail the EPUBs to the Kindle"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  book:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+      - name: Install pandoc and weasyprint
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q pandoc fonts-dejavu
+          pipx install weasyprint
+      - name: Build the book
+        run: book/build.sh all "$RUNNER_TEMP/book"
+      - name: Keep the books as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: osg-demo-book
+          path: |
+            ${{ runner.temp }}/book/*.epub
+            ${{ runner.temp }}/book/*.pdf
+      - name: Attach to the release
+        if: env.TAG != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$RUNNER_TEMP"/book/*.epub "$RUNNER_TEMP"/book/*.pdf --clobber
+      - name: Send to Kindle
+        if: github.event_name == 'release' || inputs.kindle
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          KINDLE_EMAIL: ${{ secrets.KINDLE_EMAIL }}
+          RELEASE_TAG: ${{ env.TAG }}
+        run: python3 .github/scripts/send-to-kindle.py "$RUNNER_TEMP"/book/*.epub
