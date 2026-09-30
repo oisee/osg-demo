@@ -4,11 +4,12 @@
   "customerNamespaces": [],
   "units": {
     "osg-demo": {
-      "description": "The hello class and the Airship fleet: its tables, search help, report, audit, BAL, job and job-chain classes, the job reports, OData service, Fiori app, cube and AMDP classes. Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have. ZCL_OSD_FLEET_TPL stays local too: it needs ZCL_OSD_TPL and ZCL_AJSON, which are not in this unit. So does ZCL_OSD_FLEET_DOCTOR, which asks the engine's job doctor ZCL_OSD_JOB_DOCTOR.",
+      "description": "The hello class and the Airship fleet: its tables, search help, report, audit, BAL, job and job-chain classes, the job reports, the business-log ALV, OData service, Fiori app, cube and AMDP classes. Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have. ZCL_OSD_FLEET_TPL stays local too: it needs ZCL_OSD_TPL and ZCL_AJSON, which are not in this unit. So does ZCL_OSD_FLEET_DOCTOR, which asks the engine's job doctor ZCL_OSD_JOB_DOCTOR.",
       "sources": ["src"],
       "objects": [
         "CLAS ZOSD_DEMO_HELLO",
         "PROG ZOSD_FLEET_ALV",
+        "PROG ZOSD_FLEET_BALV",
         "TABL ZOSD_FLEET_SHIP",
         "TABL ZOSD_FLEET_VOY",
         "TABL ZOSD_FLEET_STAT",

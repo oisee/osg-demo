@@ -103,7 +103,7 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the business-log ALV `PROG zosd_fleet_balv`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the four local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
@@ -125,7 +125,15 @@ jobs and the optional doctor as later steps.
    `ERR` has one error. Restart OSD with the same database file and run the
    viewer again: the same logs and message UTC timestamps remain. `RENDER` also
    accepts an exact run ID, `IV_SEVERITY`, or `IV_ERRORS_ONLY` for filtered reads.
-3. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
+3. See the same messages as a grid: enter `ZGUI_OSD_FLEET_BALV` in
+   **WEBGUI** (or open
+   `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_BALV`).
+   [ZOSD_FLEET_BALV](src/zosd_fleet_balv.prog.abap) shows one row per message
+   with `RUN_ID`, `ITEM`, `SEVERITY`, `TEXT` and `UTC`, sorted by run and
+   item; `ZCL_OSD_FLEET_BAL_VIEW=>MESSAGES` supplies the rows. It is a demo
+   view of the fleet's log, not SLG1. With no log yet it says
+   `No fleet business log to show`.
+4. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
    `DANGEROUS`: it checks the error filter and ordered messages. OSD gives
    SQLite/DuckDB tests a disposable database; for HANA/Postgres, choose a
    dedicated schema/database. Its cleanup on A4H has not been tested.
