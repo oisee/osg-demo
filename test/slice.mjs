@@ -543,7 +543,10 @@ await check("13 ch2 classic ALV ZGUI_OSD_FLEET_ALV", async () => {
     text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
   }
   text = text.replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " | ").replace(/(\s*\|\s*)+/g, " | ");
-  expect(text.includes(`${ships.length} rows`), "no row count of the grid");
+  // the grid prints no row count since SALV renders through CL_GUI_ALV_GRID
+  // (open-abap-gui #177, aa3154e), so count the ship rows it shows
+  const gridRows = text.match(/ \| S\d{3} \| /g) ?? [];
+  expect(gridRows.length === ships.length, `grid shows ${gridRows.length} ship rows, expected ${ships.length}`);
   for (const h of ["SHIP_ID", "NAME", "STATUS", "TEXT", "STEAM_PCT", "HOME_PORT"]) expect(text.includes(` ${h} `), `no column ${h}`);
   const texts = new Map(seed("zosd_fleet_stat").map((s) => [s.status, s.text]));
   const missing = ships.filter((s) => !text.includes(` ${s.ship_id} | ${s.name} | ${s.status} | ${texts.get(s.status)} | ${s.steam_pct} | ${s.home_port} `));
