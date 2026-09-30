@@ -95,7 +95,7 @@ open-steamgate; в системе она следует документиров
 
 [ZCL_OSD_FLEET_DOCTOR](../../src/zcl_osd_fleet_doctor.clas.abap) отвечает на этот вопрос для
 каждого задания готовности, которое все еще ждет. Класс выбирает их через `BP_JOB_SELECT`
-(начиная с open-steamgate 0.4 с полями `BTCSELECT` как в SAP: `PRELIM`,
+(с полями `BTCSELECT` как в SAP: `PRELIM`,
 `SCHEDUL` и так далее; фильтр, который локальная система не поддерживает,
 например диапазон дат, вызывает `SELECTION_CANCELED`, а не игнорируется),
 спрашивает «доктора» заданий open-steamgate `ZCL_OSD_JOB_DOCTOR` об ожидающем задании

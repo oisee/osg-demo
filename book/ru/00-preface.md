@@ -36,7 +36,8 @@ ABAP-системе, которая работает внутри VS Code: open-
    pre-release): найдите его в представлении Extensions или возьмите `.vsix`
    из последнего
    [релиза `vscode-v*`](https://github.com/oisee/open-steamgate/releases)
-   (0.4 или новее) и
+   (0.4 или новее; пока релиз 0.4 не вышел, запускайте пак из checkout
+   `main` open-steamgate через `OSD_PACKS`, как показано ниже) и
    выполните **Extensions: Install from VSIX...**.
 2. Клонируйте [oisee/osg-demo](https://github.com/oisee/osg-demo) и откройте
    клон как папку VS Code.

@@ -36,7 +36,8 @@ for readers who meet its key behaviour elsewhere.
    pre-release): search for it in the Extensions view, or take the `.vsix`
    from the latest
    [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
-   (0.4 or later) and
+   (0.4 or later; until the 0.4 release is out, run the pack from an
+   open-steamgate checkout of `main` with `OSD_PACKS`, as shown below) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
