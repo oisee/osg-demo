@@ -216,7 +216,13 @@ restart or a replayed import does not start a job twice, but a crash after a
 step's business commit and before its result is recorded leaves the job
 `RUNNING` for an operator (open-steamgate `docs/job-tail-events.md`). The
 event is raised when the voyage step's business work is committed, just
-before open-steamgate records the step as finished. The chain is measured on
+before open-steamgate records the step as finished. So a crash or abort after
+a successful raise still starts the readiness job while the voyage job shows
+`FAILED` or `RUNNING`; and a raise that fails (on a system: the event is not
+defined in SM64, or the job's user may not raise it) aborts the voyage job
+after its log already says OK. The portable `BP_EVENT_RAISE` is used on
+purpose; open-steamgate's private tail event would tie the event to the
+recorded result but does not exist on a system. The chain is measured on
 open-steamgate; on a system it follows SAP's documented event pattern but has
 not been measured there ([Take it to a system](docs/take-to-system.md)).
 

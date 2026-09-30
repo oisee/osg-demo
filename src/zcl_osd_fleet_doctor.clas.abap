@@ -6,7 +6,9 @@ CLASS zcl_osd_fleet_doctor DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * the voyage step's BAL log for the same run next to that. The job doctor
 * has no BAL link of its own; the run ID from the step input is the link.
 * Whether a waiting chain is stuck is the voyage job's state: FAILED means it
-* will not move; QUEUED or RUNNING means it is still on its way.
+* will not move; QUEUED or RUNNING means it is still on its way; COMPLETED
+* next to a waiting readiness job means the event went elsewhere (a
+* different parameter, or no raise).
 * ZCL_OSD_JOB_DOCTOR is open-steamgate's, so this class stays local.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
