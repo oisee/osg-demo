@@ -51,7 +51,10 @@
 //        its model path;
 //    15. B1: the classic ALV report ZOSD_FLEET_BALV, run as transaction
 //        ZGUI_OSD_FLEET_BALV, shows the BAL messages written in check 1b1 as
-//        grid rows.
+//        grid rows;
+//    16. R4: ZCL_OSD_FLEET_LIFT's lifted region is what the lift recipe
+//        renders from BEFORE (test/lift.mjs), its classrun finds BEFORE and
+//        AFTER equal on the seeded voyages, and its ABAP Unit test passes.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -615,6 +618,33 @@ await check("15 B1 fleet business log as ALV ZGUI_OSD_FLEET_BALV", async () => {
   const sorted = ["ERR1", "ERR2", "ERR3", "OK11", "OK12", "OK13", "OK21", "OK22", "OK23"];
   expect(order.join() === sorted.join(), `grid order: ${order.join()}`);
   return `9 rows of batch ${balBatch}, ERR item 3 with severity E`;
+});
+
+await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", async () => {
+  const lift = spawnSync(process.execPath, [join(repo, "test", "lift.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
+  expect(lift.status === 0, `lift check: ${(lift.stderr || lift.stdout).slice(0, 300)}`);
+  const token = await fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
+  const headers = {"x-csrf-token": token.headers.get("x-csrf-token"),
+    cookie: (token.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ")};
+  const run = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_LIFT`, {method: "POST", headers});
+  const output = await run.text();
+  expect(run.ok, `classrun: HTTP ${run.status}: ${output.slice(0, 200)}`);
+  const voyages = seed("zosd_fleet_voy").length;
+  expect(output.startsWith(`BEFORE and AFTER agree on ${voyages} voyages.`), `classrun: ${output.slice(0, 200)}`);
+  const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
+    headers: {...headers, "content-type": "application/xml"}, body: `<?xml version="1.0" encoding="UTF-8"?>
+<aunit:runConfiguration xmlns:aunit="http://www.sap.com/adt/aunit"><external><coverage active="false"/></external>
+<options><uriType value="semantic"/><testDeterminationStrategy sameProgram="true" assignedTests="false"/>
+<testRiskLevels harmless="true" dangerous="false" critical="false"/><testDurations short="true" medium="true" long="true"/></options>
+<adtcore:objectSets xmlns:adtcore="http://www.sap.com/adt/core"><objectSet kind="inclusive"><adtcore:objectReferences>
+<adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_osd_fleet_lift"/>
+</adtcore:objectReferences></objectSet></adtcore:objectSets></aunit:runConfiguration>`});
+  const report = await unit.text();
+  expect(unit.ok, `ABAP Unit: HTTP ${unit.status}: ${report.slice(0, 200)}`);
+  const methods = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1]);
+  expect(methods.length === 4, `ABAP Unit ran ${methods.length} methods: ${methods.join(", ")}`);
+  expect(!/<alert /.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
+  return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
 });
 
 stop();

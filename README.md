@@ -103,7 +103,7 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the business-log ALV `PROG zosd_fleet_balv`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL`, `ZCL_OSD_FLEET_DOCTOR` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job reports `PROG zosd_fleet_job`, `zosd_fleet_voyage` and `zosd_fleet_ready`, the business-log ALV `PROG zosd_fleet_balv`, the three fleet tables, the search help, the report, BAL, job and job-chain classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the lift example, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
 2. Leave the four local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
@@ -279,6 +279,34 @@ The class stays local because what it needs is not in this unit:
 `ZCL_OSD_TPL` comes with open-steamgate (on a system it is an ordinary Z class
 that would have to be imported first) and `ZCL_AJSON` is the ajson library,
 which a system may or may not have.
+
+### Lift a legacy routine
+
+[ZCL_OSD_FLEET_LIFT](src/zcl_osd_fleet_lift.clas.abap) holds a routine as it
+is often found: `BEFORE` loops over the voyages and reads each ship's name
+with its own `SELECT SINGLE`. `AFTER` is the lifted form from open-steamgate's
+verified lift, recipe R1
+([open-steamgate PR #271](https://github.com/oisee/open-steamgate/pull/271)):
+one `SELECT ... FOR ALL ENTRIES` into a hashed table, then a `READ TABLE` per
+voyage that sets the name only on a hit. The code between
+`" lift:R1 begin` and `" lift:R1 end` is generated, not written by hand.
+
+1. In an open-steamgate checkout with a build, run
+   `OSD_HOME=/path/to/open-steamgate node test/lift.mjs`. Expected: the model
+   it read out of `BEFORE` (`zosd_fleet_ship by ship_id; fields name ->
+   ship_name`), three open obligations the recipe leaves to you (no
+   concurrent writes during the loop, one client, `sy-subrc`/`sy-dbcnt` not
+   read afterwards), and `AFTER's 14 generated lines match the template`.
+   `--write` regenerates the region after a change to `BEFORE`.
+2. Open the class and press **F9**. Expected:
+   `BEFORE and AFTER agree on 20 voyages.` and the first three voyages with
+   their ship names, from `V00001 S001 Albatross`.
+3. Run the class in Testing. Its four HARMLESS tests run both methods on the
+   same rows: the seeded voyages, an unknown ship that keeps its old name,
+   the same ship twice with a stale name, and no voyages at all.
+4. Change `BEFORE` so that its `WHERE` no longer names the whole key, or
+   reads into a component typed by hand, and run step 1 again: the lift
+   refuses and says why.
 
 ## Run the checks
 
