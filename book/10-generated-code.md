@@ -1,12 +1,12 @@
 # 10. Generated code
 
-open-steamgate generates ABAP in layers, and every generated line keeps the
+open-steamgate generates ABAP in layers, and a generated line can keep the
 way back to what made it:
 
 | Layer | What a person writes | What comes out | In this demo |
 |---|---|---|---|
-| **L0** templates | a Mustache-style template and a JSON model | text; every line traced to its template line and model path | `ZCL_OSD_FLEET_TPL` (below) |
-| **L1** typed model | nothing by hand: a generator fills it | ABAP from recipes; lines traced to model nodes (`@id`), literals typed from the DDIC (`@type`) | the lift in chapter 11 renders one recipe |
+| **L0** templates | a Mustache-style template and a JSON model | text; every line traced to its template line and model path | `ZCL_OSD_FLEET_TPL` (below); chapter 11's lift renders its recipe through it |
+| **L1** typed model | nothing by hand: a generator fills it | ABAP from recipes; lines traced to model nodes (`@id`), literals typed from the DDIC (`@type`) | not yet; the lift in chapter 11 borrows its recipe idea by hand |
 | **L2** domain rules | a rule in the domain's words (YAML) | an L1 model, then an ABAP check class and its test class | not yet; see the end of this chapter |
 
 The rule between them: **the template renders, the model decides.**
@@ -52,7 +52,7 @@ identifiers) and point a violation at the template line that caused it.
 
 Where you meet it in open-steamgate (not in this demo's code):
 
-- the SEGW generator writes a whole `_MPC` class through L1 recipes, with its
+- the SEGW generator writes a whole `_MPC` class through L1 templates, with its
   trace file (`GenerateSet` in the SEGW editor);
 - `node tools/dsl-abap.mjs model <folder> --class <name>` reads a model out of
   existing ABAP (methods, parameters, types through the DDIC);
@@ -60,9 +60,11 @@ Where you meet it in open-steamgate (not in this demo's code):
   `node tools/dsl-regions.mjs check|write <path>`, and recipes built as units
   by `npm run dsl:build`.
 
-Chapter 11's lift uses the same pieces by hand: `tools/lift.mjs` builds the
-model out of `BEFORE`, a recipe template renders `AFTER`'s region, and
-`test/lift.mjs` checks the two stay in step.
+Chapter 11's lift is simpler than L1: `tools/lift.mjs` builds a plain model
+(no `@id`, no `@type`) out of `BEFORE`, `ZCL_OSD_TPL` renders the recipe's
+template into `AFTER`'s region, and `test/lift.mjs` checks the two stay in
+step; it keeps no trace file. open-steamgate's `dsl-regions` can manage such a
+region with its own `osd:gen` markers; this demo keeps its `lift:R1` markers.
 
 The specification is open-steamgate's
 [docs/dsl-l1.md](https://github.com/oisee/open-steamgate/blob/main/docs/dsl-l1.md).

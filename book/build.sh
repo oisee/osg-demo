@@ -4,12 +4,13 @@
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 out=${1:-$here/out}
-mkdir -p "$out"
+out=$(mkdir -p "$out" && cd "$out" && pwd)
 cd "$here"
 # Appendix B is docs/take-to-system.md with a book title; its links are
 # relative to docs/, so they are rebased to the book folder first.
 sed -e '1s/^# .*/# Appendix B. Take it to a system/' \
-    -e 's#](\([^)h#][^)]*\))#](../docs/\1)#g' ../docs/take-to-system.md > "$out/91-take-to-system.md"
+    -e 's#](\(\.\./\)\([^)]*\))#](../\2)#g' \
+    -e '/](\.\.\//!s#](\([^)#:][^):]*\))#](../docs/\1)#g' ../docs/take-to-system.md > "$out/91-take-to-system.md"
 chapters=(00-preface.md 01-hello.md 02-debug-tests-dumps.md 03-odata.md 04-fiori.md 05-cds.md \
   06-amdp.md 07-take-to-system.md 08-business-log.md 09-background-jobs.md 10-generated-code.md \
   11-lift.md 90-run-the-checks.md "$out/91-take-to-system.md" 92-limits-glossary.md)

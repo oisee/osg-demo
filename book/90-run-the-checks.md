@@ -8,7 +8,7 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 
 | Script | Checks | Backends | In CI |
 |---|---|---|---|
-| `test/slice.mjs` | 21: tables and seed, F8 preview, classruns, OData, the tile (UI, skippable), unit tests, a dump, the zip, AMDP, both ALV grids, the template report, the lift | SQLite, DuckDB | yes, both |
+| `test/slice.mjs` | 21: tables and seed, F8 preview, classruns, the BAL audit, the service tree, OData, the tile (UI, skippable), unit tests, a dump, the zip, AMDP, both ALV grids, the template report, the lift | SQLite, DuckDB | yes, both, with the UI check skipped |
 | `test/jobs.mjs` | 7: one job, both chains, the doctor | SQLite file | yes |
 | `test/lift.mjs` | the lifted region is in step with its recipe | any | through slice check 16 |
 

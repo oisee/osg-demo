@@ -37,12 +37,12 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 
 ## Code that writes code
 
-Chapters 10 and 11 use open-steamgate's generation layers. Every generated line keeps the way back to what made it.
+Chapters 10 and 11 use open-steamgate's generation layers, in which a generated line can keep the way back to what made it.
 
 | Layer | You write | You get | Here |
 |---|---|---|---|
-| **L0** templates | a template and a JSON model | text, each line traced to template line and model path | chapter 10 |
-| **L1** typed model | nothing: a generator fills it | ABAP from recipes, typed literals, a trace per line | chapter 11 (the lift), chapter 10 (overview) |
+| **L0** templates | a template and a JSON model | text, each line traced to template line and model path | chapter 10; chapter 11's lift renders its recipe this way |
+| **L1** typed model | nothing: a generator fills it | ABAP from recipes, typed literals, a trace per line | chapter 10 (overview; the demo has no L1 generator of its own) |
 | **L2** domain rules | a rule in the domain's words | a check class and its tests, traced to the rule's lines | chapter 10 (overview; no rule of its own yet) |
 
 ## Check it
@@ -50,13 +50,13 @@ Chapters 10 and 11 use open-steamgate's generation layers. Every generated line 
 In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then:
 
 ```
-OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 21 checks, SQLite (UI skipped)
+OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 21 checks, SQLite; 20 run, the UI one is skipped
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 ```
 
-CI runs the slice on SQLite and DuckDB and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check. [Appendix A](book/90-run-the-checks.md) says what each covers.
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
 ## Repository map
 

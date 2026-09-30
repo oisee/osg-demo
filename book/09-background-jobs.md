@@ -1,9 +1,10 @@
 # 9. Background jobs
 
 The audit from chapter 8 now runs in the background, first as one job, then
-as a chain of two, and a doctor explains a chain that does not move. Everything
-here uses the standard job function modules; nothing runs until a worker picks
-the job up, the way a background work process would.
+as a chain of two, and a doctor explains a chain that does not move. The job
+and the chain use only the standard job function modules (the doctor uses
+open-steamgate's own); nothing runs until a worker picks the job up, the way a
+background work process would.
 
 ## One job: the audit
 
