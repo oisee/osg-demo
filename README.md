@@ -187,8 +187,9 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
    voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
    `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
    `WAITING`: on open-steamgate a failed predecessor never releases it. It
-   stays in the local operations store until you start with a fresh
-   `STG_DB_PATH` (the facade has no `BP_JOB_DELETE` yet).
+   stays in the local operations store until you remove that store
+   (`OSD_OPERATIONS_DB`, or `osd-operations.sqlite` next to `STG_DB_PATH`) or
+   use a fresh directory; the facade has no `BP_JOB_DELETE` yet.
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
