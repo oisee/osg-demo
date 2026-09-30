@@ -103,8 +103,8 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
 
 What can leave this repository for a real system is listed, object by object, in [deploy/manifest.json](deploy/manifest.json); [Take it to a system](docs/take-to-system.md) builds the abapGit zip and says what travels and what does not.
 
-1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job report `PROG zosd_fleet_job`, the three fleet tables, the search help, the report, BAL and job classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
-2. Leave the two local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
+1. Build the zip as that page shows: stage a copy of this folder without `ZCL_OSD_FLEET_TRAN`, `ZCL_OSD_FLEET_TPL` and `TRAN ZOSD_FLEET`, then `npm run segw:zip` on the copy. Expected: it lists the hello class, the ALV report `PROG zosd_fleet_alv`, the job report `PROG zosd_fleet_job`, the three fleet tables, the search help, the report, BAL and job classes, the cube `DDLS zc_osd_fleetcube`, both AMDP classes, the SEGW project, service and model with their classes, and the app as `WAPA zosg_demo` with its `SICF` node; and it says the seed rows are not carried.
+2. Leave the three local objects in and run it again. Expected: `not-in-manifest` for `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and no new zip (the one from step 1 stays as it was; remove it first or use another `--out`). The transaction's class implements `ZIF_OSD_TRANSACTION`, which exists only in open-steamgate.
 3. Importing the zip into a sandbox is a human step on a system you are allowed to change. Expected: nothing to run here; the page's import steps list what to activate and check on the system.
 
 ## Next: fleet operations trace
@@ -166,6 +166,29 @@ and, for now, SQLite in a file: other backends refuse to schedule jobs.
 The job uses only the standard function modules, so both objects travel to a
 system. The job-chain steps from the
 [fleet operations trace](docs/fleet-operations-trace.md) come next.
+
+### The fleet report from a model
+
+[ZCL_OSD_FLEET_TPL](src/zcl_osd_fleet_tpl.clas.abap) generates the fleet
+report instead of writing it by hand: it reads the ships and their status
+texts into a JSON model and renders a Mustache-style template over it with
+open-steamgate's template engine `ZCL_OSD_TPL`
+([open-steamgate PR #266](https://github.com/oisee/open-steamgate/pull/266)).
+Every output line keeps a trace to where it came from.
+
+1. Open the class and press **F9**. Expected: `Fleet report: 6 airships`, one
+   line per ship such as `S001 Albatross    Aloft       steam 82%`, and
+   `End of fleet report`; then a trace, one row per output line, such as
+   `2 <- fleet:3 /airships/1/id`: output line 2 came from line 3 of the
+   template `fleet`, for the first airship of the model.
+2. Change the template in `TEMPLATE` (for example add `{{status}}` to line 3)
+   and press **F9** again: every ship line changes, and the trace still points
+   at template line 3.
+3. Run the class in Testing. Its two HARMLESS tests read the seed rows and
+   check a ship line and the trace of the third ship.
+
+The class stays local: `ZCL_OSD_TPL` and `ZCL_AJSON` are part of the
+open-steamgate runtime.
 
 ## Run the checks
 

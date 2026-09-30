@@ -33,7 +33,7 @@
 //        (ASSERTION_FAILED), and prints again once the value is restored;
 //     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
 //        S001 and S006 through ShipSet(..)/Voyages match the seed;
-//    10. ch7: segw:zip of this folder refuses exactly the two local objects,
+//    10. ch7: segw:zip of this folder refuses exactly the three local objects,
 //        and of a copy without them carries every object the deploy unit
 //        lists and no seed rows (docs/take-to-system.md);
 //    11. ch5: the cube service ZC_OSD_FLEETCUBE_CDS answers one row per
@@ -45,7 +45,10 @@
 //         reconciles the AMDP rows with independent Open SQL reads;
 //    13. ch2: the classic ALV report ZOSD_FLEET_ALV, run as transaction
 //        ZGUI_OSD_FLEET_ALV, shows a grid of the six ships with their status
-//        texts.
+//        texts;
+//    14. R1: ZCL_OSD_FLEET_TPL renders the fleet report from a model through
+//        ZCL_OSD_TPL, and each ship line is traced to its template line and
+//        its model path.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -437,11 +440,11 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
     const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
     const refusedKeys = [...new Set(keys)].sort().join(", ");
-    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
-      && !/zcl_osd_fleet_tran\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
     // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
@@ -552,6 +555,25 @@ await check("13 ch2 classic ALV ZGUI_OSD_FLEET_ALV", async () => {
   const missing = ships.filter((s) => !text.includes(` ${s.ship_id} | ${s.name} | ${s.status} | ${texts.get(s.status)} | ${s.steam_pct} | ${s.home_port} `));
   expect(missing.length === 0, `rows missing or wrong: ${missing.map((s) => s.ship_id).join(", ")}`);
   return `${ships.length} rows with status texts`;
+});
+
+await check("14 R1 fleet report from a model, with its trace", async () => {
+  const token = await fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
+  const headers = {"x-csrf-token": token.headers.get("x-csrf-token"),
+    cookie: (token.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ")};
+  const run = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_TPL`, {method: "POST", headers});
+  const output = await run.text();
+  expect(run.ok, `classrun: HTTP ${run.status}: ${output.slice(0, 200)}`);
+  const lines = output.split("\n");
+  expect(lines[0] === `Fleet report: ${ships.length} airships`, `header: ${lines[0]}`);
+  const texts = new Map(seed("zosd_fleet_stat").map((s) => [s.status, s.text]));
+  ships.forEach((s, i) => {
+    const want = `${s.ship_id} ${s.name.padEnd(12)} ${texts.get(s.status).padEnd(11)} steam ${s.steam_pct}%`;
+    expect(lines[i + 1] === want, `line ${i + 2}: "${lines[i + 1]}", expected "${want}"`);
+  });
+  const traced = ships.filter((s, i) => !lines.includes(`${i + 2} <- fleet:3 /airships/${i + 1}/id`));
+  expect(traced.length === 0, `no trace to the model for: ${traced.map((s) => s.ship_id).join(", ")}`);
+  return `${ships.length} ship lines, each traced to fleet:3 and its /airships/<n>`;
 });
 
 stop();
