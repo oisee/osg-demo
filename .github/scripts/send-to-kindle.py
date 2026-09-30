@@ -18,7 +18,7 @@ password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
 kindle = os.environ.get("KINDLE_EMAIL", "").strip()
 files = sys.argv[1:]
 if not (sender and password and kindle):
-    print("send-to-kindle: GMAIL_ADDRESS, GMAIL_APP_PASSWORD or KINDLE_EMAIL not set; nothing sent")
+    print("::warning::send-to-kindle: GMAIL_ADDRESS, GMAIL_APP_PASSWORD or KINDLE_EMAIL not set; nothing sent")
     sys.exit(0)
 if not files:
     sys.exit("send-to-kindle: no files given")

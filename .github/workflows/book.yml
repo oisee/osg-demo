@@ -19,6 +19,9 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: book-${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
 jobs:
   book:
     runs-on: ubuntu-latest
@@ -29,11 +32,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
-      - name: Install pandoc and weasyprint
+          persist-credentials: false
+      - name: Install pandoc and weasyprint (both from the runner's apt)
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q pandoc fonts-dejavu
-          pipx install weasyprint
+          sudo apt-get install -y -q pandoc weasyprint fonts-dejavu
       - name: Build the book
         run: book/build.sh all "$RUNNER_TEMP/book"
       - name: Keep the books as a workflow artifact
@@ -48,6 +51,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" "$RUNNER_TEMP"/book/*.epub "$RUNNER_TEMP"/book/*.pdf --clobber
+      # a re-run after a partial failure mails every EPUB again
       - name: Send to Kindle
         if: github.event_name == 'release' || inputs.kindle
         env:
