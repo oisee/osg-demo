@@ -60,7 +60,7 @@ jobs:
           OSD_HOME: ${{ github.workspace }}/osd
           WS: /tmp/osg-demo
           OUT: ${{ runner.temp }}/shots
-          SPIKE_DOUBLE_PACK: "1"  # TEMPORARY repro run
+          SPIKE_DOUBLE_PACK: ${{ inputs.double_pack && '1' || '' }}
         run: |
           export VSIX=$(ls "$RUNNER_TEMP"/vsix/*.vsix | head -1)
           xvfb-run -a --server-args="-screen 0 1280x800x24" node test/vscode-shots.mjs
