@@ -60,14 +60,15 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
 ## From the code to the HTTP answer
 
-6. In `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
+6. In a fresh VS Code window with the system started, open
+   `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
    `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
    stops), and wait until its dot is filled. Then click **Attach debugger and
-   call ShipSet** above the method. Expected: the request stops on the
-   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. With the
-   extension 0.4.1444 it stopped in our runs in a fresh VS Code window; after
-   a plain call (step 7) or in a longer session it did not, even with a filled
-   dot (reported). With 0.4.1414 the breakpoint stayed hollow.
+   call ShipSet** above the method. Expected, with 0.4.1444 in a fresh window:
+   the request stops on the breakpoint. Stop the session (Shift+F5) and remove
+   the breakpoint. After a plain call (step 7) or in a longer session it did
+   not stop in our runs, even with a filled dot (reported). With 0.4.1414 the
+   breakpoint stayed hollow.
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
