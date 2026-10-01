@@ -100,13 +100,10 @@ const closePanels = async () => {
 await step("start", async () => {
   // the exact title: a shorter query picks "osd: Choose which system Start runs"
   await palette("osd: Start (build + run this system)");
-  // the system is up when its port answers; the extension's default URL
-  let up = false;
-  for (let i = 0; i < 300 && !up; i++) {
-    up = await fetch("http://localhost:3030/sap/bc/adt/discovery").then((r) => r.ok, () => false);
-    if (!up) await win.waitForTimeout(1000);
-  }
-  if (!up) throw new Error("the system did not start");
+  // the system is up when the status bar shows its generation ("osd 726a0c3b");
+  // the extension picks the port of the instance it launches
+  await win.locator(".statusbar").getByText(/^osd [0-9a-f]{7,}/).first().waitFor({timeout: 300000})
+    .catch(() => { throw new Error("the system did not start"); });
   await win.waitForTimeout(3000);
 });
 await step("classrun", async () => {
