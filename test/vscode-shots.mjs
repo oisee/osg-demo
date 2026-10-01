@@ -191,7 +191,8 @@ await step("debugger", async () => {
   // the method's own variables, with ls_ship and its first ship
   await win.locator(".debug-view-content .monaco-list-row", {hasText: "Local:"}).first().click();
   await see("ls_ship", win.locator(".debug-view-content").getByText("ls_ship"));
-  // the first ship: the hover over ls_ship in the stopped line shows its fields
+  // the first ship: the debug hover over ls_ship in the stopped line carries
+  // the structure as JSON, "S001" in it
   const line = win.locator(".view-line", {hasText: "steam_check( ls_ship-steam_pct )"}).first();
   // the inner span is as wide as the text, the line itself as the editor
   const span = line.locator(":scope > span").first();

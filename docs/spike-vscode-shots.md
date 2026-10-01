@@ -37,7 +37,10 @@ The script's header says how to run it. It takes four pictures:
 - Readiness: the status bar shows `osd <generation> · SQLite` once the system
   serves.
 
-## Found in the extension (0.4.1414, reported, fixed in the next 0.4.x)
+## Found in the extension (0.4.1414, reported to its owner)
+
+The first two are confirmed and fixed in the next 0.4.x patch.
+
 
 - **Breakpoints:** the extension declares no ABAP language, so an `.abap` file
   opens as Plain Text and VS Code refuses a breakpoint there.
