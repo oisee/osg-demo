@@ -22,7 +22,7 @@ ABAP-системе, которая работает внутри VS Code: open-
 
 ## Об этом издании
 
-Книга написана для open-steamgate 0.4.0 (`main` на коммите 17ac360b, до тега):
+Книга написана для open-steamgate 0.4 (расширение 0.4.1413, выпущено 2026-10-01):
 `BP_JOB_SELECT` с полями `BTCSELECT` как в SAP, F9 и Ctrl+Shift+F10 так, как
 описано, и слои DSL вплоть до L2 slice 2. **Этому демо нужен open-steamgate
 0.4 или новее.** С расширением 0.3.1370 пак не собирается:
@@ -36,8 +36,7 @@ ABAP-системе, которая работает внутри VS Code: open-
    pre-release): найдите его в представлении Extensions или возьмите `.vsix`
    из последнего
    [релиза `vscode-v*`](https://github.com/oisee/open-steamgate/releases)
-   (0.4 или новее; пока релиз 0.4 не вышел, запускайте пак из checkout
-   `main` open-steamgate через `OSD_PACKS`, как показано ниже) и
+   (0.4.1413 или новее) и
    выполните **Extensions: Install from VSIX...**.
 2. Клонируйте [oisee/osg-demo](https://github.com/oisee/osg-demo) и откройте
    клон как папку VS Code.
