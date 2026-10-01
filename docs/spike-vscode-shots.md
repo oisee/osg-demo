@@ -44,3 +44,7 @@ The script's header says how to run it. It takes four pictures:
   `debug.allowBreakpointsEverywhere` works around it; chapter 2 says so.
 - **Test tree:** the Testing tree is built before the system serves, so it has
   no workspace tests until **Test: Refresh Tests**; chapter 1 says so.
+- **Variables:** the Variables view and the debug hover show the runtime's
+  JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
+  the hover's first line carries the structure as JSON, which is where the
+  script finds `S001`. Chapter 2 says so.
