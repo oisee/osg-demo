@@ -20,8 +20,8 @@ The selection screen stays the program's interface, in three shapes:
 
 - **command line**: each `PARAMETERS` and `SELECT-OPTIONS` becomes an option,
   `--status M`, `--seed`, `--file ships.csv`; the list (`WRITE`) goes to
-  stdout, messages to stderr, exit code 0, 1 (a `MESSAGE` of type `E` or
-  `A`, or a runtime failure) or 2 (unsupported operation);
+  stdout, messages to stderr, exit code 0, 1 (a `MESSAGE` of any type but
+  `I` and `S`, or a runtime failure) or 2 (unsupported operation);
 - **terminal form** (TUI): started without arguments in a terminal, it shows
   the selection screen as a form;
 - **SAP GUI**: `-sapgui` serves the same selection screen to a real SAP GUI
@@ -71,7 +71,7 @@ runs it the same way.
    `S006 Old Boiler`, `2 ships`.
 5. `./fleet -db fleet.sqlite --file data/ships.csv`. Expected:
    `Error: cannot read data/ships.csv, Permission denied: no dataset root
-   allows this` on stderr and exit code 1. `OPEN DATASET` runs in a sandbox:
+   allows this (...)` on stderr and exit code 1. `OPEN DATASET` runs in a sandbox:
    without a grant every file is refused.
 6. `./fleet -db fleet.sqlite -allow-read data -dataset-home data --file ships.csv`.
    Expected: `Loaded 2 ships from ships.csv`; `S004 Cumulus` is now `Docked`
@@ -83,7 +83,7 @@ The import is all or nothing. A line whose steam is not a number,
 `S008,Gauge,A,plenty,Tinmere`, gives `Error: ship S008, steam plenty is not a
 number; nothing loaded`, and none of the file's ships are kept. The report
 rolls back and ends with `MESSAGE ... TYPE 'E'`. On a system that ends the
-program with the message in the status bar; the native program writes the
+program with the message in the status bar, or cancels it in a background job; the native program writes the
 lines it had before it to stdout, the message to stderr, and exits with 1, so
 a script can tell.
 

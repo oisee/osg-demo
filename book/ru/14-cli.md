@@ -21,8 +21,8 @@ zosd_fleet_cli.prog.abap
 
 - **командная строка**: каждый `PARAMETERS` и `SELECT-OPTIONS` становится
   опцией, `--status M`, `--seed`, `--file ships.csv`; список (`WRITE`) идет в
-  stdout, сообщения - в stderr, код выхода 0, 1 (`MESSAGE` типа `E` или `A`
-  либо ошибка выполнения) или 2 (неподдерживаемая операция);
+  stdout, сообщения - в stderr, код выхода 0, 1 (`MESSAGE` любого типа, кроме
+  `I` и `S`, либо ошибка выполнения) или 2 (неподдерживаемая операция);
 - **форма в терминале** (TUI): запущенная без аргументов в терминале,
   программа показывает экран выбора как форму;
 - **SAP GUI**: `-sapgui` отдает тот же экран выбора настоящему SAP GUI по DIAG
@@ -70,7 +70,7 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
    `S006 Old Boiler`, `2 ships`.
 5. `./fleet -db fleet.sqlite --file data/ships.csv`. Ожидается:
    `Error: cannot read data/ships.csv, Permission denied: no dataset root
-   allows this` в stderr и код выхода 1. `OPEN DATASET` работает в песочнице:
+   allows this (...)` в stderr и код выхода 1. `OPEN DATASET` работает в песочнице:
    без разрешения отказывается любой файл.
 6. `./fleet -db fleet.sqlite -allow-read data -dataset-home data --file ships.csv`.
    Ожидается: `Loaded 2 ships from ships.csv`; `S004 Cumulus` теперь `Docked`,
@@ -82,7 +82,8 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 `S008,Gauge,A,plenty,Tinmere`, дает `Error: ship S008, steam plenty is not a
 number; nothing loaded`, и ни один корабль из файла не сохраняется. Отчет
 откатывает изменения и завершается через `MESSAGE ... TYPE 'E'`. В системе это
-завершает программу с сообщением в строке состояния; нативная программа пишет
+завершает программу с сообщением в строке состояния, а в фоновом задании
+отменяет его; нативная программа пишет
 строки, выведенные до него, в stdout, сообщение - в stderr и выходит с кодом
 1, так что скрипт это видит.
 
