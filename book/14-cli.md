@@ -134,12 +134,8 @@ layer in 4.6 (p. 104–106).
 The program is built with open-steamgate 0.5 or later.
 
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
-  run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. In 0.4 twelve of
-  eighteen measured statement forms compiled: an aggregate into a scalar other
-  than `COUNT(*)`, `UP TO ... ORDER BY`, `APPENDING TABLE`, a sorted target
-  table, a `SELECT` loop with `GROUP BY` and inline `@DATA( )` did not, and
-  one of them made the whole method unavailable. `main` compiles all eighteen;
-  this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
+  run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. This report keeps
+  to plain `SELECT ... INTO TABLE` into standard tables.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core

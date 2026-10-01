@@ -4,7 +4,7 @@
 
    ![F9 на ZOSD_DEMO_HELLO: osd console печатает приветствие](../img/vscode-classrun.png)
 
-2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** или нажмите ее в самом классе. Ожидается: один зеленый тест ABAP Unit.
+2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** или откройте сам класс и нажмите **Ctrl+Shift+F10** в нем. Ожидается: один зеленый тест ABAP Unit.
 
    ![Ctrl+Shift+F10 в классе: один тест ABAP Unit, зеленый](../img/vscode-testing.png)
 

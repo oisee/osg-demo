@@ -48,12 +48,10 @@ there, and the script uses neither:
 
 - **Breakpoints (0.4.1414):** the extension declared no ABAP language, so an
   `.abap` file opened as Plain Text and VS Code refused a breakpoint there;
-  `debug.allowBreakpointsEverywhere` worked around it. Chapter 2 keeps it as a
-  note for 0.4.1414.
+  `debug.allowBreakpointsEverywhere` worked around it.
 - **Test tree (0.4.1414):** the Testing tree was built before the system
-  served, so it had no workspace tests until **Test: Refresh Tests**. Chapter 1
-  keeps it as a note for 0.4.1414; the script checks that the tree fills
-  itself.
+  served, so it had no workspace tests until **Test: Refresh Tests**. The
+  script checks that the tree fills itself.
 
 Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
 

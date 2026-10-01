@@ -65,8 +65,8 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    stops), and wait until its dot is filled. Then click **Attach debugger and
    call ShipSet** above the method. Expected: the request stops on the
    breakpoint. Stop the session (Shift+F5) and remove the breakpoint. After a
-   plain call (step 7) or in a longer session it does not stop yet, even with
-   a filled dot (a known issue of the extension), so do this step first, in a
+   plain call (step 7) or in a longer session it may not stop, even with a
+   filled dot (a known issue of the extension), so do this step first, in a
    fresh window.
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
