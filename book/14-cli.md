@@ -107,8 +107,9 @@ ones `-help` shows.
 ## What it can and cannot do
 
 The report is built and checked against open-steamgate's `main`, past 0.4: a
-`MESSAGE` that ends the run needs #362, the selection texts as labels #363,
-a comma inside a template of a chained `WRITE:` #364.
+`MESSAGE` that ends the run needs #362, the selection texts as labels #363.
+Since #364 and #369, a comma inside a template of a chained `WRITE:` and
+`CATCH ... INTO` a global variable compile too.
 
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
   run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. In 0.4 twelve of
@@ -117,7 +118,6 @@ a comma inside a template of a chained `WRITE:` #364.
   table, a `SELECT` loop with `GROUP BY` and inline `@DATA( )` did not, and
   one of them made the whole method unavailable. `main` compiles all eighteen;
   this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
-- **Not yet**: `CATCH ... INTO` a global variable (catch into a local one).
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
@@ -136,7 +136,7 @@ The specification is open-steamgate's
 
 The whole program logic is the report's `START-OF-SELECTION`:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 30-63 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 28-61 -->
 ```abap
 START-OF-SELECTION.
 * a selection screen on a system upper-cases P_STATUS; the command line does not
@@ -176,7 +176,7 @@ START-OF-SELECTION.
 
 And the CSV import: plain `DATASET` statements, one LUW, rolled back on the first bad line:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 102-154 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 100-152 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.
