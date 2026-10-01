@@ -72,7 +72,7 @@ const results = [];
 const check = (name, args, want) => {
   const r = spawnSync(fleet, args, {cwd: run, encoding: "utf8"});
   const out = `${r.stdout}${r.stderr}`;
-  const problems = want(out, r.status);
+  const problems = want(out, r.status, r.stderr);
   results.push(!problems);
   console.log(`${problems ? "FAIL" : "ok  "}  ${name}${problems ? ` -- ${problems}\n${out}` : ""}`);
 };
@@ -93,13 +93,16 @@ check("--status M", ["-db", "fleet.sqlite", "--status", "M"], (out, rc) =>
     || (out.includes("S001") ? "S001 is not in maintenance" : ""));
 check("--status m is upper-cased", ["-db", "fleet.sqlite", "--status", "m"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "S004 Cumulus Maintenance 15 Cloudhaven", "2 ships"));
-// a refused import writes "Error: ..." and exits 0: osabap does not compile
-// MESSAGE ... TYPE 'E' yet (reported upstream)
-check("--file without -allow-read: refused by the sandbox", ["-db", "fleet.sqlite", "--file", "data/ships.csv"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "Error: cannot read data/ships.csv", "Permission denied", "6 ships"));
-check("a ship with a bad number: refused, nothing kept", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "Error: ship S008, steam plenty is not a number; nothing loaded", "6 ships")
-    || (/^S0(08|10) /m.test(out) ? "a ship of the refused file was kept" : ""));
+// a refused import ends the run with MESSAGE ... TYPE 'E': the message on
+// stderr, exit 1, no list
+const refused = (out, rc, err, message) => rc !== 1 ? `rc ${rc}` : has(err, message)
+  || (/ships$/m.test(out) ? "the list was written after the message" : "");
+check("--file without -allow-read: refused by the sandbox", ["-db", "fleet.sqlite", "--file", "data/ships.csv"], (out, rc, err) =>
+  refused(out, rc, err, "Error: cannot read data/ships.csv, Permission denied"));
+check("a ship with a bad number: refused", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc, err) =>
+  refused(out, rc, err, "Error: ship S008, steam plenty is not a number; nothing loaded"));
+check("... and nothing of that file kept", ["-db", "fleet.sqlite"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "6 ships") || (/^S0(08|10) /m.test(out) ? "a ship of the refused file was kept" : ""));
 check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "ships.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Loaded 2 ships from ships.csv", "S004 Cumulus Docked 95 Cloudhaven", "S007 Zephyr Aloft 77 Cloudhaven", "7 ships")
     || (/S008|S010/.test(out) ? "a ship of the refused file was kept" : ""));
