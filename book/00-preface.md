@@ -22,7 +22,7 @@ statuses.
 
 ## This edition
 
-Written against open-steamgate 0.4 (extension 0.4.1413, released 2026-10-01):
+Written against open-steamgate 0.4 (extension 0.4.1413, released 2026-10-01; the VS Code pictures are of 0.4.1444):
 `BP_JOB_SELECT` with SAP's `BTCSELECT` fields, F9 and Ctrl+Shift+F10 as
 described, and the DSL layers up to L2 slice 2. **This demo needs
 open-steamgate 0.4 or later.** On the extension 0.3.1370 the pack does not

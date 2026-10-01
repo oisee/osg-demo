@@ -4,7 +4,7 @@
 
    ![F9 on ZOSD_DEMO_HELLO: the osd console prints the greeting](img/vscode-classrun.png)
 
-2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there (from 0.4 the class file works too; on 0.3.1370 it has no test items: `No test found in this file`). Expected: one green ABAP Unit test. With the extension 0.4.1414, Testing can stay empty after **osd: Start**; run **Test: Refresh Tests** once.
+2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there (from 0.4 the class file works too; on 0.3.1370 it has no test items: `No test found in this file`). Expected: one green ABAP Unit test. With the extension 0.4.1414, Testing can stay empty after **osd: Start** until **Test: Refresh Tests** (fixed in 0.4.1444, where it fills itself).
 
    ![Ctrl+Shift+F10 in the class: one ABAP Unit test, green](img/vscode-testing.png)
 

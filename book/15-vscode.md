@@ -5,7 +5,7 @@ class, F8 previews a table, Ctrl+Shift+F10 runs its tests, the debugger stops
 in it. This chapter follows the fleet's OData service through VS Code: from the
 service to the method that answers it, from a request in a file to the same
 method, from the method to the HTTP answer, and from a class to the code that
-uses it. The pictures are of the extension 0.4.1414 with the system started
+uses it. The pictures are of the extension 0.4.1444 with the system started
 (`osd: Start`, chapter 1).
 
 ## From a service to its code
@@ -19,7 +19,7 @@ uses it. The pictures are of the extension 0.4.1414 with the system started
    entity-set method: `ShipSet get_entityset`, `VoyageSet get_entityset`,
    `StatusVHSet get_entityset` and the three `get_entity`. A click on the
    service opens its details: the DPC and MPC classes, a `$metadata` link and
-   the entity sets. With 0.4.1414 the details call every method "inherited
+   the entity sets. With 0.4.1444 the details call every method "inherited
    (generic)", even those `ZCL_ZOSD_FLEET_DPC_EXT` redefines, such as
    `GET_ENTITYSET` of `ShipSet`; the rows of the tree and the lenses below get
    it right (reported).
@@ -71,9 +71,10 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 7. **Attach debugger and call ShipSet**, beside it, sends the same request
    with the debugger attached, to stop on a breakpoint in the method (on a
    statement such as `lt_ship_id = ranges_for(`; a `DATA` line never stops).
-   With the extension 0.4.1414 it did not stop in our run: the breakpoint
-   stayed unbound and the call answered as in step 6. This is reported to the
-   extension's owner.
+   In our run on 0.4.1414 it did not stop: the breakpoint stayed unbound (a
+   hollow dot) and the call answered as in step 6. On 0.4.1444 the breakpoint
+   still shows hollow before the call. This is reported to the extension's
+   owner.
 
 ## Who uses this class
 
