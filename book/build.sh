@@ -39,7 +39,7 @@ for lang in $langs; do
   done
   if [ "$lang" = en ]; then stamp="Version $version, $today"; else stamp="Версия $version, $today"; fi
   title=$(sed -n 's/^title: "\(.*\)"$/\1/p' "metadata.$lang.yaml")
-  base="$out/osg-demo-book-$version.$lang"
+  base="$out/osg-demo-book-${version//\//-}.$lang"   # a tag with / stays one file name
   common=(--metadata-file="metadata.$lang.yaml" --lua-filter=pandoc-links.lua \
     --toc --toc-depth=2 --resource-path=".:$src" --highlight-style=tango)
   # the EPUB's title carries the version (a stamp in its date would leave
