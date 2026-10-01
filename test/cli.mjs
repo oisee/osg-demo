@@ -8,9 +8,14 @@
 // copied from src/ddic beside it, through the ABAP-to-Go transpiler into one
 // native binary. It needs Go 1.26 on PATH and the checkout's library clones at
 // their pins (npm run bootstrap). --keep DIR leaves the binary and its working
-// folder there (test/cli-shots.mjs uses them).
+// folder there (test/cli-shots.mjs uses them). With GOOS/GOARCH for another
+// platform it only builds, and says where the binary is.
+//
+// cli/fleet holds copies of the two fleet tables' .tabl.xml, because osabap
+// compiles only the tables beside a report; this script fails when they are
+// not the same as src/ddic's.
 import {spawnSync} from "node:child_process";
-import {copyFileSync, cpSync, mkdirSync, mkdtempSync, rmSync} from "node:fs";
+import {copyFileSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
@@ -22,15 +27,28 @@ if (!home) {
   process.exit(2);
 }
 const keepAt = process.argv.indexOf("--keep");
+if (keepAt > 0 && !process.argv[keepAt + 1]) {
+  console.error("cli: --keep needs a directory");
+  process.exit(2);
+}
 const work = keepAt > 0 ? resolve(process.argv[keepAt + 1]) : mkdtempSync(join(tmpdir(), "osg-demo-cli-"));
-const stage = join(work, "stage");
-rmSync(stage, {recursive: true, force: true});
-mkdirSync(stage, {recursive: true});
-for (const file of ["zosd_fleet_cli.prog.abap", "zosd_fleet_cli.prog.xml"]) copyFileSync(join(repo, "cli", "fleet", file), join(stage, file));
-for (const table of ["zosd_fleet_ship", "zosd_fleet_stat"]) copyFileSync(join(repo, "src", "ddic", `${table}.tabl.xml`), join(stage, `${table}.tabl.xml`));
+mkdirSync(work, {recursive: true});
+for (const table of ["zosd_fleet_ship", "zosd_fleet_stat"]) {
+  if (readFileSync(join(repo, "cli", "fleet", `${table}.tabl.xml`), "utf8") !== readFileSync(join(repo, "src", "ddic", `${table}.tabl.xml`), "utf8")) {
+    console.error(`cli: cli/fleet/${table}.tabl.xml is not the same as src/ddic/${table}.tabl.xml; copy it over`);
+    process.exit(1);
+  }
+}
+const report = join(repo, "cli", "fleet", "zosd_fleet_cli.prog.abap");
+const target = {os: process.env.GOOS || {win32: "windows"}[process.platform] || process.platform,
+  arch: process.env.GOARCH || {x64: "amd64"}[process.arch] || process.arch};
+const native = target.os === ({win32: "windows"}[process.platform] || process.platform)
+  && target.arch === ({x64: "amd64"}[process.arch] || process.arch);
+const exe = target.os === "windows" ? ".exe" : "";
 
-console.log(`cli: building ${join(stage, "zosd_fleet_cli.prog.abap")} with ${home}`);
-const build = spawnSync(process.execPath, ["tools/gogen/osabap.mjs", join(stage, "zosd_fleet_cli.prog.abap")],
+console.log(`cli: building ${report} for ${target.os}/${target.arch} with ${home}`);
+rmSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), {force: true});
+const build = spawnSync(process.execPath, ["tools/gogen/osabap.mjs", report],
   {cwd: home, encoding: "utf8", env: {...process.env, GOFLAGS: process.env.GOFLAGS ?? "-buildvcs=false"}});
 if (build.status !== 0) {
   console.error(`cli: the build failed\n${(build.stdout + build.stderr).slice(-1500)}`);
@@ -39,9 +57,15 @@ if (build.status !== 0) {
 const run = join(work, "run");
 rmSync(run, {recursive: true, force: true});
 mkdirSync(run, {recursive: true});
-const fleet = join(run, process.platform === "win32" ? "fleet.exe" : "fleet");
-copyFileSync(join(home, "tools", "gogen", ".out", process.platform === "win32" ? "osabap.exe" : "osabap"), fleet);
+const fleet = join(run, `fleet${exe}`);
+copyFileSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), fleet);
+if (!native) {
+  console.log(`cli: built for ${target.os}/${target.arch}, not run here: ${fleet}`);
+  process.exit(0);
+}
 cpSync(join(repo, "cli", "data"), join(run, "data"), {recursive: true});
+writeFileSync(join(run, "data", "bad.csv"), "S008,Gauge,A,plenty,Tinmere\n");
+writeFileSync(join(run, "data", "last.csv"), "S009,Kestrel,A,50,Tinmere");
 
 const results = [];
 const check = (name, args, want) => {
@@ -64,10 +88,20 @@ check("a second --seed leaves them", ["-db", "fleet.sqlite", "--seed"], (out, rc
 check("--status M", ["-db", "fleet.sqlite", "--status", "M"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "S004 Cumulus Maintenance 15 Cloudhaven", "S006 Old Boiler Maintenance 0 Tinmere", "2 ships")
     || (out.includes("S001") ? "S001 is not in maintenance" : ""));
+check("--status m is upper-cased", ["-db", "fleet.sqlite", "--status", "m"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "S004 Cumulus Maintenance 15 Cloudhaven", "2 ships"));
+// a refused import writes "Error: ..." and exits 0: osabap does not compile
+// MESSAGE ... TYPE 'E' yet (reported upstream)
 check("--file without -allow-read: refused by the sandbox", ["-db", "fleet.sqlite", "--file", "data/ships.csv"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "Cannot read data/ships.csv Permission denied", "6 ships"));
+  rc !== 0 ? `rc ${rc}` : has(out, "Error: cannot read data/ships.csv", "Permission denied", "6 ships"));
+check("a ship with a bad number: refused, nothing kept", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "Error: ship S008, steam plenty is not a number; nothing loaded", "6 ships")
+    || (/^S008 /m.test(out) ? "S008 was kept" : ""));
 check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "ships.csv"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "Loaded 2 ships from ships.csv", "S004 Cumulus Docked 95 Cloudhaven", "S007 Zephyr Aloft 77 Cloudhaven", "7 ships"));
+  rc !== 0 ? `rc ${rc}` : has(out, "Loaded 2 ships from ships.csv", "S004 Cumulus Docked 95 Cloudhaven", "S007 Zephyr Aloft 77 Cloudhaven", "7 ships")
+    || (out.includes("S008") ? "the refused S008 was kept" : ""));
+check("a last line without a line feed is read", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "last.csv"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "Loaded 1 ships from last.csv", "S009 Kestrel Aloft 50 Tinmere", "8 ships"));
 
 const failed = results.filter((ok) => !ok).length;
 console.log(`cli: ${results.length - failed} passed, ${failed} failed (binary: ${fleet})`);

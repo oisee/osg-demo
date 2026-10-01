@@ -9,7 +9,7 @@
 // terminal, 90x22), whose screen is captured with its colours, turned into
 // HTML here and photographed with open-steamgate's Playwright Chromium.
 import {spawnSync} from "node:child_process";
-import {mkdirSync, rmSync, writeFileSync} from "node:fs";
+import {existsSync, mkdirSync, rmSync} from "node:fs";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
@@ -22,6 +22,13 @@ if (!home || !kept) {
   process.exit(2);
 }
 const run = join(kept, "run");
+const fail = (why) => {
+  console.error(`cli-shots: ${why}`);
+  spawnSync("tmux", ["kill-session", "-t", "fleet-tui"]);
+  process.exit(1);
+};
+if (!existsSync(join(run, "fleet"))) fail(`no ${join(run, "fleet")}: run test/cli.mjs --keep ${kept} first`);
+if (spawnSync("tmux", ["-V"]).status !== 0) fail("the TUI shots need tmux");
 const out = join(repo, "book", "img");
 mkdirSync(out, {recursive: true});
 
@@ -88,6 +95,7 @@ const shoot = async (name, html) => {
 // CLI: commands and their output, as typed in a terminal
 const session = (commands) => commands.map((args) => {
   const r = spawnSync(join(run, "fleet"), args, {cwd: run, encoding: "utf8"});
+  if (!`${r.stdout}${r.stderr}`.trim()) fail(`./fleet ${args.join(" ")} printed nothing`);
   const shown = args.map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(" ");
   return `<span class="p">$</span> ./fleet ${escapeHtml(shown)}\n${escapeHtml(`${r.stdout}${r.stderr}`)}`;
 }).join("\n");
@@ -103,18 +111,27 @@ await shoot("cli-session", page("fleet: one SQLite file, its own tables", sessio
 
 // TUI: the same selection screen as a form in a real terminal
 const tmux = (...args) => spawnSync("tmux", args, {encoding: "utf8"});
-const capture = () => tmux("capture-pane", "-t", "fleet-tui", "-p", "-e").stdout.replace(/\n+$/, "");
+const must = (...args) => { const r = tmux(...args); if (r.status !== 0) fail(`tmux ${args[0]}: ${r.stderr.trim()}`); return r; };
+// waits until the screen shows the text, so a slow start never gives a half-drawn picture
+const screenWith = async (text) => {
+  for (let i = 0; i < 40; i++) {
+    const screen = must("capture-pane", "-t", "fleet-tui", "-p", "-e").stdout.replace(/\n+$/, "");
+    if (screen.replace(/\x1b\[[0-9;]*m/g, "").includes(text)) return screen;
+    await sleep(250);
+  }
+  fail(`the TUI never showed "${text}"`);
+};
 const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 tmux("kill-session", "-t", "fleet-tui");
-tmux("new-session", "-d", "-s", "fleet-tui", "-x", "90", "-y", "22", `cd '${run}' && ./fleet -db fleet.sqlite; sleep 60`);
+must("new-session", "-d", "-s", "fleet-tui", "-x", "90", "-y", "22", `cd '${run}' && ./fleet -db fleet.sqlite; sleep 60`);
 try {
-  await sleep(1500);
-  tmux("send-keys", "-t", "fleet-tui", "M");
-  await sleep(700);
-  await shoot("tui-form", page("./fleet -db fleet.sqlite", ansiToHtml(capture()), 90));
-  tmux("send-keys", "-t", "fleet-tui", "Enter");
-  await sleep(1500);
-  await shoot("tui-result", page("./fleet -db fleet.sqlite", ansiToHtml(capture()), 90));
+  await screenWith("P_STATUS");
+  must("send-keys", "-t", "fleet-tui", "M");
+  await sleep(500);
+  await shoot("tui-form", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith("P_STATUS")), 90));
+  must("send-keys", "-t", "fleet-tui", "Enter");
+  // step 6 of the session above docked S004, so one ship is left in maintenance
+  await shoot("tui-result", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith("1 ships")), 90));
 } finally {
   tmux("kill-session", "-t", "fleet-tui");
   await browser.close();

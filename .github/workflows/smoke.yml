@@ -61,6 +61,7 @@ jobs:
           STG_DB: duckdb
         run: node test/slice.mjs
       - uses: actions/setup-go@v5
+        if: success() || failure()
         with:
           go-version: "1.26"
           cache: false

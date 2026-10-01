@@ -34,8 +34,9 @@ zosd_fleet_cli.prog.abap
 
 Отчет этой главы, [ZOSD_FLEET_CLI](../../cli/fleet/zosd_fleet_cli.prog.abap),
 лежит в `cli/`, а не в паке: это отдельная программа. Его таблицы - таблицы
-флота `ZOSD_FLEET_SHIP` и `ZOSD_FLEET_STAT`, при сборке они копируются из
-`src/ddic`.
+флота `ZOSD_FLEET_SHIP` и `ZOSD_FLEET_STAT`. osabap компилирует только таблицы,
+лежащие рядом с отчетом, поэтому в `cli/fleet` лежат копии их определений из
+`src/ddic`; проверка падает, если копии разошлись.
 
 ## Сборка
 
@@ -46,11 +47,12 @@ zosd_fleet_cli.prog.abap
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 ```
 
-Скрипт кладет отчет рядом с определениями таблиц, запускает на нем
-`node tools/gogen/osabap.mjs` из open-steamgate, копирует результат в
-`/tmp/fleet-cli/run/fleet` и прогоняет шаги ниже как проверки. Для другой
-платформы задайте `GOOS`/`GOARCH` (например, `GOOS=windows GOARCH=arm64`). В
-VS Code F8 на отчете (`osd run`) собирает и запускает его так же.
+Скрипт запускает на отчете `node tools/gogen/osabap.mjs` из open-steamgate,
+копирует результат в `/tmp/fleet-cli/run/fleet` и прогоняет шаги ниже и еще
+несколько - всего десять проверок. С `GOOS`/`GOARCH` другой платформы
+(например, `GOOS=windows GOARCH=arm64`) он только собирает и оставляет там
+`run/fleet.exe`, чтобы скопировать его на ту машину. В VS Code F8 на отчете
+(`osd run`) собирает и запускает его так же.
 
 ## Запуск
 
@@ -67,13 +69,21 @@ VS Code F8 на отчете (`osd run`) собирает и запускает 
 4. `./fleet -db fleet.sqlite --status M`. Ожидается: `S004 Cumulus` и
    `S006 Old Boiler`, `2 ships`.
 5. `./fleet -db fleet.sqlite --file data/ships.csv`. Ожидается:
-   `Permission denied: no dataset root allows this`. `OPEN DATASET` работает в
-   песочнице: без разрешения отказывается любой файл.
+   `Error: cannot read data/ships.csv, Permission denied: no dataset root
+   allows this`, затем шесть кораблей. `OPEN DATASET` работает в песочнице:
+   без разрешения отказывается любой файл.
 6. `./fleet -db fleet.sqlite -allow-read data -dataset-home data --file ships.csv`.
    Ожидается: `Loaded 2 ships from ships.csv`; `S004 Cumulus` теперь `Docked`,
    и появился седьмой корабль, `S007 Zephyr`.
 
    ![Один сеанс: отказ без -db, начальные данные, фильтр, отказ и затем разрешение читать файл](../img/cli-session.png)
+
+Импорт - все или ничего. Строка, в которой пар не число,
+`S008,Gauge,A,plenty,Tinmere`, дает `Error: ship S008, steam plenty is not a
+number; nothing loaded`, и ни один корабль из файла не сохраняется. Отказ
+импорта все равно завершается с кодом 0: в системе отчет поднял бы
+`MESSAGE ... TYPE 'E'`, а osabap пока такое не компилирует, поэтому отчет
+пишет ошибку и выходит. До тех пор скрипт ищет `Error:` в выводе.
 
 ## Та же программа в виде формы
 
@@ -85,20 +95,28 @@ VS Code F8 на отчете (`osd run`) собирает и запускает 
 
 ![Список после Enter](../img/tui-result.png)
 
+В обслуживании теперь только `S006 Old Boiler`: шаг 6 поставил `S004 Cumulus`
+в док.
+
 Без терминала (канал, CI) программа спрашивает поля построчно, так что тот же
 бинарник работает в скриптах. Подписи полей - имена параметров: тексты экрана
 выбора отчета osabap пока не читает.
 
-## Что она умеет и чего нет (open-steamgate 0.4)
+## Что она умеет и чего нет
+
+Отчет собирается и проверяется на `main` open-steamgate, после 0.4.
 
 - **Open SQL только на собственных таблицах отчета**, в файле, который
   называет `-db`; каждый запуск - один LUW, `COMMIT WORK` и `ROLLBACK WORK`
-  работают. Из восемнадцати измеренных форм операторов компилируются
-  двенадцать. Пишите простой `SELECT ... INTO TABLE` в стандартные таблицы:
-  агрегат в скаляр, кроме `COUNT(*)`, `UP TO ... ORDER BY`, `APPENDING TABLE`,
-  сортированная целевая таблица, цикл `SELECT` с `GROUP BY` и встроенные
-  `@DATA( )` пока не компилируются, и любая из них делает недоступным весь
-  метод.
+  работают. В 0.4 из восемнадцати измеренных форм операторов компилировались
+  двенадцать: агрегат в скаляр, кроме `COUNT(*)`, `UP TO ... ORDER BY`,
+  `APPENDING TABLE`, сортированная целевая таблица, цикл `SELECT` с
+  `GROUP BY` и встроенные `@DATA( )` - нет, и любая из них делала недоступным
+  весь метод. `main` компилирует все восемнадцать; этот отчет держится
+  простого `SELECT ... INTO TABLE` в стандартные таблицы.
+- **Пока нет**: `MESSAGE ... TYPE 'E'` (отчет пишет `Error: ...`), строкового
+  шаблона внутри `WRITE` (отчет сначала кладет его в переменную),
+  `CATCH ... INTO` глобальной переменной и текстов экрана выбора в подписях.
 - **Файлы** через `OPEN`/`READ`/`TRANSFER DATASET` и `CL_GUI_FRONTEND_SERVICES`,
   внутри корней, которые разрешают `-allow-read` / `-allow-write`.
 - **Классы** рядом с отчетом или из папок `--lib`; классы open-abap-core,
@@ -106,8 +124,10 @@ VS Code F8 на отчете (`osd run`) собирает и запускает 
 - **Один экран выбора и один запуск** на процесс; справки F4, всплывающих окон
   и интерактивных списков (`AT LINE-SELECTION`) пока нет; HTTP, OData и ICF
   нет.
-- В шаблоне `CP` символ `#` - экранирующий: строка, начинающаяся с `#`, это
-  `CP '##*'`, а не `CP '#*'`, здесь так же, как в системе.
+- **Как в системе**: в шаблоне `CP` символ `#` - экранирующий, поэтому
+  строка, начинающаяся с `#`, это `CP '##*'`, а не `CP '#*'`. **Не как в
+  системе**: экран выбора переводит `--status m` в верхний регистр, а
+  командная строка нет, поэтому отчет делает это сам через `TRANSLATE`.
 
 Спецификация - в
 [docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/main/docs/osabap-native.md)
@@ -117,9 +137,11 @@ open-steamgate.
 
 Вся логика программы - это `START-OF-SELECTION` отчета:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 29-60 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 32-65 -->
 ```abap
 START-OF-SELECTION.
+* a selection screen on a system upper-cases P_STATUS; the command line does not
+  TRANSLATE p_status TO UPPER CASE.
   IF p_seed = abap_true.
     SELECT COUNT(*) FROM zosd_fleet_ship INTO gv_count.
     IF gv_count = 0.
@@ -153,32 +175,62 @@ START-OF-SELECTION.
   WRITE: / gv_count, 'ships'.
 ```
 
-И импорт CSV, обычные операторы `DATASET`:
+И импорт CSV: обычные операторы `DATASET`, один LUW, откат на первой плохой строке:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 97-121 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 105-159 -->
 ```abap
 FORM load.
+  DATA lv_subrc TYPE i.
   OPEN DATASET p_file FOR INPUT IN TEXT MODE ENCODING UTF-8 MESSAGE gv_msg.
   IF sy-subrc <> 0.
-    WRITE: / 'Cannot read', p_file, gv_msg.
+    gv_out = |Error: cannot read { p_file }, { gv_msg }|.
+    WRITE / gv_out.
     RETURN.
   ENDIF.
   DO.
     READ DATASET p_file INTO gv_line.
-    IF sy-subrc <> 0.
+    lv_subrc = sy-subrc.
+* 4 is the end of the file; a last line without a line feed still comes with it
+    IF lv_subrc > 4.
       EXIT.
     ENDIF.
-    IF gv_line IS INITIAL OR gv_line CP '##*'.
-      CONTINUE.
+    IF lv_subrc = 4 AND gv_line IS INITIAL.
+      EXIT.
     ENDIF.
-    CLEAR gs_ship.
-    gs_ship-mandt = sy-mandt.
-    SPLIT gv_line AT ',' INTO gs_ship-ship_id gs_ship-name gs_ship-status gv_steam gs_ship-home_port.
-    gs_ship-steam_pct = gv_steam.
-    MODIFY zosd_fleet_ship FROM gs_ship.
-    gv_loaded = gv_loaded + 1.
+    IF gv_line IS NOT INITIAL AND gv_line NP '##*'.
+      CLEAR gs_ship.
+      gs_ship-mandt = sy-mandt.
+      SPLIT gv_line AT ',' INTO gs_ship-ship_id gs_ship-name gs_ship-status gv_steam gs_ship-home_port.
+      TRY.
+          gs_ship-steam_pct = gv_steam.
+        CATCH cx_sy_conversion_no_number.
+          CLOSE DATASET p_file.
+          ROLLBACK WORK.
+          gv_out = |Error: ship { gs_ship-ship_id }, steam { gv_steam } is not a number; nothing loaded|.
+          WRITE / gv_out.
+          RETURN.
+      ENDTRY.
+      MODIFY zosd_fleet_ship FROM gs_ship.
+      IF sy-subrc <> 0.
+        CLOSE DATASET p_file.
+        ROLLBACK WORK.
+        gv_out = |Error: ship { gs_ship-ship_id } could not be written; nothing loaded|.
+        WRITE / gv_out.
+        RETURN.
+      ENDIF.
+      gv_loaded = gv_loaded + 1.
+    ENDIF.
+    IF lv_subrc <> 0.
+      EXIT.
+    ENDIF.
   ENDDO.
   CLOSE DATASET p_file.
+  IF lv_subrc > 4.
+    ROLLBACK WORK.
+    gv_out = |Error: cannot read { p_file } to its end; nothing loaded|.
+    WRITE / gv_out.
+    RETURN.
+  ENDIF.
   COMMIT WORK.
   WRITE: / 'Loaded', gv_loaded, 'ships from', p_file.
 ENDFORM.
