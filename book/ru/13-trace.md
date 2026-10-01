@@ -17,12 +17,18 @@ AND voy~dep_date > iv_date
 
 Ее запись в файле трассировки:
 
+<!-- code: src/l2/zcl_osd_fleet_l2_maint.clas.trace.json lines 224-230 -->
 ```json
-{"line": 32, "template_line": 102, "path": "/queries/1/where/2/pre",
- "node": "rule/maintenance-ship-no-voyage/forbid/where/2", "rule_line": 14}
+{
+ "line": 32,
+ "template_line": 125,
+ "path": "/queries/1/where/2/pre",
+ "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
+ "rule_line": 14
+},
 ```
 
-- `template_line` 102 - строка шаблона open-steamgate
+- `template_line` - строка шаблона open-steamgate
   `recipes/l2-check/template.tpl`, которая печатает условие `WHERE`;
 - `path` - место в модели L1, откуда взято значение: второе условие первого
   запроса;
