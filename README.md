@@ -33,6 +33,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 11 | [Lift a legacy routine](book/11-lift.md) | [Lift](book/ru/11-lift.md) | a SELECT in a loop rewritten from a model, proven equal | `ZCL_OSD_FLEET_LIFT` |
 | 12 | [Rules, code and proof](book/12-rules.md) | [Правила](book/ru/12-rules.md) | a fleet rule in YAML compiled to ABAP, proven by its examples | `ZCL_OSD_FLEET_L2_MAINT` |
 | 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json` |
+| 14 | [My ABAP escaped from the server](book/14-cli.md) | [Сбежал с сервера](book/ru/14-cli.md) | a report compiled into a native CLI and terminal form, its own SQLite file | `ZOSD_FLEET_CLI` (`cli/`) |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -58,6 +59,7 @@ OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
+OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
 ```
 
@@ -70,6 +72,7 @@ CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser c
 | `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to |
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
+| `cli/` | the fleet's command line program (chapter 14), not part of the pack |
 | `book/`, `book/ru/` | the book in English and Russian; `book/build.sh` renders EPUB, PDF and HTML of both |
 | `docs/` | the fleet contract, measurements and design notes |
 | `deploy/manifest.json` | the objects allowed to travel to a system |

@@ -15,7 +15,7 @@ done
 cd "$here"
 names=(00-preface.md 01-hello.md 02-debug-tests-dumps.md 03-odata.md 04-fiori.md 05-cds.md \
   06-amdp.md 07-take-to-system.md 08-business-log.md 09-background-jobs.md 10-generated-code.md \
-  11-lift.md 12-rules.md 13-trace.md 90-run-the-checks.md 91-take-to-system.md 92-limits-glossary.md)
+  11-lift.md 12-rules.md 13-trace.md 14-cli.md 90-run-the-checks.md 91-take-to-system.md 92-limits-glossary.md)
 for lang in $langs; do
   if [ "$lang" = en ]; then
     src=.
