@@ -16,12 +16,18 @@ AND voy~dep_date > iv_date
 
 Its entry in the trace file:
 
+<!-- code: src/l2/zcl_osd_fleet_l2_maint.clas.trace.json lines 224-230 -->
 ```json
-{"line": 32, "template_line": 102, "path": "/queries/1/where/2/pre",
- "node": "rule/maintenance-ship-no-voyage/forbid/where/2", "rule_line": 14}
+{
+ "line": 32,
+ "template_line": 125,
+ "path": "/queries/1/where/2/pre",
+ "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
+ "rule_line": 14
+},
 ```
 
-- `template_line` 102 is the line of open-steamgate's
+- `template_line` is the line of open-steamgate's
   `recipes/l2-check/template.tpl` that prints a `WHERE` condition;
 - `path` is where in the L1 model the value came from: the second condition
   of the first query;
