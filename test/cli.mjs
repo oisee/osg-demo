@@ -64,7 +64,8 @@ if (!native) {
   process.exit(0);
 }
 cpSync(join(repo, "cli", "data"), join(run, "data"), {recursive: true});
-writeFileSync(join(run, "data", "bad.csv"), "S008,Gauge,A,plenty,Tinmere\n");
+// a good ship before the bad one: the rollback must take it back too
+writeFileSync(join(run, "data", "bad.csv"), "S010,Plover,A,40,Tinmere\nS008,Gauge,A,plenty,Tinmere\n");
 writeFileSync(join(run, "data", "last.csv"), "S009,Kestrel,A,50,Tinmere");
 
 const results = [];
@@ -75,7 +76,9 @@ const check = (name, args, want) => {
   results.push(!problems);
   console.log(`${problems ? "FAIL" : "ok  "}  ${name}${problems ? ` -- ${problems}\n${out}` : ""}`);
 };
-const has = (out, ...lines) => lines.filter((l) => !out.includes(l)).map((l) => `missing "${l}"`).join("; ");
+// "N ships" must be a whole line, so "6 ships" never matches "16 ships"
+const has = (out, ...lines) => lines.filter((l) => (/^\d+ ships$/.test(l) ? !new RegExp(`^\\s*${l}\\s*$`, "m").test(out) : !out.includes(l)))
+  .map((l) => `missing "${l}"`).join("; ");
 
 check("-help is the selection screen", ["-help"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "--status", "--seed", "--file", "-db FILE", "-allow-read DIR"));
@@ -96,10 +99,10 @@ check("--file without -allow-read: refused by the sandbox", ["-db", "fleet.sqlit
   rc !== 0 ? `rc ${rc}` : has(out, "Error: cannot read data/ships.csv", "Permission denied", "6 ships"));
 check("a ship with a bad number: refused, nothing kept", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Error: ship S008, steam plenty is not a number; nothing loaded", "6 ships")
-    || (/^S008 /m.test(out) ? "S008 was kept" : ""));
+    || (/^S0(08|10) /m.test(out) ? "a ship of the refused file was kept" : ""));
 check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "ships.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Loaded 2 ships from ships.csv", "S004 Cumulus Docked 95 Cloudhaven", "S007 Zephyr Aloft 77 Cloudhaven", "7 ships")
-    || (out.includes("S008") ? "the refused S008 was kept" : ""));
+    || (/S008|S010/.test(out) ? "a ship of the refused file was kept" : ""));
 check("a last line without a line feed is read", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "last.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Loaded 1 ships from last.csv", "S009 Kestrel Aloft 50 Tinmere", "8 ships"));
 

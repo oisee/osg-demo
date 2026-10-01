@@ -111,8 +111,8 @@ number; nothing loaded`, и ни один корабль из файла не с
   работают. В 0.4 из восемнадцати измеренных форм операторов компилировались
   двенадцать: агрегат в скаляр, кроме `COUNT(*)`, `UP TO ... ORDER BY`,
   `APPENDING TABLE`, сортированная целевая таблица, цикл `SELECT` с
-  `GROUP BY` и встроенные `@DATA( )` - нет, и любая из них делала недоступным
-  весь метод. `main` компилирует все восемнадцать; этот отчет держится
+  `GROUP BY` и встроенные `@DATA( )` - нет, и одна такая форма делала
+  недоступным весь метод. `main` компилирует все восемнадцать; этот отчет держится
   простого `SELECT ... INTO TABLE` в стандартные таблицы.
 - **Пока нет**: `MESSAGE ... TYPE 'E'` (отчет пишет `Error: ...`), строкового
   шаблона внутри `WRITE` (отчет сначала кладет его в переменную),
@@ -177,7 +177,7 @@ START-OF-SELECTION.
 
 И импорт CSV: обычные операторы `DATASET`, один LUW, откат на первой плохой строке:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 105-159 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 105-161 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.
@@ -188,9 +188,11 @@ FORM load.
     RETURN.
   ENDIF.
   DO.
+    CLEAR gv_line.
     READ DATASET p_file INTO gv_line.
     lv_subrc = sy-subrc.
-* 4 is the end of the file; a last line without a line feed still comes with it
+* 4 is the end of the file; GV_LINE is cleared first, so a last line without a
+* line feed is taken whether it comes with 0 or with 4
     IF lv_subrc > 4.
       EXIT.
     ENDIF.
@@ -203,7 +205,7 @@ FORM load.
       SPLIT gv_line AT ',' INTO gs_ship-ship_id gs_ship-name gs_ship-status gv_steam gs_ship-home_port.
       TRY.
           gs_ship-steam_pct = gv_steam.
-        CATCH cx_sy_conversion_no_number.
+        CATCH cx_sy_conversion_error.
           CLOSE DATASET p_file.
           ROLLBACK WORK.
           gv_out = |Error: ship { gs_ship-ship_id }, steam { gv_steam } is not a number; nothing loaded|.

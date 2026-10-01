@@ -116,7 +116,8 @@ const must = (...args) => { const r = tmux(...args); if (r.status !== 0) fail(`t
 const screenWith = async (text) => {
   for (let i = 0; i < 40; i++) {
     const screen = must("capture-pane", "-t", "fleet-tui", "-p", "-e").stdout.replace(/\n+$/, "");
-    if (screen.replace(/\x1b\[[0-9;]*m/g, "").includes(text)) return screen;
+    const plain = screen.replace(/\x1b\[[0-9;]*m/g, "");
+    if (typeof text === "string" ? plain.includes(text) : text.test(plain)) return screen;
     await sleep(250);
   }
   fail(`the TUI never showed "${text}"`);
@@ -128,10 +129,10 @@ try {
   await screenWith("P_STATUS");
   must("send-keys", "-t", "fleet-tui", "M");
   await sleep(500);
-  await shoot("tui-form", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith("P_STATUS")), 90));
+  await shoot("tui-form", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith(/P_STATUS\s+M/)), 90));
   must("send-keys", "-t", "fleet-tui", "Enter");
   // step 6 of the session above docked S004, so one ship is left in maintenance
-  await shoot("tui-result", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith("1 ships")), 90));
+  await shoot("tui-result", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith(/S006 Old Boiler[^\n]*\n\s*1 ships$/m)), 90));
 } finally {
   tmux("kill-session", "-t", "fleet-tui");
   await browser.close();
