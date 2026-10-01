@@ -1,16 +1,22 @@
 // Screenshots of the real VS Code with the open-steamgate extension, for the
-// book (chapters 1 and 2).
+// book (chapters 1 and 2), taken on a workstation and committed to book/img/
+// like the other pictures:
 //
 //   CODE=<VS Code binary> VSIX=<extension .vsix> OSD_HOME=<open-steamgate checkout> \
-//   WS=<a copy of this repository> OUT=<dir> xvfb-run -a node test/vscode-shots.mjs
+//   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
+//
+// CODE is the code binary of the desktop VS Code tarball (no install needed),
+// VSIX a released extension (gh release download vscode-v0.4.1414 --repo
+// oisee/open-steamgate --pattern '*.vsix'), WS a copy (git archive main), so
+// no local path shows in a breadcrumb. Headless Chromium renders a blank
+// workbench, so this needs an X server: without one, `apt download xvfb` and
+// `dpkg -x` it into a scratch folder, and put its usr/bin on PATH.
 //
 // Drives VS Code (Electron) with Playwright's _electron from OSD_HOME's
 // node_modules: a fresh user-data and extensions dir under /tmp/osd-shot, the
-// extension installed from VSIX, the system started from OSD_HOME with this
-// repository as a pack, then commands through the command palette. Headless
-// Chromium renders a blank workbench, so this needs an X server (xvfb-run).
-// Every step is screenshotted on its own; a failed step is reported and the
-// run goes on. How it came about: docs/spike-vscode-shots.md.
+// extension installed from VSIX, the system started from OSD_HOME with WS as
+// its pack, then commands through the command palette. Every step is
+// screenshotted on its own; a failed step is reported and the run goes on.
 import {execFileSync} from "node:child_process";
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {createRequire} from "node:module";
@@ -39,6 +45,9 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "chat.disableAIFeatures": true,
   "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.tips.enabled": false,
+  // the extension declares no ABAP language, so an .abap file is Plain Text
+  // and takes a breakpoint only with this (chapter 2 says so too)
+  "debug.allowBreakpointsEverywhere": true,
 }, null, 2));
 // the CLI script beside the Electron binary installs extensions
 execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
@@ -102,8 +111,8 @@ await step("start", async () => {
   await palette("osd: Start (build + run this system)");
   // the system is up when the status bar shows its generation ("osd 726a0c3b");
   // the extension picks the port of the instance it launches
-  await win.locator(".statusbar").getByText(/^osd [0-9a-f]{7,}/).first().waitFor({timeout: 300000})
-    .catch(() => { throw new Error("the system did not start"); });
+  await win.locator(".statusbar").getByText(/osd [0-9a-f]{7,} ·/).first().waitFor({timeout: 300000})
+    .catch(async () => { await shot("vscode-start-failed"); throw new Error("the system did not start"); });
   await win.waitForTimeout(3000);
 });
 await step("classrun", async () => {
@@ -113,8 +122,15 @@ await step("classrun", async () => {
   await shot("vscode-classrun");
 });
 await step("tests", async () => {
-  // the demo's own tests: Ctrl+Shift+F10 in the test include
-  await open("zosd_demo_hello.clas.testclasses.abap");
+  // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
+  // test item points at
+  await open("zosd_demo_hello.clas.abap");
+  // the tree is built before the system serves; refreshed, it has the
+  // workspace's tests (chapter 1 says so too)
+  await palette("Testing: Focus on Test Explorer View");
+  await win.waitForTimeout(1500);
+  await palette("Test: Refresh Tests");
+  await win.waitForTimeout(8000);
   await win.keyboard.press("Control+Shift+F10");
   await win.waitForTimeout(12000);
   await palette("Testing: Focus on Test Explorer View");

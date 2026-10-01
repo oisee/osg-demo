@@ -1,7 +1,13 @@
 # 1. Hello
 
 1. Откройте [ZOSD_DEMO_HELLO](../../src/zosd_demo_hello.clas.abap), поставьте курсор в класс и нажмите **F9**. Ожидается: **osd console** показывает `Hello from ZOSD_DEMO_HELLO.` С расширением 0.3.1370 F9 может вместо этого ставить точку останова; начиная с open-steamgate 0.4 F9 и F8 запускают код, пока отладчик не остановлен на строке. В 0.3.1370, если F9 ставит точку останова, значит, подключен отладчик ABAP: расширение подключает сеанс отладки **`OSD: ABAP (<port>)`**, когда в работающей системе есть включенная точка останова в любом файле `.abap` (или система была запущена с `osd.debug`), и пока этот сеанс работает, F9 ставит или снимает точку останова, а F8 продолжает выполнение. Удалите точки останова ABAP (**Run > Remove All Breakpoints**), затем остановите сеанс (**Run > Stop Debugging**, Shift+F5) и снова нажмите F9; если F9 по-прежнему переключает точку останова, проверьте, что настройка `osd.keymap` имеет значение `abap`.
-2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** (начиная с 0.4 работает и файл класса; в 0.3.1370 в нем нет тестовых элементов: `No test found in this file`). Ожидается: один зеленый тест ABAP Unit.
+
+   ![F9 на ZOSD_DEMO_HELLO: osd console печатает приветствие](../img/vscode-classrun.png)
+
+2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** (начиная с 0.4 работает и файл класса; в 0.3.1370 в нем нет тестовых элементов: `No test found in this file`). Ожидается: один зеленый тест ABAP Unit. С расширением 0.4.1414 Testing может остаться пустым после **osd: Start**; один раз выполните **Test: Refresh Tests**.
+
+   ![Ctrl+Shift+F10 в классе: один тест ABAP Unit, зеленый](../img/vscode-testing.png)
+
 3. Измените текст, который возвращает `greeting( )`, нажмите **Ctrl+F2** для проверки, **Ctrl+F3** для сохранения и активации, затем снова **F9**. Ожидается: консоль показывает ваш новый текст. Верните исходный текст, активируйте и перезапустите тест, чтобы он остался зеленым.
 
 ## Под капотом
