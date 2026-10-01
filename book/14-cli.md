@@ -110,13 +110,13 @@ The selection screen and the dynpro are SAP's, but the way they work has a
 close relative in IBM's CICS, the transaction monitor of the 3270 terminal
 era. IBM's guide to CICS describes pseudo-conversational processing: a CICS
 program sends a screen and ends its task (BMS is the CICS interface that
-builds such screens from predefined maps); the user's input starts a new
-task, which picks up the state passed on to it. A chain of short tasks looks
-to the user like one conversation, and no transaction exists while the
-program waits for input. SAP's dialog steps work alike: a dialog step is the
-PAI of the screen the user answered followed by the PBO of the next screen,
-and while a screen waits for input no work process is held. This program is
-the simplest case, one screen and one answer per run.
+builds such screens from predefined maps); the user's input starts a new task,
+which picks up the state passed on to it. A chain of short tasks looks to the
+user like one conversation, and between screens the program is not running at
+all. SAP's dialog steps work alike: a dialog step is the PAI of the screen the
+user answered followed by the PBO of the next screen, and while a screen waits
+for input no work process is held. This program is the simplest case, one
+screen and one answer per run.
 
 The guide also describes giving existing 3270 programs a new presentation
 without changing them, for example a web front end that plays the terminal
