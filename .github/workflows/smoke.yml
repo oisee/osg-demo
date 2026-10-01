@@ -60,6 +60,16 @@ jobs:
           SLICE_SKIP_UI: "1"
           STG_DB: duckdb
         run: node test/slice.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache: false
+      - name: Fleet command line program (osabap, chapter 14)
+        if: success() || failure()
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+        run: node test/cli.mjs
       - name: Fleet jobs on SQLite file
         if: success() || failure()
         working-directory: demo
