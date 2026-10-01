@@ -17,3 +17,24 @@ This optional chapter runs SQLScript from ABAP classes. The default SQLite syste
    Old Boiler has no voyages, so it has no line. The engine translated the SQLScript into DuckDB SQL; the source in `src/` is unchanged.
 3. Open [ZCL_OSD_FLEET_SUMMARY](../src/zcl_osd_fleet_summary.clas.abap) and press **F9**. Its second read-only AMDP joins ships to voyages, groups by ship and keeps ships with no voyages through a `LEFT OUTER JOIN`. The classrun reads the same tables through Open SQL and checks every result. Expected on DuckDB: `Fleet summary (duckdb); checked against Open SQL`, six ship lines, from `S001 A: 6 voyages, 305 passengers, 2440 km` to `S006 M: 0 voyages, 0 passengers, 0 km`, then `MATCH: 6 ships`. On SQLite it prints the same database requirement as step 1.
 4. On HANA Express, run both classes as [Running on HANA](../docs/hana.md) describes (`STG_DB=hana`, or `osd.database.system` = `hana`). Expected: both headings say `(HDB)`; the fuel lines and six summary lines match DuckDB. Here the SQLScript runs on HANA as written. [The HANA checklist](../docs/hana.md#chapter-6-on-hana) lists what to check.
+
+## Under the hood
+
+SQLScript inside ABAP: fuel per 100 km for every ship that flew:
+
+<!-- code: src/zcl_osd_fleet_fuel.clas.abap method fuel_per_100km -->
+```abap
+METHOD fuel_per_100km BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT
+                      OPTIONS READ-ONLY USING zosd_fleet_voy.
+  et_fuel = SELECT ship_id,
+                   CAST(SUM(fuel_kg) AS INTEGER) AS fuel_kg,
+                   CAST(SUM(distance_km) AS INTEGER) AS distance_km,
+                   ROUND( CAST(SUM(fuel_kg) AS INTEGER) * 100
+                          / CAST(SUM(distance_km) AS INTEGER), 2 ) AS fuel_per_100km
+              FROM zosd_fleet_voy
+             WHERE mandt = CAST(:iv_client AS NVARCHAR(3))
+               AND distance_km > 0
+             GROUP BY ship_id
+             ORDER BY ship_id;
+ENDMETHOD.
+```

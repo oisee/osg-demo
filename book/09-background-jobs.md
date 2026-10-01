@@ -120,3 +120,73 @@ the step input (`P_RUN`) is that link.
 
 The class stays local: `ZCL_OSD_JOB_DOCTOR` is open-steamgate's. On a system,
 SM37 and the job log answer the same question.
+
+## Under the hood
+
+The voyage step, a report run as a job: it commits its log, then raises the event only on success:
+
+<!-- code: src/zosd_fleet_voyage.prog.abap -->
+```abap
+* Job step 1 of the fleet chain (ZCL_OSD_FLEET_CHAIN): counts the voyages and
+* records BAL log <run>-VOY. When the count matches, it commits the log and
+* then raises ZOSD_FLEET_VOYAGE_DONE with the run ID, which starts the
+* readiness job. A count other than P_VOYS commits the log with its error
+* and aborts the job without raising the event.
+REPORT zosd_fleet_voyage.
+
+PARAMETERS p_run TYPE c LENGTH 32 OBLIGATORY.
+PARAMETERS p_voys TYPE i DEFAULT 20.
+
+START-OF-SELECTION.
+  DATA lv_ok TYPE abap_bool.
+  TRY.
+      lv_ok = zcl_osd_fleet_chain=>voyage_step(
+        iv_run_id = CONV #( p_run ) iv_expected_voyages = p_voys ).
+      COMMIT WORK.
+    CATCH cx_bali_runtime INTO DATA(lx_bal).
+      MESSAGE lx_bal->get_text( ) TYPE 'A'.
+  ENDTRY.
+  IF lv_ok = abap_false.
+    MESSAGE |Voyage step failed for run { p_run }; see BAL { p_run }-VOY| TYPE 'A'.
+  ENDIF.
+* the last thing the step does: a raise is not undone by a later ROLLBACK
+  CALL FUNCTION 'BP_EVENT_RAISE'
+    EXPORTING eventid = zcl_osd_fleet_chain=>c_event eventparm = p_run
+    EXCEPTIONS OTHERS = 1.
+  IF sy-subrc <> 0.
+    MESSAGE |Voyage step { p_run } could not raise { zcl_osd_fleet_chain=>c_event }| TYPE 'A'.
+  ENDIF.
+  WRITE: / |Voyage step { p_run }: OK|.
+```
+
+The waiter is closed first, with the run ID as event parameter:
+
+<!-- code: src/zcl_osd_fleet_chain.clas.abap lines 72-97 -->
+```abap
+CALL FUNCTION 'JOB_OPEN'
+  EXPORTING jobname = rs_chain-ready_jobname
+  IMPORTING jobcount = rs_chain-ready_count
+  EXCEPTIONS OTHERS = 1.
+IF sy-subrc <> 0.
+  rs_chain-failed = `JOB_OPEN ready`.
+  RETURN.
+ENDIF.
+lv_jobname = rs_chain-ready_jobname.
+lv_jobcount = rs_chain-ready_count.
+SUBMIT zosd_fleet_ready
+  WITH p_run = iv_run_id
+  VIA JOB lv_jobname NUMBER lv_jobcount AND RETURN.
+IF sy-subrc <> 0.
+  rs_chain-failed = `SUBMIT ready`.
+  RETURN.
+ENDIF.
+CALL FUNCTION 'JOB_CLOSE'
+  EXPORTING jobname = rs_chain-ready_jobname jobcount = rs_chain-ready_count
+            event_id = c_event event_param = lv_event_param
+  IMPORTING job_was_released = lv_released
+  EXCEPTIONS OTHERS = 1.
+IF sy-subrc <> 0 OR lv_released <> 'X'.
+  rs_chain-failed = `JOB_CLOSE ready`.
+  RETURN.
+ENDIF.
+```

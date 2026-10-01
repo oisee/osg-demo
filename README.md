@@ -54,6 +54,8 @@ OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
+node test/book-snippets.mjs                                                      # the book's code excerpts match src/
+OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
 ```
 
 CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check. [Appendix A](book/90-run-the-checks.md) says what each covers.

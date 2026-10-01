@@ -27,9 +27,38 @@
    демонстрационное представление журнала флота, а не SLG1. Если журнала еще нет, выводится
    `No fleet business log to show` (в open-steamgate за этим следует причина
    от BAL, поскольку чтение вызывает исключение, если ни один журнал не подходит).
+
+   ![ZGUI_OSD_FLEET_BALV: журнал приложения одного пакета запусков в виде таблицы](../img/webgui-bal-alv.png)
+
 4. Запустите `ZCL_OSD_FLEET_BAL` в Testing. Его тест ABAP Unit, который пишет в БД, помечен как
    `DANGEROUS`: он проверяет фильтр ошибок и порядок сообщений. OSD дает
    тестам на SQLite/DuckDB одноразовую базу данных; для HANA/Postgres выберите
    отдельную схему/базу данных. Его очистка на A4H не тестировалась.
    `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
    node test/slice.mjs` запускает более широкую проверку пака (pack) на этой среде выполнения.
+
+## Под капотом
+
+Один аудит становится одним журналом с тремя сообщениями через стандартный API CL_BALI_*:
+
+<!-- code: src/zcl_osd_fleet_bal.clas.abap method record -->
+```abap
+METHOD record.
+  DATA(ls_result) = zcl_osd_fleet_audit=>inspect(
+    iv_expected_ships = iv_expected_ships
+    iv_expected_voyages = iv_expected_voyages ).
+  DATA(lo_header) = cl_bali_header_setter=>create(
+    object = 'ZOSD_FLEET' subobject = 'AUDIT'
+    external_id = iv_run_id ).
+  DATA(lo_log) = cl_bali_log=>create_with_header( header = lo_header ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = 'Fleet audit started' severity = 'S' ) ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = |Observed { ls_result-ship_count } ships and { ls_result-voyage_count } voyages|
+    severity = 'I' ) ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = ls_result-message severity = ls_result-severity ) ).
+  cl_bali_log_db=>get_instance( )->save_log( log = lo_log ).
+  rv_handle = lo_log->get_handle( ).
+ENDMETHOD.
+```

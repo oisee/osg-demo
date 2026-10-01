@@ -32,7 +32,8 @@ for lang in $langs; do
     if [ "$lang" = en ] && [ "$n" = 91-take-to-system.md ]; then files+=("$out/91-take-to-system.en.md")
     else files+=("$src/$n"); fi
   done
-  common=(--metadata-file="metadata.$lang.yaml" --lua-filter=pandoc-links.lua --toc --toc-depth=2)
+  common=(--metadata-file="metadata.$lang.yaml" --lua-filter=pandoc-links.lua --toc --toc-depth=2 \
+    --resource-path=".:$src" --highlight-style=tango)
   pandoc "${common[@]}" -o "$out/osg-demo-book.$lang.epub" "${files[@]}"
   pandoc "${common[@]}" --standalone --embed-resources --css=book.css -o "$out/osg-demo-book.$lang.html" "${files[@]}"
   weasyprint -q "$out/osg-demo-book.$lang.html" "$out/osg-demo-book.$lang.pdf"

@@ -26,9 +26,38 @@ It needs the persistent BAL subset of
    view of the fleet's log, not SLG1. With no log yet it says
    `No fleet business log to show` (on open-steamgate followed by the BAL
    reason, since its read raises when no log matches).
+
+   ![ZGUI_OSD_FLEET_BALV: the business log of one batch as a grid](img/webgui-bal-alv.png)
+
 4. Run `ZCL_OSD_FLEET_BAL` in Testing. Its DB-writing ABAP Unit test is
    `DANGEROUS`: it checks the error filter and ordered messages. OSD gives
    SQLite/DuckDB tests a disposable database; for HANA/Postgres, choose a
    dedicated schema/database. Its cleanup on A4H has not been tested.
    `SLICE_SKIP_UI=1 OSD_HOME=/path/to/open-steamgate
    node test/slice.mjs` runs the broader pack check against that runtime.
+
+## Under the hood
+
+One audit becomes one log with three messages, through the standard CL_BALI_* API:
+
+<!-- code: src/zcl_osd_fleet_bal.clas.abap method record -->
+```abap
+METHOD record.
+  DATA(ls_result) = zcl_osd_fleet_audit=>inspect(
+    iv_expected_ships = iv_expected_ships
+    iv_expected_voyages = iv_expected_voyages ).
+  DATA(lo_header) = cl_bali_header_setter=>create(
+    object = 'ZOSD_FLEET' subobject = 'AUDIT'
+    external_id = iv_run_id ).
+  DATA(lo_log) = cl_bali_log=>create_with_header( header = lo_header ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = 'Fleet audit started' severity = 'S' ) ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = |Observed { ls_result-ship_count } ships and { ls_result-voyage_count } voyages|
+    severity = 'I' ) ).
+  lo_log->add_item( item = cl_bali_free_text_setter=>create(
+    text = ls_result-message severity = ls_result-severity ) ).
+  cl_bali_log_db=>get_instance( )->save_log( log = lo_log ).
+  rv_handle = lo_log->get_handle( ).
+ENDMETHOD.
+```

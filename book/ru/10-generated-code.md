@@ -125,3 +125,44 @@ Slice 2 (open-steamgate #317) делает `check` одним операторо
 (`ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY`). Спецификация - в
 [docs/dsl-l2.md](https://github.com/oisee/open-steamgate/blob/main/docs/dsl-l2.md)
 open-steamgate.
+
+## Под капотом
+
+Шаблон, по которому формируется отчет по флоту:
+
+<!-- code: src/zcl_osd_fleet_tpl.clas.abap method template -->
+```abap
+METHOD template.
+  DATA(lv_nl) = cl_abap_char_utilities=>newline.
+  rv_template = `Fleet report: {{count}} airships` && lv_nl
+    && `{{#airships}}` && lv_nl
+    && `{{id}} {{name | pad 12}} {{status_text | pad 11}} steam {{steam_pct}}%` && lv_nl
+    && `{{/airships}}` && lv_nl
+    && `End of fleet report`.
+ENDMETHOD.
+```
+
+Модель, над которой он формируется, собранная из таблиц флота:
+
+<!-- code: src/zcl_osd_fleet_tpl.clas.abap method model -->
+```abap
+METHOD model.
+  DATA lv_index TYPE i.
+  SELECT ship~ship_id, ship~name, ship~status, stat~text, ship~steam_pct
+    FROM zosd_fleet_ship AS ship
+    LEFT OUTER JOIN zosd_fleet_stat AS stat ON stat~status = ship~status
+    ORDER BY ship~ship_id
+    INTO TABLE @DATA(lt_ships).
+  ri_model = zcl_ajson=>create_empty( ).
+  ri_model->set_integer( iv_path = `/count` iv_val = lines( lt_ships ) ).
+  ri_model->touch_array( `/airships` ).
+  LOOP AT lt_ships INTO DATA(ls_ship).
+    lv_index = sy-tabix.
+    ri_model->set_string( iv_path = |/airships/{ lv_index }/id| iv_val = ls_ship-ship_id ).
+    ri_model->set_string( iv_path = |/airships/{ lv_index }/name| iv_val = ls_ship-name ).
+    ri_model->set_string( iv_path = |/airships/{ lv_index }/status| iv_val = ls_ship-status ).
+    ri_model->set_string( iv_path = |/airships/{ lv_index }/status_text| iv_val = ls_ship-text ).
+    ri_model->set_integer( iv_path = |/airships/{ lv_index }/steam_pct| iv_val = ls_ship-steam_pct ).
+  ENDLOOP.
+ENDMETHOD.
+```
