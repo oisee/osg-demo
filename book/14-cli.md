@@ -131,8 +131,6 @@ layer in 4.6 (p. 104–106).
 
 ## What it can and cannot do
 
-The program is built with open-steamgate 0.5 or later.
-
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
   run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. This report keeps
   to plain `SELECT ... INTO TABLE` into standard tables and one

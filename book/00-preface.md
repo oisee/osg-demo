@@ -23,8 +23,9 @@ statuses.
 ## This edition
 
 The book is written for the open-steamgate VS Code extension **0.4.1444 or
-later**; its pictures are of 0.4.1444. Chapters 7 and 14 and the automated checks of
-appendix A also need an open-steamgate checkout at **0.5 or later**. Where the
+later**; its pictures are of 0.4.1444. Where a chapter works in an
+open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the
+checks of appendix A), use the tag **`vscode-v0.5.1467` or later**. Where the
 extension does not yet do what a step needs, the step says so.
 
 ## Before you start
