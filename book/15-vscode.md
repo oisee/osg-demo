@@ -60,27 +60,21 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
 ## From the code to the HTTP answer
 
-6. In `ZCL_ZOSD_FLEET_DPC_EXT`, above `METHOD shipset_get_entityset`, click
-   **▶ Call ShipSet**. Expected: beside the code, the request it sent,
+6. In `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
+   `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
+   stops), and wait until its dot is filled. Then click **Attach debugger and
+   call ShipSet** above the method. Expected: the request stops on the
+   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. With the
+   extension 0.4.1444 it stopped in our runs in a fresh VS Code window; after
+   a plain call (step 7) or in a longer session it did not, even with a filled
+   dot (reported). With 0.4.1414 the breakpoint stayed hollow.
+7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
+   the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
    `HTTP 200`, the time and `6 row(s)`, and the six ships as a table with
    `StatusText` filled by the method. **raw JSON** shows the answer as it came.
 
    ![Call ShipSet: the DPC method on the left, its HTTP answer as a table on the right](img/vscode-call-entityset.png)
-
-7. Set a breakpoint on the method's first statement, `lt_ship_id =
-   ranges_for(` (a `DATA` line never stops). Setting it attaches the
-   debugger, which takes a few seconds: wait until the dot is filled, not
-   hollow. Then click **Attach debugger and call ShipSet** beside the method.
-   Expected: the same request, sent with the debugger attached, stops on the
-   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. A click
-   while the dot is still hollow sends the request before the breakpoint is
-   bound, and the call answers as in step 6. With 0.4.1414 the breakpoint
-   stayed hollow; use 0.4.1444 or later. With 0.4.1444 it stopped reliably
-   only in a fresh VS Code window: once the method had run without the
-   debugger, as in step 6, and in some longer sessions, the call ran through
-   even with a filled dot, also after `osd: Stop` and `osd: Start`
-   (reported). Do this step first, before step 6, in a fresh window.
 
 ## Who uses this class
 

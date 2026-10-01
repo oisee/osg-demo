@@ -51,12 +51,11 @@ there, and the script uses neither:
   `debug.allowBreakpointsEverywhere` worked around it. Chapter 2 keeps it as a
   note for 0.4.1414.
 - **Attach debugger and call ShipSet (0.4.1414):** a breakpoint in the DPC
-  method stayed unbound and the call ran through. On 0.4.1444 it binds a few
-  seconds after it is set and the call stops on it; a click before that runs
-  through. Still open on 0.4.1444: after one plain "Call ShipSet", and in
-  some longer sessions, the debugged call runs through even with a filled
-  dot, also after osd: Stop and osd: Start. The script does not check this
-  call; chapter 15 says what was seen.
+  method stayed unbound and the call ran through. On 0.4.1444 it stopped in
+  our runs in a fresh window, with the dot filled before the click; after a
+  plain "Call ShipSet", or in a longer session, it did not, even with a filled
+  dot, also after osd: Stop and osd: Start (reported). The script does not
+  check this call; chapter 15 says what was seen.
 - **Test tree (0.4.1414):** the Testing tree was built before the system
   served, so it had no workspace tests until **Test: Refresh Tests**. Chapter 1
   keeps it as a note for 0.4.1414; the script checks that the tree fills
