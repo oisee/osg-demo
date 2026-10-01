@@ -1,1 +1,3 @@
+# the pair the runner's apt installed: weasyprint 61 needs pydyf before 0.11
 weasyprint==61.1
+pydyf==0.10.0
