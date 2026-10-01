@@ -6,7 +6,7 @@
 //   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
 //
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.4.1414 --repo
+// - VSIX: a released extension (gh release download vscode-v0.4.1444 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
@@ -49,9 +49,6 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "chat.disableAIFeatures": true,
   "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.tips.enabled": false,
-  // the extension declares no ABAP language, so an .abap file is Plain Text
-  // and takes a breakpoint only with this (chapter 2 says so too)
-  "debug.allowBreakpointsEverywhere": true,
 }, null, 2));
 // the CLI script beside the Electron binary installs extensions
 execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
@@ -171,12 +168,7 @@ await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
   // test item points at
   await open("zosd_demo_hello.clas.abap");
-  // the tree is built before the system serves; refreshed, it has the
-  // workspace's tests (chapter 1 says so too)
-  await palette("Testing: Focus on Test Explorer View");
-  await win.waitForTimeout(1500);
-  await palette("Test: Refresh Tests");
-  await win.waitForTimeout(8000);
+  await win.waitForTimeout(3000);
   await win.keyboard.press("Control+Shift+F10");
   await see("test result", win.locator(".panel").getByText(/ZOSD_DEMO_HELLO: 1 passed, 0 failed/), 120000);
   await palette("Testing: Focus on Test Explorer View");

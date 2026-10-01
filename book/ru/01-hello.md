@@ -4,7 +4,7 @@
 
    ![F9 на ZOSD_DEMO_HELLO: osd console печатает приветствие](../img/vscode-classrun.png)
 
-2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** (начиная с 0.4 работает и файл класса; в 0.3.1370 в нем нет тестовых элементов: `No test found in this file`). Ожидается: один зеленый тест ABAP Unit. С расширением 0.4.1414 Testing может остаться пустым после **osd: Start**; один раз выполните **Test: Refresh Tests**.
+2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** (начиная с 0.4 работает и файл класса; в 0.3.1370 в нем нет тестовых элементов: `No test found in this file`). Ожидается: один зеленый тест ABAP Unit. С расширением 0.4.1413 и 0.4.1414 Testing может остаться пустым после **osd: Start**, пока не выполнить **Test: Refresh Tests**; с 0.4.1444 он заполняется сам.
 
    ![Ctrl+Shift+F10 в классе: один тест ABAP Unit, зеленый](../img/vscode-testing.png)
 

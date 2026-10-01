@@ -43,7 +43,8 @@ The script's header says how to run it. It takes eight pictures:
 
 ## Found in the extension (0.4.1414, reported to its owner)
 
-The first two are confirmed and fixed in the next 0.4.x patch.
+The first two are fixed in 0.4.1444, which the pictures now use; the script
+no longer needs their workarounds.
 
 
 - **Breakpoints:** the extension declares no ABAP language, so an `.abap` file
