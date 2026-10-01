@@ -1,0 +1,16 @@
+# the whole set from a passing book build, so a new release of any of these
+# cannot change the book or break it on release day (pydyf 0.11 did)
+brotli==1.2.0
+cffi==2.1.1
+cssselect2==0.10.1
+fonttools==4.66.1
+html5lib==1.1
+Pillow==12.3.0
+pycparser==3.0
+pydyf==0.10.0
+Pyphen==0.18.1
+six==1.17.0
+tinycss2==1.5.1
+weasyprint==61.1
+webencodings==0.6.1
+zopfli==0.4.3
