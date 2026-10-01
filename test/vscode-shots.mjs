@@ -13,7 +13,7 @@
 import {execFileSync} from "node:child_process";
 import {mkdirSync, rmSync, writeFileSync} from "node:fs";
 import {createRequire} from "node:module";
-import {join, resolve} from "node:path";
+import {dirname, join, resolve} from "node:path";
 
 const need = (name) => {
   const value = process.env[name];
@@ -36,7 +36,8 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "security.workspace.trust.enabled": false,
   "osd.home": home,
 }, null, 2));
-execFileSync(code, ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
+// the CLI script beside the Electron binary installs extensions
+execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
   {stdio: "inherit"});
 
 const {_electron} = createRequire(join(home, "package.json"))("playwright");
