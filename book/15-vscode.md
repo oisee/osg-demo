@@ -60,21 +60,22 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
 ## From the code to the HTTP answer
 
-6. In `ZCL_ZOSD_FLEET_DPC_EXT`, above `METHOD shipset_get_entityset`, click
-   **▶ Call ShipSet**. Expected: beside the code, the request it sent,
+6. In a fresh VS Code window with the system started, open
+   `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
+   `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
+   stops), and wait until its dot is filled. Then click **Attach debugger and
+   call ShipSet** above the method. Expected, with 0.4.1444 in a fresh window:
+   the request stops on the breakpoint. Stop the session (Shift+F5) and remove
+   the breakpoint. After a plain call (step 7) or in a longer session it did
+   not stop in our runs, even with a filled dot (reported). With 0.4.1414 the
+   breakpoint stayed hollow.
+7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
+   the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
    `HTTP 200`, the time and `6 row(s)`, and the six ships as a table with
    `StatusText` filled by the method. **raw JSON** shows the answer as it came.
 
    ![Call ShipSet: the DPC method on the left, its HTTP answer as a table on the right](img/vscode-call-entityset.png)
-
-7. **Attach debugger and call ShipSet**, beside it, sends the same request
-   with the debugger attached, to stop on a breakpoint in the method (on a
-   statement such as `lt_ship_id = ranges_for(`; a `DATA` line never stops).
-   In our run on 0.4.1414 it did not stop: the breakpoint stayed unbound (a
-   hollow dot) and the call answered as in step 6. On 0.4.1444 the breakpoint
-   still shows hollow before the call. This is reported to the extension's
-   owner.
 
 ## Who uses this class
 

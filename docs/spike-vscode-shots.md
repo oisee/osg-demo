@@ -62,9 +62,11 @@ Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
   the hover's first line carries the structure as JSON, which is where the
   script finds `S001`. Also on 0.4.1444. Chapter 2 says so.
 - **Attach debugger and call ShipSet:** on 0.4.1414 a breakpoint in the DPC
-  method stayed unbound and the call ran through; on 0.4.1444 the breakpoint
-  still showed hollow before the call (the call itself was not rechecked).
-  Chapter 15 says so.
+  method stayed unbound and the call ran through. On 0.4.1444 it stopped in
+  our runs in a fresh window, with the dot filled before the click; after a
+  plain "Call ShipSet" (also after osd: Stop and osd: Start), or in a longer
+  session, it did not, even with a filled dot. The script does not check this
+  call; chapter 15 says what was seen.
 - **Service details:** the Details page lists redefined methods as
   "inherited (generic)"; also on 0.4.1444, as its picture shows. Chapter 15
   says so.
