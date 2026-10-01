@@ -109,7 +109,8 @@ number; nothing loaded`, и ни один корабль из файла не с
 
 Отчет собирается и проверяется на `main` open-steamgate, после 0.4:
 `MESSAGE`, завершающему запуск, нужен #362, текстам экрана выбора в подписях -
-#363, запятой в шаблоне цепочки `WRITE:` - #364.
+#363. С #364 и #369 компилируются и запятая в шаблоне цепочки `WRITE:`, и
+`CATCH ... INTO` глобальной переменной.
 
 - **Open SQL только на собственных таблицах отчета**, в файле, который
   называет `-db`; каждый запуск - один LUW, `COMMIT WORK` и `ROLLBACK WORK`
@@ -119,7 +120,6 @@ number; nothing loaded`, и ни один корабль из файла не с
   `GROUP BY` и встроенные `@DATA( )` - нет, и одна такая форма делала
   недоступным весь метод. `main` компилирует все восемнадцать; этот отчет держится
   простого `SELECT ... INTO TABLE` в стандартные таблицы.
-- **Пока нет**: `CATCH ... INTO` глобальной переменной (ловите в локальную).
 - **Файлы** через `OPEN`/`READ`/`TRANSFER DATASET` и `CL_GUI_FRONTEND_SERVICES`,
   внутри корней, которые разрешают `-allow-read` / `-allow-write`.
 - **Классы** рядом с отчетом или из папок `--lib`; классы open-abap-core,
@@ -140,7 +140,7 @@ open-steamgate.
 
 Вся логика программы - это `START-OF-SELECTION` отчета:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 30-63 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 28-61 -->
 ```abap
 START-OF-SELECTION.
 * a selection screen on a system upper-cases P_STATUS; the command line does not
@@ -180,7 +180,7 @@ START-OF-SELECTION.
 
 И импорт CSV: обычные операторы `DATASET`, один LUW, откат на первой плохой строке:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 102-154 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 100-152 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.
