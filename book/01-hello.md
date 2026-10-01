@@ -1,10 +1,10 @@
 # 1. Hello
 
-1. Open [ZOSD_DEMO_HELLO](../src/zosd_demo_hello.clas.abap), place the cursor in the class and press **F9**. Expected: the **osd console** shows `Hello from ZOSD_DEMO_HELLO.` With the extension 0.3.1370 F9 may toggle a breakpoint instead; from open-steamgate 0.4 on, F9 and F8 run as long as the debugger is not stopped at a line. On 0.3.1370, if F9 toggles a breakpoint, the ABAP debugger is attached: the extension attaches the debug session **`OSD: ABAP (<port>)`** when the running system has an enabled breakpoint in any `.abap` file (or was started with `osd.debug`), and while that session runs F9 toggles a breakpoint and F8 continues. Remove the ABAP breakpoints (**Run > Remove All Breakpoints**), then stop the session (**Run > Stop Debugging**, Shift+F5), and press F9 again; if it still toggles, check that the setting `osd.keymap` is `abap`.
+1. Open [ZOSD_DEMO_HELLO](../src/zosd_demo_hello.clas.abap), place the cursor in the class and press **F9**. Expected: the **osd console** shows `Hello from ZOSD_DEMO_HELLO.` If F9 toggles a breakpoint instead, the debugger is stopped at a line: remove the ABAP breakpoints (**Run > Remove All Breakpoints**), stop the session (**Run > Stop Debugging**, Shift+F5) and press F9 again; if it still toggles, check that the setting `osd.keymap` is `abap`.
 
    ![F9 on ZOSD_DEMO_HELLO: the osd console prints the greeting](img/vscode-classrun.png)
 
-2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there (from 0.4 the class file works too; on 0.3.1370 it has no test items: `No test found in this file`). Expected: one green ABAP Unit test. With the extension 0.4.1414, Testing can stay empty after **osd: Start** until **Test: Refresh Tests** (fixed in 0.4.1444, where it fills itself).
+2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there, or in the class itself. Expected: one green ABAP Unit test.
 
    ![Ctrl+Shift+F10 in the class: one ABAP Unit test, green](img/vscode-testing.png)
 

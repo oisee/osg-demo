@@ -4,7 +4,7 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout whose `segw:zip` accepts `--unit` and `--manifest` (main at `3048c59`, oisee/open-steamgate#168, or later: from there the app's manifest is rebased for its BSP location). The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the four objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout at the tag `vscode-v0.5.1467` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the four objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo
@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the four local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` (an engine before open-steamgate #346 also refuses `L2 MAINTENANCE_NO_VOYAGE` and the `.trace.json` files of `CLAS ZCL_OSD_FLEET_L2_MAINT`, whose class itself travels; later ones skip those files) and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
+and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the four local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
 
 ## What travels and what does not
 

@@ -3,9 +3,7 @@
 [ZCL_OSD_FLEET_LIFT](../../src/zcl_osd_fleet_lift.clas.abap) содержит процедуру в
 том виде, в каком ее часто находят: `BEFORE` обходит рейсы в цикле и читает
 имя каждого корабля отдельным `SELECT SINGLE`. `AFTER` - это поднятая форма из
-верифицированного lift open-steamgate, рецепт R1 в том виде, как он есть в
-main open-steamgate
-([PR #271](https://github.com/oisee/open-steamgate/pull/271) и позже):
+верифицированного lift open-steamgate, рецепт R1:
 один `SELECT ... FOR ALL ENTRIES` в хешированную таблицу, затем `READ TABLE`
 на каждый рейс, который устанавливает имя только при попадании. Код между
 `" lift:R1 begin` и `" lift:R1 end` сгенерирован, а не написан вручную.

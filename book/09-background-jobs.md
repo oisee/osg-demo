@@ -8,9 +8,8 @@ background work process would.
 
 ## One job: the audit
 
-The audit also runs as a background job step. This needs the job API merged
-up to [open-steamgate PR #246](https://github.com/oisee/open-steamgate/pull/246)
-and, for now, SQLite in a file: other backends refuse to schedule jobs.
+The audit also runs as a background job step. This needs SQLite in a file:
+other backends refuse to schedule jobs.
 
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
@@ -32,8 +31,7 @@ and, for now, SQLite in a file: other backends refuse to schedule jobs.
    answers `"kind": "empty"`; so does a `work` pointed at a wrong
    `STG_DB_PATH`, which quietly starts a fresh database. `"kind": "busy"`
    means a `RUNNING` run blocks the queue until it is interrupted. `worker`
-   prints one compact line per worked step. This needs open-steamgate
-   [#302](https://github.com/oisee/open-steamgate/pull/302) or later.
+   prints one compact line per worked step.
 4. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: a log for `Run <ID>`
    with `errors 0` and the three audit messages.
 

@@ -131,18 +131,10 @@ layer in 4.6 (p. 104–106).
 
 ## What it can and cannot do
 
-The report is built and checked against open-steamgate's `main`, past 0.4: a
-`MESSAGE` that ends the run needs #362, the selection texts as labels #363.
-Since #364 and #369, a comma inside a template of a chained `WRITE:` and
-`CATCH ... INTO` a global variable compile too.
-
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
-  run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. In 0.4 twelve of
-  eighteen measured statement forms compiled: an aggregate into a scalar other
-  than `COUNT(*)`, `UP TO ... ORDER BY`, `APPENDING TABLE`, a sorted target
-  table, a `SELECT` loop with `GROUP BY` and inline `@DATA( )` did not, and
-  one of them made the whole method unavailable. `main` compiles all eighteen;
-  this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
+  run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. This report keeps
+  to plain `SELECT ... INTO TABLE` into standard tables and one
+  `SELECT COUNT(*)` into a variable.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
