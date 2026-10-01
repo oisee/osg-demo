@@ -38,6 +38,10 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q pandoc weasyprint fonts-dejavu
       - name: Build the book
+        env:
+          # the release tag names the files and goes on the title page; a
+          # build without a tag falls back to git describe
+          BOOK_VERSION: ${{ env.TAG }}
         run: book/build.sh all "$RUNNER_TEMP/book"
       - name: Keep the books as a workflow artifact
         uses: actions/upload-artifact@v4
