@@ -104,6 +104,29 @@ instead, so the same binary works in scripts. The labels are the report's
 selection texts, read from `zosd_fleet_cli.prog.xml` at build time, the same
 ones `-help` shows.
 
+## Where the selection screen comes from
+
+The selection screen and the dynpro behind it are older than SAP. IBM's
+CICS, the transaction monitor of the 3270 terminal era, described a screen
+as a map (BMS), sent it, and ended the task; the user's answer started a new
+task, which picked up its state and went on. CICS calls this
+pseudo-conversational processing: a chain of short tasks that looks to the
+user like one conversation, so nothing waits in the system while the user
+thinks. A dynpro does the same with PBO and PAI: one dialog step sends the
+screen, the next one reads it, and the work process is free in between.
+This program is the simplest case, one screen and one answer per run.
+
+The same book also describes giving old 3270 screens new faces without
+changing the program behind them, for example a web front end that drives
+the terminal dialog. SAP took that path from SAP GUI to the WEBGUI of
+chapter 2; the terminal form and `-sapgui` here are two more faces of one
+selection screen.
+
+Source: IBM Redbooks, *Architect's Guide to IBM CICS on System z*:
+pseudo-conversational design in chapter 1 (p. 11); the presentation layer,
+3270, BMS and state in 3.3 (p. 58–60); modernizing the 3270 presentation
+layer in 4.6 (p. 104–106).
+
 ## What it can and cannot do
 
 The report is built and checked against open-steamgate's `main`, past 0.4: a
