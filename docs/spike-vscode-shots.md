@@ -55,13 +55,16 @@ there, and the script uses neither:
   keeps it as a note for 0.4.1414; the script checks that the tree fills
   itself.
 
-Still open, seen on 0.4.1414 and again on 0.4.1444:
+Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
 
 - **Variables:** the Variables view and the debug hover show the runtime's
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
   the hover's first line carries the structure as JSON, which is where the
-  script finds `S001`. Chapter 2 says so.
-- **Attach debugger and call ShipSet:** a breakpoint in the DPC method stays
-  unbound (on 0.4.1414 the call ran through); chapter 15 says so.
+  script finds `S001`. Also on 0.4.1444. Chapter 2 says so.
+- **Attach debugger and call ShipSet:** on 0.4.1414 a breakpoint in the DPC
+  method stayed unbound and the call ran through; on 0.4.1444 the breakpoint
+  still showed hollow before the call (the call itself was not rechecked).
+  Chapter 15 says so.
 - **Service details:** the Details page lists redefined methods as
-  "inherited (generic)"; chapter 15 says so.
+  "inherited (generic)"; also on 0.4.1444, as its picture shows. Chapter 15
+  says so.
