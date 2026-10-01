@@ -54,7 +54,9 @@ jobs:
           pip install -r .github/book-requirements.txt
           pandoc --version | head -1
           weasyprint --version
-          fc-list | grep -ci dejavu
+          # the faces book/book.css names
+          fc-list | grep -q "DejaVu Serif"
+          fc-list | grep -q "DejaVu Sans Mono"
       - name: Build the book
         env:
           # the release tag names the files and goes on the title page; a
