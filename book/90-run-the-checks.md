@@ -16,5 +16,5 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 | `test/book-snippets.mjs` | every code excerpt in the book equals its source in `src/` (`--write` refreshes them) | none needed | yes, first step |
 | `test/book-shots.mjs` | retakes the screenshots in `book/img/` from a running engine | SQLite | no, run by hand |
 | `test/cli-shots.mjs` | retakes chapter 14's terminal and TUI pictures from the program `test/cli.mjs --keep` left | SQLite file | no, run by hand |
-| `test/vscode-shots.mjs` | retakes chapters 1 and 2's VS Code pictures: VS Code and the released extension under Xvfb, each picture taken once its state is on screen | SQLite | no, run by hand |
+| `test/vscode-shots.mjs` | retakes the VS Code pictures of chapters 1, 2 and 15: VS Code and the released extension under Xvfb, each picture taken once its state is on screen | SQLite | no, run by hand |
 

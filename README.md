@@ -34,6 +34,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 12 | [Rules, code and proof](book/12-rules.md) | [Правила](book/ru/12-rules.md) | a fleet rule in YAML compiled to ABAP, proven by its examples | `ZCL_OSD_FLEET_L2_MAINT` |
 | 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json` |
 | 14 | [My ABAP escaped from the server](book/14-cli.md) | [Сбежал с сервера](book/ru/14-cli.md) | a report compiled into a native CLI and terminal form, its own SQLite file | `ZOSD_FLEET_CLI` (`cli/`) |
+| 15 | [The workbench](book/15-vscode.md) | [Рабочее место](book/ru/15-vscode.md) | from a service to its code and back in VS Code: the System view, `.http` requests, a call to its HTTP answer | `http/fleet.http` |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -64,7 +65,7 @@ OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       
 OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         # chapter 14's pictures, after cli.mjs --keep /tmp/fleet-cli
 ```
 
-`test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1 and 2; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
+`test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2 and 15; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
 CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
@@ -76,6 +77,7 @@ CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser c
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
 | `cli/` | the fleet's command line program (chapter 14), not part of the pack |
+| `http/` | the fleet service's requests as a `.http` file (chapter 15) |
 | `book/`, `book/ru/` | the book in English and Russian; `book/build.sh` renders EPUB, PDF and HTML of both |
 | `docs/` | the fleet contract, measurements and design notes |
 | `deploy/manifest.json` | the objects allowed to travel to a system |

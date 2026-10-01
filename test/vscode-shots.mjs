@@ -1,5 +1,5 @@
 // Screenshots of the real VS Code with the open-steamgate extension, for the
-// book (chapters 1 and 2), taken on a workstation and committed to book/img/
+// book (chapters 1, 2 and 15), taken on a workstation and committed to book/img/
 // like the other pictures:
 //
 //   CODE=<VS Code binary> VSIX=<extension .vsix> OSD_HOME=<open-steamgate checkout> \
@@ -92,7 +92,12 @@ const shot = async (name) => {
 
 let failed = 0;
 const step = async (name, body) => {
-  try { await body(); } catch (e) { failed++; console.error(`vscode-shots: ${name} failed: ${e.message.split("\n")[0]}`); }
+  try { await body(); } catch (e) {
+    failed++;
+    console.error(`vscode-shots: ${name} failed: ${e.message.split("\n")[0]}`);
+    // the window as it was, for whoever looks into it; never into OUT
+    await win.screenshot({path: join(tmp, `failed-${name.replace(/\W+/g, "-")}.png`)}).catch(() => {});
+  }
 };
 
 const goto = async (line) => {
@@ -208,6 +213,72 @@ await step("debugger", async () => {
   await shot("vscode-debugger");
   await win.keyboard.press("Shift+F5");
   await win.waitForTimeout(2000);
+  // the breakpoint off again, the way it was set, so no later picture has it
+  await open("zcl_osd_fleet_report.clas.abap");
+  await goto(lineOf(file, "steam_check( ls_ship-steam_pct )."));
+  await win.keyboard.press("Control+Shift+B");
+  await win.waitForTimeout(800);
+});
+
+// chapter 15: from a service to its code and from the code to the HTTP result
+const osdView = win.locator('[id="workbench.view.extension.osd"]');
+const expandRow = async (text) => {
+  const row = osdView.locator(".monaco-list-row", {hasText: text}).first();
+  await see(`${text} in the System view`, row, 30000);
+  await row.click();
+  await win.keyboard.press("ArrowRight");
+  await win.waitForTimeout(1500);
+};
+const lens = (text) => win.locator(".codelens-decoration a", {hasText: text}).first();
+await step("services", async () => {
+  await closePanels();
+  await palette("View: Hide Panel");
+  await palette("View: Show OSD");
+  await win.keyboard.press("Escape");
+  await win.waitForTimeout(1500);
+  // Layers names local folders: closed, so no path shows
+  const layers = osdView.locator(".monaco-list-row", {hasText: "Layers"}).first();
+  await layers.click();
+  await win.keyboard.press("ArrowLeft");
+  await expandRow("Services");
+  await expandRow("OData (");
+  await expandRow("ZOSD_FLEET_SRV");
+  await see("the entity sets", osdView.locator(".monaco-list-row", {hasText: "VoyageSet"}));
+  await win.mouse.move(900, 470);
+  await shot("vscode-services");
+  // an entity set's row opens the method that serves it
+  await osdView.locator(".monaco-list-row", {hasText: /ShipSet\s*get_entityset/}).first().click();
+  await see("the method of ShipSet", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
+  await closePanels();
+});
+await step("http lens", async () => {
+  await open("fleet.http");
+  await see("the lens over a GET", lens("ShipSet › GET_ENTITYSET → zcl_zosd_fleet_dpc_ext:"), 60000);
+  await see("the unresolved lens", lens("unresolved: query options are unsupported"));
+  await shot("vscode-http-lens");
+});
+await step("call", async () => {
+  await lens("ShipSet › GET_ENTITYSET").click();
+  await see("the DPC method", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
+  await see("the call lens", lens("Call ShipSet"), 60000);
+  await lens("Call ShipSet").click();
+  await seeInWebview(/6 row\(s\)/);
+  await seeInWebview("Old Boiler");
+  await win.mouse.move(900, 470);
+  await win.waitForTimeout(1000);
+  await shot("vscode-call-entityset");
+});
+await step("readers", async () => {
+  await closePanels();
+  await open("zcl_osd_fleet_report.clas.abap");
+  // the lens sits over the definition, at the top
+  await goto(1);
+  await see("the readers lens", lens(/read by \d+ · tests \d+ · services \d+/), 60000);
+  await lens(/read by/).click();
+  await see("the readers", win.locator(".quick-input-widget .monaco-list-row").first(), 15000);
+  await win.waitForTimeout(800);
+  await shot("vscode-readers");
+  await win.keyboard.press("Escape");
 });
 
 await app.close();
