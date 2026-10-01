@@ -23,21 +23,21 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Check out the demo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: demo
       - name: Book excerpts in step with src
         working-directory: demo
         run: node test/book-snippets.mjs
       - name: Check out current OSD main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: oisee/open-steamgate
           ref: main
           path: osd
       - name: Record the runtime under test
         run: git -C osd rev-parse HEAD
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -60,7 +60,7 @@ jobs:
           SLICE_SKIP_UI: "1"
           STG_DB: duckdb
         run: node test/slice.mjs
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         if: success() || failure()
         with:
           go-version: "1.26"
