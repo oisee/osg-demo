@@ -461,6 +461,20 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     expect(local.every((k) => refusedSet.has(k)) && [...refusedSet].every((k) => local.includes(k) || sidecars.includes(k)),
       `refused: ${refusedKeys || said.slice(0, 300)}`);
 
+    // the L2 sidecars alone: an engine with open-steamgate #346 skips them and
+    // must not carry them; an older one refuses only them
+    const sidecarStage = join(work, "with-sidecars", "osg-demo");
+    cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+    const withSidecars = zip(sidecarStage, join(work, "with-sidecars.zip"));
+    if (withSidecars.status === 0) {
+      const inZip = spawnSync("unzip", ["-Z1", join(work, "with-sidecars.zip")], {encoding: "utf8"}).stdout;
+      expect(!/\.l2\.yaml$|\.trace\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace\.json$/.test(l)).join(", ")}`);
+    } else {
+      const only = [...new Set([...(withSidecars.stdout + withSidecars.stderr).matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]))];
+      expect(only.length > 0 && only.every((k) => sidecars.includes(k)), `with only the L2 sidecars left in: ${only.join(", ") || (withSidecars.stdout + withSidecars.stderr).slice(0, 300)}`);
+    }
+
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
