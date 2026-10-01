@@ -3,8 +3,7 @@
 [ZCL_OSD_FLEET_LIFT](../src/zcl_osd_fleet_lift.clas.abap) holds a routine as it
 is often found: `BEFORE` loops over the voyages and reads each ship's name
 with its own `SELECT SINGLE`. `AFTER` is the lifted form from open-steamgate's
-verified lift, recipe R1 as on open-steamgate main
-([PR #271](https://github.com/oisee/open-steamgate/pull/271) and later):
+verified lift, recipe R1:
 one `SELECT ... FOR ALL ENTRIES` into a hashed table, then a `READ TABLE` per
 voyage that sets the name only on a hit. The code between
 `" lift:R1 begin` and `" lift:R1 end` is generated, not written by hand.

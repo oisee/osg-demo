@@ -16,8 +16,7 @@ The rule between them: **the template renders, the model decides.**
 [ZCL_OSD_FLEET_TPL](../src/zcl_osd_fleet_tpl.clas.abap) generates the fleet
 report instead of writing it by hand: it reads the ships and their status
 texts into a JSON model and renders a Mustache-style template over it with
-open-steamgate's template engine `ZCL_OSD_TPL`
-([open-steamgate PR #266](https://github.com/oisee/open-steamgate/pull/266)).
+open-steamgate's template engine `ZCL_OSD_TPL`.
 Every output line keeps a trace to where it came from.
 
 1. Open the class and press **F9**. Expected: `Fleet report: 6 airships`, one
@@ -102,7 +101,7 @@ a test class with one method per example. The trace goes all the way down: the
 `where:` line. A rule must carry examples, and open-steamgate's own test flips
 `>` to `>=` to prove the examples would catch it.
 
-Slice 2 (open-steamgate #317) makes `check` one Open SQL statement, an
+Slice 2 makes `check` one Open SQL statement, an
 `INNER JOIN` of the two tables on the rule's equalities, where slice 1 read the
 second table once per row of the first; the generated test class keeps the direct
 form as a private `check_reference` and compares the two on every example and

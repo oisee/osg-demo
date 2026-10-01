@@ -4,9 +4,6 @@ The fleet audit counts ships and voyages and says whether they match what is
 expected. This chapter keeps that result as SAP's application log (BAL) does:
 `CL_BALI_*` writes a log per run under object `ZOSD_FLEET`, subobject `AUDIT`,
 with its messages, severities and UTC times, and the log survives a restart.
-It needs the persistent BAL subset of
-[open-steamgate PR #207](https://github.com/oisee/open-steamgate/pull/207)
-(a current `main` has it; an installed VSIX must include it).
 
 1. On a seeded system, open [ZCL_OSD_FLEET_BAL](../src/zcl_osd_fleet_bal.clas.abap)
    and press **F9**. It writes two successful audits and one deliberate error,

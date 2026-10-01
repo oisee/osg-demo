@@ -22,13 +22,10 @@ statuses.
 
 ## This edition
 
-Written against open-steamgate 0.4 (extension 0.4.1413, released 2026-10-01; the VS Code pictures are of 0.4.1444):
-`BP_JOB_SELECT` with SAP's `BTCSELECT` fields, F9 and Ctrl+Shift+F10 as
-described, and the DSL layers up to L2 slice 2. **This demo needs
-open-steamgate 0.4 or later.** On the extension 0.3.1370 the pack does not
-build: `ZCL_OSD_FLEET_DOCTOR` uses the SAP field names `PRELIM` and `SCHEDUL`,
-which 0.3.1370 does not have. The notes on 0.3.1370 in chapters 1 and 2 are
-for readers who meet its key behaviour elsewhere.
+The book is written for the open-steamgate VS Code extension **0.4.1444 or
+later**; its pictures are of 0.4.1444. Chapter 14 and the automated checks of
+appendix A also need an open-steamgate checkout at **0.5 or later**. Where the
+extension does not yet do what a step needs, the step says so.
 
 ## Before you start
 
@@ -36,7 +33,7 @@ for readers who meet its key behaviour elsewhere.
    pre-release): search for it in the Extensions view, or take the `.vsix`
    from the latest
    [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
-   (0.4.1413 or later) and
+   (0.4.1444 or later) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
@@ -57,9 +54,9 @@ use port 8099.
 
 The extension uses ADT's keys: **F9** runs a class (its classrun), **F8** runs
 a report or previews a table or CDS view, **Ctrl+F2** checks, **Ctrl+F3**
-activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you are in (0.4; on 0.3.1370 only the test include),
-**Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys only while execution is paused
-at a line (0.4); chapter 1 says what to do on 0.3.1370.
+activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you
+are in, **Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys
+only while execution is paused at a line.
 
 ## How the book is organised
 

@@ -4,7 +4,7 @@
 
 ## Сборка офлайн-zip
 
-Используйте checkout open-steamgate, в котором `segw:zip` принимает `--unit` и `--manifest` (main на `3048c59`, oisee/open-steamgate#168, или позже: начиная с него манифест приложения перебазируется под его расположение в BSP). Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без четырех объектов, работающих только локально (ниже), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
+Используйте checkout open-steamgate 0.5 или новее. Его `segw:zip` принимает `--unit` и `--manifest` и перебазирует манифест приложения под его расположение в BSP. Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без четырех объектов, работающих только локально (ниже), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
 
 ```sh
 DEMO=/path/to/osg-demo
@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если четыре локальных объекта оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` и `TRAN ZOSD_FLEET` (движок до open-steamgate #346 также отказывает `L2 MAINTENANCE_NO_VOYAGE` и файлам `.trace.json` класса `CLAS ZCL_OSD_FLEET_L2_MAINT`, сам класс которого переносится; более новые эти файлы пропускают) и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
+и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если четыре локальных объекта оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` и `TRAN ZOSD_FLEET` и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
 
 ## Что переносится в систему, а что нет
 

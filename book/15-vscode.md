@@ -5,8 +5,7 @@ class, F8 previews a table, Ctrl+Shift+F10 runs its tests, the debugger stops
 in it. This chapter follows the fleet's OData service through VS Code: from the
 service to the method that answers it, from a request in a file to the same
 method, from the method to the HTTP answer, and from a class to the code that
-uses it. The pictures are of the extension 0.4.1444 with the system started
-(`osd: Start`, chapter 1).
+uses it. Start the system first (`osd: Start`, chapter 1).
 
 ## From a service to its code
 
@@ -19,10 +18,10 @@ uses it. The pictures are of the extension 0.4.1444 with the system started
    entity-set method: `ShipSet get_entityset`, `VoyageSet get_entityset`,
    `StatusVHSet get_entityset` and the three `get_entity`. A click on the
    service opens its details: the DPC and MPC classes, a `$metadata` link and
-   the entity sets. With 0.4.1444 the details call every method "inherited
+   the entity sets. The details still call every method "inherited
    (generic)", even those `ZCL_ZOSD_FLEET_DPC_EXT` redefines, such as
    `GET_ENTITYSET` of `ShipSet`; the rows of the tree and the lenses below get
-   it right (reported).
+   it right (a known issue of the extension).
 
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
 
@@ -64,11 +63,11 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
    `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
    stops), and wait until its dot is filled. Then click **Attach debugger and
-   call ShipSet** above the method. Expected, with 0.4.1444 in a fresh window:
-   the request stops on the breakpoint. Stop the session (Shift+F5) and remove
-   the breakpoint. After a plain call (step 7) or in a longer session it did
-   not stop in our runs, even with a filled dot (reported). With 0.4.1414 the
-   breakpoint stayed hollow.
+   call ShipSet** above the method. Expected: the request stops on the
+   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. After a
+   plain call (step 7) or in a longer session it does not stop yet, even with
+   a filled dot (a known issue of the extension), so do this step first, in a
+   fresh window.
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
