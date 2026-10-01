@@ -18,10 +18,10 @@ uses it. Start the system first (`osd: Start`, chapter 1).
    entity-set method: `ShipSet get_entityset`, `VoyageSet get_entityset`,
    `StatusVHSet get_entityset` and the three `get_entity`. A click on the
    service opens its details: the DPC and MPC classes, a `$metadata` link and
-   the entity sets, each method marked "redefined" with its line where
-   `ZCL_ZOSD_FLEET_DPC_EXT` redefines it. (In the picture, taken with
-   0.4.1444, the details still call every method "inherited (generic)"; the
-   rows of the tree and the lenses below were right there too.)
+   the entity sets. With 0.4.1444, as in the picture, the details call every
+   method "inherited (generic)", even those `ZCL_ZOSD_FLEET_DPC_EXT`
+   redefines; the rows of the tree and the lenses below get it right, and
+   newer releases mark the redefined methods with their line number.
 
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
 

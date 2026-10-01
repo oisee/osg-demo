@@ -65,6 +65,6 @@ Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
   plain "Call ShipSet" (also after osd: Stop and osd: Start), or in a longer
   session, it did not, even with a filled dot. The script does not check this
   call; chapter 15 says what was seen.
-- **Service details:** the Details page lists redefined methods as
-  "inherited (generic)"; also on 0.4.1444, as its picture shows. Chapter 15
-  says so.
+- **Service details:** on 0.4.1414 and 0.4.1444 the Details page lists
+  redefined methods as "inherited (generic)", as chapter 15's picture shows
+  and its text says; on 0.5.1467 it marks them "redefined" with their line.
