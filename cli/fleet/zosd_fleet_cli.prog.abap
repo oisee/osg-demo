@@ -8,10 +8,8 @@ REPORT zosd_fleet_cli.
 *                                          add or change ships from a CSV
 * Its tables are the fleet's own ZOSD_FLEET_SHIP and ZOSD_FLEET_STAT; their
 * .tabl.xml beside it are copies of src/ddic that test/cli.mjs keeps in step.
-* Written for what the
-* Go backend compiles: SELECT ... INTO TABLE into standard tables, no inline
-* declarations, no colon or semicolon inside literals of chained WRITEs, no
-* string templates in a WRITE (the messages go through GV_OUT).
+* Written for what the Go backend compiles: no inline declarations, no colon,
+* semicolon or comma inside literals or templates of chained WRITEs.
 
 PARAMETERS p_status TYPE c LENGTH 1.
 PARAMETERS p_seed AS CHECKBOX.
@@ -99,16 +97,14 @@ ENDFORM.
 
 * One ship per line, SHIP_ID,NAME,STATUS,STEAM_PCT,HOME_PORT; a line that
 * starts with # is a comment. An existing ship is changed. A file that cannot
-* be read, or a ship that cannot be written, is reported and nothing of the
-* file is kept. (On a system this would be MESSAGE ... TYPE 'E'; osabap does
-* not compile that yet, so the program writes the error and returns.)
+* be read, or a ship that cannot be written, is rolled back and ends the run
+* with MESSAGE ... TYPE 'E': nothing of the file is kept.
 FORM load.
   DATA lv_subrc TYPE i.
   OPEN DATASET p_file FOR INPUT IN TEXT MODE ENCODING UTF-8 MESSAGE gv_msg.
   IF sy-subrc <> 0.
     gv_out = |Error: cannot read { p_file }, { gv_msg }|.
-    WRITE / gv_out.
-    RETURN.
+    MESSAGE gv_out TYPE 'E'.
   ENDIF.
   DO.
     CLEAR gv_line.
@@ -132,16 +128,14 @@ FORM load.
           CLOSE DATASET p_file.
           ROLLBACK WORK.
           gv_out = |Error: ship { gs_ship-ship_id }, steam { gv_steam } is not a number; nothing loaded|.
-          WRITE / gv_out.
-          RETURN.
+          MESSAGE gv_out TYPE 'E'.
       ENDTRY.
       MODIFY zosd_fleet_ship FROM gs_ship.
       IF sy-subrc <> 0.
         CLOSE DATASET p_file.
         ROLLBACK WORK.
         gv_out = |Error: ship { gs_ship-ship_id } could not be written; nothing loaded|.
-        WRITE / gv_out.
-        RETURN.
+        MESSAGE gv_out TYPE 'E'.
       ENDIF.
       gv_loaded = gv_loaded + 1.
     ENDIF.
@@ -153,8 +147,7 @@ FORM load.
   IF lv_subrc > 4.
     ROLLBACK WORK.
     gv_out = |Error: cannot read { p_file } to its end; nothing loaded|.
-    WRITE / gv_out.
-    RETURN.
+    MESSAGE gv_out TYPE 'E'.
   ENDIF.
   COMMIT WORK.
   WRITE: / 'Loaded', gv_loaded, 'ships from', p_file.

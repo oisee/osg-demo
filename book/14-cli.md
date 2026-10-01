@@ -20,8 +20,8 @@ The selection screen stays the program's interface, in three shapes:
 
 - **command line**: each `PARAMETERS` and `SELECT-OPTIONS` becomes an option,
   `--status M`, `--seed`, `--file ships.csv`; the list (`WRITE`) goes to
-  stdout, messages to stderr, exit code 0, 1 (runtime failure) or 2
-  (unsupported operation);
+  stdout, messages to stderr, exit code 0, 1 (a `MESSAGE` of any type but
+  `I` and `S`, or a runtime failure) or 2 (unsupported operation);
 - **terminal form** (TUI): started without arguments in a terminal, it shows
   the selection screen as a form;
 - **SAP GUI**: `-sapgui` serves the same selection screen to a real SAP GUI
@@ -49,7 +49,7 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 
 It runs open-steamgate's `node tools/gogen/osabap.mjs` on the report, copies
 the result to `/tmp/fleet-cli/run/fleet` and runs the steps below, and a few
-more, as ten checks. With `GOOS`/`GOARCH` for another platform (for example
+more, as eleven checks. With `GOOS`/`GOARCH` for another platform (for example
 `GOOS=windows GOARCH=arm64`) it only builds and leaves `run/fleet.exe` there,
 to copy to that machine. In VS Code, F8 on a report (`osd run`) builds and
 runs it the same way.
@@ -71,8 +71,8 @@ runs it the same way.
    `S006 Old Boiler`, `2 ships`.
 5. `./fleet -db fleet.sqlite --file data/ships.csv`. Expected:
    `Error: cannot read data/ships.csv, Permission denied: no dataset root
-   allows this`, then the six ships. `OPEN DATASET` runs in a sandbox: without
-   a grant every file is refused.
+   allows this (...)` on stderr and exit code 1. `OPEN DATASET` runs in a sandbox:
+   without a grant every file is refused.
 6. `./fleet -db fleet.sqlite -allow-read data -dataset-home data --file ships.csv`.
    Expected: `Loaded 2 ships from ships.csv`; `S004 Cumulus` is now `Docked`
    and a seventh ship, `S007 Zephyr`, is there.
@@ -81,10 +81,11 @@ runs it the same way.
 
 The import is all or nothing. A line whose steam is not a number,
 `S008,Gauge,A,plenty,Tinmere`, gives `Error: ship S008, steam plenty is not a
-number; nothing loaded`, and none of the file's ships are kept. A refused
-import still exits with 0: on a system the report would raise
-`MESSAGE ... TYPE 'E'`, which osabap does not compile yet, so it writes the
-error and returns. Until then, a script looks for `Error:` in the output.
+number; nothing loaded`, and none of the file's ships are kept. The report
+rolls back and ends with `MESSAGE ... TYPE 'E'`. On a system that ends the
+program with the message in the status bar, or cancels it in a background job; the native program writes the
+lines it had before it to stdout, the message to stderr, and exits with 1, so
+a script can tell.
 
 ## The same program, as a form
 
@@ -113,10 +114,10 @@ The report is built and checked against open-steamgate's `main`, past 0.4.
   table, a `SELECT` loop with `GROUP BY` and inline `@DATA( )` did not, and
   one of them made the whole method unavailable. `main` compiles all eighteen;
   this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
-- **Not yet**: `MESSAGE ... TYPE 'E'` (the report writes `Error: ...`
-  instead), a string template inside `WRITE` (the report puts it in a
-  variable first), `CATCH ... INTO` a global variable, and the report's
-  selection texts as labels.
+- **Not yet**: a comma inside a string template of a chained `WRITE:` (write
+  it as `WRITE / ...` without the colon), `CATCH ... INTO` a global variable,
+  and the report's selection texts as labels. A `MESSAGE` that ends
+  the run needs open-steamgate `main` from #362 on.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
@@ -135,7 +136,7 @@ The specification is open-steamgate's
 
 The whole program logic is the report's `START-OF-SELECTION`:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 32-65 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 30-63 -->
 ```abap
 START-OF-SELECTION.
 * a selection screen on a system upper-cases P_STATUS; the command line does not
@@ -175,15 +176,14 @@ START-OF-SELECTION.
 
 And the CSV import: plain `DATASET` statements, one LUW, rolled back on the first bad line:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 105-161 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 102-154 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.
   OPEN DATASET p_file FOR INPUT IN TEXT MODE ENCODING UTF-8 MESSAGE gv_msg.
   IF sy-subrc <> 0.
     gv_out = |Error: cannot read { p_file }, { gv_msg }|.
-    WRITE / gv_out.
-    RETURN.
+    MESSAGE gv_out TYPE 'E'.
   ENDIF.
   DO.
     CLEAR gv_line.
@@ -207,16 +207,14 @@ FORM load.
           CLOSE DATASET p_file.
           ROLLBACK WORK.
           gv_out = |Error: ship { gs_ship-ship_id }, steam { gv_steam } is not a number; nothing loaded|.
-          WRITE / gv_out.
-          RETURN.
+          MESSAGE gv_out TYPE 'E'.
       ENDTRY.
       MODIFY zosd_fleet_ship FROM gs_ship.
       IF sy-subrc <> 0.
         CLOSE DATASET p_file.
         ROLLBACK WORK.
         gv_out = |Error: ship { gs_ship-ship_id } could not be written; nothing loaded|.
-        WRITE / gv_out.
-        RETURN.
+        MESSAGE gv_out TYPE 'E'.
       ENDIF.
       gv_loaded = gv_loaded + 1.
     ENDIF.
@@ -228,8 +226,7 @@ FORM load.
   IF lv_subrc > 4.
     ROLLBACK WORK.
     gv_out = |Error: cannot read { p_file } to its end; nothing loaded|.
-    WRITE / gv_out.
-    RETURN.
+    MESSAGE gv_out TYPE 'E'.
   ENDIF.
   COMMIT WORK.
   WRITE: / 'Loaded', gv_loaded, 'ships from', p_file.
