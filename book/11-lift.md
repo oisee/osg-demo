@@ -32,3 +32,43 @@ voyage that sets the name only on a hit. The code between
 The tests compare results, not cost: the `IS NOT INITIAL` guard before the
 `FOR ALL ENTRIES` only matters for the database calls (an empty table would
 otherwise read every ship), and only the drift check in step 1 protects it.
+
+## Under the hood
+
+Before: one database read per voyage.
+
+<!-- code: src/zcl_osd_fleet_lift.clas.abap method before -->
+```abap
+METHOD before.
+  FIELD-SYMBOLS <ls_voyage> LIKE LINE OF ct_voyages.
+  LOOP AT ct_voyages ASSIGNING <ls_voyage>.
+    SELECT SINGLE name FROM zosd_fleet_ship INTO <ls_voyage>-ship_name
+      WHERE ship_id = <ls_voyage>-ship_id.
+  ENDLOOP.
+ENDMETHOD.
+```
+
+After: one read for all voyages; the region between the markers is generated.
+
+<!-- code: src/zcl_osd_fleet_lift.clas.abap method after -->
+```abap
+METHOD after.
+  FIELD-SYMBOLS <ls_voyage> LIKE LINE OF ct_voyages.
+  " lift:R1 begin
+  DATA lt_lookup TYPE HASHED TABLE OF zosd_fleet_ship WITH UNIQUE KEY ship_id.
+  FIELD-SYMBOLS <ls_lookup> LIKE LINE OF lt_lookup.
+  IF ct_voyages IS NOT INITIAL.
+    SELECT ship_id name FROM zosd_fleet_ship
+      INTO CORRESPONDING FIELDS OF TABLE lt_lookup
+      FOR ALL ENTRIES IN ct_voyages
+      WHERE ship_id = ct_voyages-ship_id.
+  ENDIF.
+  LOOP AT ct_voyages ASSIGNING <ls_voyage>.
+    READ TABLE lt_lookup ASSIGNING <ls_lookup> WITH TABLE KEY ship_id = <ls_voyage>-ship_id.
+    IF sy-subrc = 0.
+      <ls_voyage>-ship_name = <ls_lookup>-name.
+    ENDIF.
+  ENDLOOP.
+  " lift:R1 end
+ENDMETHOD.
+```

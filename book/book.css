@@ -3,7 +3,7 @@ body { font-family: "Georgia", "DejaVu Serif", serif; font-size: 10.5pt; line-he
 h1 { font-size: 20pt; border-bottom: 2px solid #8a5a2b; padding-bottom: 4px; page-break-before: always; color: #5a3a1b; }
 h2 { font-size: 14pt; color: #5a3a1b; margin-top: 1.4em; }
 code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8.8pt; }
-pre { background: #f6f1ea; border-left: 3px solid #8a5a2b; padding: 6px 8px; white-space: pre-wrap; }
+pre { hyphens: none; overflow-wrap: anywhere; background: #f6f1ea; border-left: 3px solid #8a5a2b; padding: 6px 8px; white-space: pre-wrap; }
 code { background: #f6f1ea; padding: 0 2px; }
 table { border-collapse: collapse; margin: 0.8em 0; font-size: 9.5pt; }
 th, td { border: 1px solid #cdbfae; padding: 3px 6px; vertical-align: top; }
@@ -12,3 +12,7 @@ a { color: #7a4a1b; }
 nav#TOC { page-break-before: always; page-break-after: always; }
 header#title-block-header { text-align: center; margin-top: 60mm; }
 header#title-block-header .title { font-size: 28pt; border: none; page-break-before: avoid; }
+img { max-width: 100%; border: 1px solid #cdbfae; border-radius: 4px; box-shadow: 0 1px 4px rgba(90,58,27,0.18); }
+figure { margin: 1em 0; text-align: center; page-break-inside: avoid; }
+figcaption { font-size: 9pt; color: #6b5a48; font-style: italic; margin-top: 4px; }
+pre { page-break-inside: avoid; }

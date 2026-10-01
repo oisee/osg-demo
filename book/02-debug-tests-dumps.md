@@ -24,4 +24,71 @@ To inspect the data, open a definition below and press **F8**. The extension ope
 
    Run the report again with **F9**. Expected: the console shows `Airship fleet` and then `Runtime error: ASSERTION_FAILED` with `zcl_osd_fleet_report.clas.abap` and the line `ASSERT iv_steam_pct >= 0.`; no ship line is printed: the report collects all lines before it writes any, and S004's check stops it first. Set `SteamPct` back to `15` with the same MERGE, or restart the system: the seed replaces the rows at every start.
 5. Run the transaction. Open the launchpad's **WEBGUI** tile and enter `ZOSD_FLEET` (or open `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZOSD_FLEET` directly). Expected: the screen is titled `ZOSD_FLEET - Airship fleet` and lists the same six lines. The transaction is [ZCL_OSD_FLEET_TRAN](../src/zcl_osd_fleet_tran.clas.abap): it implements the engine's `ZIF_OSD_TRANSACTION` and calls `ship_lines( )`; it does not `SUBMIT` a report.
+
+   ![Transaction ZOSD_FLEET in WEBGUI: one line per ship](img/webgui-fleet-report.png)
+
 6. The fleet in a classic ALV. [ZOSD_FLEET_ALV](../src/zosd_fleet_alv.prog.abap) is a report that reads the ships, adds each status text and shows them with `CL_SALV_TABLE=>FACTORY` and `display( )`. The engine converts a classic report into a class and runs it as a transaction named `ZGUI_` plus the program name without its `Z`: enter `ZGUI_OSD_FLEET_ALV` in **WEBGUI** (or open `http://localhost:8099/sap/bc/gui/sap/its/webgui/?okcode=ZGUI_OSD_FLEET_ALV`). Expected: a grid with the columns `SHIP_ID`, `NAME`, `STATUS`, `TEXT`, `STEAM_PCT`, `HOME_PORT` and one row per ship, from `S001 Albatross A Aloft 82 Port Aurel` to `S006 Old Boiler M Maintenance 0 Tinmere`. The headers are the field names because the row type uses built-in types; the report's comment says why.
+
+   ![ZGUI_OSD_FLEET_ALV: CL_SALV_TABLE as a grid](img/webgui-fleet-alv.png)
+
+## Under the hood
+
+The assertion that makes step 4 dump:
+
+<!-- code: src/zcl_osd_fleet_report.clas.abap method steam_check -->
+```abap
+METHOD steam_check.
+  ASSERT iv_steam_pct >= 0.
+ENDMETHOD.
+```
+
+The report's lines, with the call the breakpoint of step 2 sits on:
+
+<!-- code: src/zcl_osd_fleet_report.clas.abap method ship_lines -->
+```abap
+METHOD ship_lines.
+  DATA lt_ship   TYPE STANDARD TABLE OF zosd_fleet_ship.
+  DATA ls_ship   LIKE LINE OF lt_ship.
+  DATA lt_voy    TYPE STANDARD TABLE OF zosd_fleet_voy.
+  DATA ls_voy    LIKE LINE OF lt_voy.
+  DATA lt_status TYPE STANDARD TABLE OF zosd_fleet_stat.
+  DATA ls_status LIKE LINE OF lt_status.
+  DATA lv_count  TYPE i.
+  DATA lv_pax    TYPE i.
+  DATA lv_line   TYPE string.
+
+  SELECT * FROM zosd_fleet_ship INTO TABLE lt_ship ORDER BY ship_id.
+  SELECT * FROM zosd_fleet_voy INTO TABLE lt_voy.
+  SELECT * FROM zosd_fleet_stat INTO TABLE lt_status.
+
+  LOOP AT lt_ship INTO ls_ship.
+    steam_check( ls_ship-steam_pct ).
+    CLEAR: lv_count, lv_pax, ls_status.
+    LOOP AT lt_voy INTO ls_voy WHERE ship_id = ls_ship-ship_id.
+      lv_count = lv_count + 1.
+      lv_pax = lv_pax + ls_voy-passengers.
+    ENDLOOP.
+    READ TABLE lt_status INTO ls_status WITH KEY status = ls_ship-status.
+    lv_line = |{ ls_ship-ship_id } { ls_ship-name } ({ ls_status-text }): |
+           && |{ lv_count } voyages, { lv_pax } passengers|.
+    APPEND lv_line TO rt_lines.
+  ENDLOOP.
+ENDMETHOD.
+```
+
+The classic ALV of step 6 is plain SALV:
+
+<!-- code: src/zosd_fleet_alv.prog.abap lines 51-61 -->
+```abap
+TRY.
+    cl_salv_table=>factory(
+      IMPORTING
+        r_salv_table = go_alv
+      CHANGING
+        t_table      = gt_rows ).
+  CATCH cx_salv_msg INTO gx_salv.
+    WRITE: / gx_salv->get_text( ).
+    RETURN.
+ENDTRY.
+go_alv->display( ).
+```

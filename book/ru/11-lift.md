@@ -36,3 +36,43 @@ main open-steamgate
 `FOR ALL ENTRIES` важна только для обращений к базе данных (иначе пустая
 таблица прочитала бы все корабли), и защищает ее только проверка
 расхождения в шаге 1.
+
+## Под капотом
+
+До: одно чтение из базы на каждый рейс.
+
+<!-- code: src/zcl_osd_fleet_lift.clas.abap method before -->
+```abap
+METHOD before.
+  FIELD-SYMBOLS <ls_voyage> LIKE LINE OF ct_voyages.
+  LOOP AT ct_voyages ASSIGNING <ls_voyage>.
+    SELECT SINGLE name FROM zosd_fleet_ship INTO <ls_voyage>-ship_name
+      WHERE ship_id = <ls_voyage>-ship_id.
+  ENDLOOP.
+ENDMETHOD.
+```
+
+После: одно чтение на все рейсы; область между маркерами сгенерирована.
+
+<!-- code: src/zcl_osd_fleet_lift.clas.abap method after -->
+```abap
+METHOD after.
+  FIELD-SYMBOLS <ls_voyage> LIKE LINE OF ct_voyages.
+  " lift:R1 begin
+  DATA lt_lookup TYPE HASHED TABLE OF zosd_fleet_ship WITH UNIQUE KEY ship_id.
+  FIELD-SYMBOLS <ls_lookup> LIKE LINE OF lt_lookup.
+  IF ct_voyages IS NOT INITIAL.
+    SELECT ship_id name FROM zosd_fleet_ship
+      INTO CORRESPONDING FIELDS OF TABLE lt_lookup
+      FOR ALL ENTRIES IN ct_voyages
+      WHERE ship_id = ct_voyages-ship_id.
+  ENDIF.
+  LOOP AT ct_voyages ASSIGNING <ls_voyage>.
+    READ TABLE lt_lookup ASSIGNING <ls_lookup> WITH TABLE KEY ship_id = <ls_voyage>-ship_id.
+    IF sy-subrc = 0.
+      <ls_voyage>-ship_name = <ls_lookup>-name.
+    ENDIF.
+  ENDLOOP.
+  " lift:R1 end
+ENDMETHOD.
+```

@@ -26,6 +26,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: demo
+      - name: Book excerpts in step with src
+        working-directory: demo
+        run: node test/book-snippets.mjs
       - name: Check out current OSD main
         uses: actions/checkout@v4
         with:
