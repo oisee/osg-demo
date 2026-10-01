@@ -291,6 +291,28 @@ await step("call", async () => {
   await win.waitForTimeout(1000);
   await shot("vscode-call-entityset");
 });
+await step("call with debugger", async () => {
+  // no picture: chapter 15 says the call stops on a breakpoint in the method.
+  // On purpose after the plain call and in this long session: the case that
+  // ran through on 0.4.1444
+  const dpc = "src/zcl_zosd_fleet_dpc_ext.clas.abap";
+  await closePanels();
+  await open("zcl_zosd_fleet_dpc_ext.clas.abap");
+  const at = lineOf(dpc, "lt_ship_id = ranges_for(");
+  await goto(at);
+  await win.keyboard.press("Control+Shift+B");
+  await see("a bound breakpoint", win.locator(".cgmr.codicon-debug-breakpoint:not(.codicon-debug-breakpoint-unverified)"), 60000);
+  await goto(lineOf(dpc, "METHOD shipset_get_entityset.") - 1);
+  await see("the call lens", lens("Attach debugger and call ShipSet"), 60000);
+  await lens("Attach debugger and call ShipSet").click();
+  await see("the stop in shipset_get_entityset", win.getByText("Paused On Breakpoint"), 60000);
+  await win.keyboard.press("Shift+F5");
+  await win.waitForTimeout(2000);
+  await open("zcl_zosd_fleet_dpc_ext.clas.abap");
+  await goto(at);
+  await win.keyboard.press("Control+Shift+B");
+  await win.waitForTimeout(800);
+});
 await step("readers", async () => {
   await closePanels();
   await open("zcl_osd_fleet_report.clas.abap");
