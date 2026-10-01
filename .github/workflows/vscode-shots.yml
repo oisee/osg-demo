@@ -7,6 +7,11 @@ on:
   push:
     branches: [spike/vscode-shots]
   workflow_dispatch:
+    inputs:
+      double_pack:
+        description: "Also set OSD_PACKS to the workspace (repro of a failing build)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,6 +60,7 @@ jobs:
           OSD_HOME: ${{ github.workspace }}/osd
           WS: /tmp/osg-demo
           OUT: ${{ runner.temp }}/shots
+          SPIKE_DOUBLE_PACK: ${{ inputs.double_pack && '1' || '' }}
         run: |
           export VSIX=$(ls "$RUNNER_TEMP"/vsix/*.vsix | head -1)
           xvfb-run -a --server-args="-screen 0 1280x800x24" node test/vscode-shots.mjs
@@ -63,3 +69,14 @@ jobs:
         with:
           name: vscode-shots
           path: ${{ runner.temp }}/shots
+      - name: The extension's logs and the system's build output
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/logs"
+          find /tmp/osd-shot/ud -name '*.log' -newer /tmp/osd-shot/ud/User/settings.json -exec cp --parents {} "$RUNNER_TEMP/logs" \; || true
+          find "${{ github.workspace }}/osd" -maxdepth 3 -name '*.log' -newer /tmp/osd-shot/ud/User/settings.json -exec cp --parents {} "$RUNNER_TEMP/logs" \; || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vscode-logs
+          path: ${{ runner.temp }}/logs

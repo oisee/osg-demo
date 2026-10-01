@@ -50,7 +50,8 @@ const app = await _electron.launch({
     "--disable-workspace-trust", "--skip-welcome", "--skip-release-notes", "--disable-gpu"],
   // the workspace folder has an osd-pack.json and is layered on its own;
   // OSD_PACKS as well would bring the same objects in twice
-  env: {...process.env, OSD_PACKS: ""},
+  // SPIKE_DOUBLE_PACK=1 reproduces the failing build for the extension's owner
+  env: {...process.env, OSD_PACKS: process.env.SPIKE_DOUBLE_PACK ? ws : ""},
   timeout: 120000,
 });
 const win = await app.firstWindow();
