@@ -123,6 +123,19 @@ const seeInWebview = async (text, timeout = 60000) => {
   }
   throw new Error(`no ${text} in the webview`);
 };
+// one row of a webview table holds all the given texts
+const seeRowInWebview = async (texts, timeout = 30000) => {
+  const until = Date.now() + timeout;
+  while (Date.now() < until) {
+    for (const frame of win.frames()) {
+      let row = frame.locator("tr");
+      for (const text of texts) row = row.filter({hasText: text});
+      if (await row.count().catch(() => 0)) return;
+    }
+    await win.waitForTimeout(500);
+  }
+  throw new Error(`no row with ${texts.join(", ")} in the webview`);
+};
 const lineOf = (file, text) => readFileSync(join(ws, file), "utf8").split("\n").findIndex((l) => l.includes(text)) + 1;
 const closePanels = async () => {
   await palette("View: Close All Editors");
@@ -273,9 +286,10 @@ await step("call", async () => {
   await seeInWebview("/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json");
   await seeInWebview(/HTTP 200 -- \d+ ms -- 6 row\(s\)/);
   await seeInWebview("StatusText");
-  // all six ships, and the status texts the method fills in
-  for (const ship of ["S001", "S002", "S003", "S004", "S005", "S006", "Albatross", "Old Boiler", "Aloft", "Docked", "Maintenance"]) {
-    await seeInWebview(ship);
+  // all six ships, each with the status text the method fills in
+  for (const row of [["S001", "Albatross", "Aloft"], ["S002", "Nimbus", "Docked"], ["S003", "Brass Heron", "Aloft"],
+    ["S004", "Cumulus", "Maintenance"], ["S005", "Lady Kelvin", "Docked"], ["S006", "Old Boiler", "Maintenance"]]) {
+    await seeRowInWebview(row);
   }
   await win.mouse.move(900, 470);
   await win.waitForTimeout(1000);
