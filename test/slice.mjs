@@ -451,10 +451,15 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
     const keys = [...said.matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]);
     const refusedKeys = [...new Set(keys)].sort().join(", ");
-    // the zip tool reads the L2 rule file (L2 MAINTENANCE_NO_VOYAGE) and the
-    // trace sidecars (filed under CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself
-    // travels) as objects; staging drops them with the local objects
-    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_L2_MAINT, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, L2 MAINTENANCE_NO_VOYAGE, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+    // exactly the local objects are refused; older engines also refuse the L2
+    // rule file (L2 MAINTENANCE_NO_VOYAGE) and the trace sidecars (filed under
+    // CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself travels), which newer
+    // ones skip (open-steamgate #346); staging drops them either way
+    const local = ["CLAS ZCL_OSD_FLEET_DOCTOR", "CLAS ZCL_OSD_FLEET_TPL", "CLAS ZCL_OSD_FLEET_TRAN", "TRAN ZOSD_FLEET"];
+    const sidecars = ["CLAS ZCL_OSD_FLEET_L2_MAINT", "L2 MAINTENANCE_NO_VOYAGE"];
+    const refusedSet = new Set(keys);
+    expect(local.every((k) => refusedSet.has(k)) && [...refusedSet].every((k) => local.includes(k) || sidecars.includes(k)),
+      `refused: ${refusedKeys || said.slice(0, 300)}`);
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)

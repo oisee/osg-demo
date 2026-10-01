@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если четыре локальных объекта или файлы правила L2 и трассировки оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` и `TRAN ZOSD_FLEET`, а также с отказами для `L2 MAINTENANCE_NO_VOYAGE` и для файлов `.trace.json` класса `CLAS ZCL_OSD_FLEET_L2_MAINT` (сам класс переносится) и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
+и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если четыре локальных объекта или файлы правила L2 и трассировки оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` и `TRAN ZOSD_FLEET` (движок до open-steamgate #346 также отказывает `L2 MAINTENANCE_NO_VOYAGE` и файлам `.trace.json` класса `CLAS ZCL_OSD_FLEET_L2_MAINT`, сам класс которого переносится; более новые эти файлы пропускают) и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
 
 ## Что переносится в систему, а что нет
 
