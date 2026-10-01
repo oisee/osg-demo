@@ -104,6 +104,31 @@ instead, so the same binary works in scripts. The labels are the report's
 selection texts, read from `zosd_fleet_cli.prog.xml` at build time, the same
 ones `-help` shows.
 
+## A relative: screens in CICS
+
+The selection screen and the dynpro are SAP's, but the way they work has a
+close relative in IBM's CICS, the transaction monitor of the 3270 terminal
+era. IBM's guide to CICS describes pseudo-conversational processing: a CICS
+program sends a screen and ends its task (BMS is the CICS interface that
+builds such screens from predefined maps); the user's input starts a new task,
+which picks up the state passed on to it. A chain of short tasks looks to the
+user like one conversation, and between screens the program is not running at
+all. SAP's dialog steps work alike: a dialog step is the PAI of the screen the
+user answered followed by the PBO of the next screen, and while a screen waits
+for input no work process is held. This program is the simplest case, one
+screen and one answer per run.
+
+The guide also describes giving existing 3270 programs a new presentation
+without changing them, for example a web front end that plays the terminal
+for the unchanged program. SAP's WEBGUI is a similar idea, the same screens
+rendered as HTML in a browser (chapter 2); the terminal form and `-sapgui`
+here are two more ways to show one selection screen.
+
+Source: IBM Redbooks, *Architect's Guide to IBM CICS on System z*:
+pseudo-conversational design in chapter 1 (p. 11); the presentation layer,
+3270, BMS and state in 3.3 (p. 58–60); modernizing the 3270 presentation
+layer in 4.6 (p. 104–106).
+
 ## What it can and cannot do
 
 The report is built and checked against open-steamgate's `main`, past 0.4: a
