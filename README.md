@@ -61,7 +61,10 @@ OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
+OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         # chapter 14's pictures, after cli.mjs --keep /tmp/fleet-cli
 ```
+
+`test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1 and 2; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
 CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
