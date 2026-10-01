@@ -104,12 +104,13 @@ instead, so the same binary works in scripts. The labels are the report's
 selection texts, read from `zosd_fleet_cli.prog.xml` at build time, the same
 ones `-help` shows.
 
-## Where the selection screen comes from
+## A relative: screens in CICS
 
-The idea behind the selection screen and the dynpro is older than SAP.
-IBM's guide to CICS, the transaction monitor of the 3270 terminal era,
-describes pseudo-conversational processing: a CICS program sends a screen
-(often a predefined BMS map) and ends its task; the user's input starts a new
+The selection screen and the dynpro are SAP's, but the way they work has a
+close relative in IBM's CICS, the transaction monitor of the 3270 terminal
+era. IBM's guide to CICS describes pseudo-conversational processing: a CICS
+program sends a screen and ends its task (BMS is the CICS interface that
+builds such screens from predefined maps); the user's input starts a new
 task, which picks up the state passed on to it. A chain of short tasks looks
 to the user like one conversation, and no transaction exists while the
 program waits for input. SAP's dialog steps work alike: a dialog step is the
