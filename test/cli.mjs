@@ -81,7 +81,7 @@ const has = (out, ...lines) => lines.filter((l) => (/^\d+ ships$/.test(l) ? !new
   .map((l) => `missing "${l}"`).join("; ");
 
 check("-help is the selection screen", ["-help"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "--status", "--seed", "--file", "-db FILE", "-allow-read DIR"));
+  rc !== 0 ? `rc ${rc}` : has(out, "--status", "Status (A, D, M)", "--seed", "Seed the six ships", "--file", "-db FILE", "-allow-read DIR"));
 check("no -db: refused, rc 1", ["--status", "A"], (out, rc) =>
   rc !== 1 ? `rc ${rc}` : has(out, "keeps its rows in tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE"));
 check("--seed fills the tables", ["-db", "fleet.sqlite", "--seed"], (out, rc) =>

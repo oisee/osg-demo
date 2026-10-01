@@ -100,8 +100,9 @@ runs, Esc cancels. Type `M` in the status field and press Enter:
 Only `S006 Old Boiler` is in maintenance now: step 6 docked `S004 Cumulus`.
 
 Without a terminal (a pipe, CI) the program asks for the fields line by line
-instead, so the same binary works in scripts. The labels are the parameter
-names: osabap does not read the report's selection texts yet.
+instead, so the same binary works in scripts. The labels are the report's
+selection texts, from `zosd_fleet_cli.prog.xml` beside it, the same ones
+`-help` shows.
 
 ## What it can and cannot do
 
@@ -115,9 +116,9 @@ The report is built and checked against open-steamgate's `main`, past 0.4.
   one of them made the whole method unavailable. `main` compiles all eighteen;
   this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
 - **Not yet**: a comma inside a string template of a chained `WRITE:` (write
-  it as `WRITE / ...` without the colon), `CATCH ... INTO` a global variable,
-  and the report's selection texts as labels. A `MESSAGE` that ends
-  the run needs open-steamgate `main` from #362 on.
+  it as `WRITE / ...` without the colon), and `CATCH ... INTO` a global variable. A
+  `MESSAGE` that ends the run needs open-steamgate `main` from #362 on, the
+  selection texts as labels from #363.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
