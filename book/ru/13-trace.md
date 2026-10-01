@@ -21,7 +21,7 @@ AND voy~dep_date > iv_date
 ```json
 {
  "line": 32,
- "template_line": 125,
+ "template_line": 134,
  "path": "/queries/1/where/2/pre",
  "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
  "rule_line": 14
