@@ -30,9 +30,11 @@ Preview of `ZOSD_FLEET_SHIP` with its six rows.
   the released 0.3.1370 is too old for this pack, which needs 0.4).
 - Commands go through the palette (F1) with their exact titles: `osd: Start`
   alone matches "osd: Choose which system Start runs", an interactive picker.
-- The pack must come in once: the workspace folder has an `osd-pack.json` and
-  is layered on its own; `OSD_PACKS` as well brings every object in twice and
-  the build fails.
+- The pack must come in once: the workspace folder has an `osd-pack.json`, and
+  the extension materializes it as a pack under its globalStorage. With
+  `OSD_PACKS` pointing at the same folder the build refuses: `BAD_PACK: ...
+  pack name osg-demo is also used by /tmp/osg-demo` (reported to the
+  extension's owner; repro switch `double_pack` in the workflow).
 - The workspace is a copy under `/tmp/osg-demo`, so no runner path or user
   name shows in a window title or breadcrumb.
 - Readiness: poll `http://localhost:3030/sap/bc/adt/discovery`, the
