@@ -38,6 +38,7 @@ const env = {...process.env, OSD_PACKS: repo, STG_PORT: String(port), STG_DB: "f
 console.log(`book-shots: building ${home} with OSD_PACKS=${repo}`);
 if (spawnSync("npm", ["run", "-s", "transpile"], {cwd: home, env, stdio: ["ignore", "ignore", "inherit"]}).status !== 0) {
   console.error("book-shots: npm run transpile failed");
+  rmSync(dir, {recursive: true, force: true});
   process.exit(1);
 }
 const server = spawn(process.execPath, ["test/run.mjs"], {cwd: home, env, stdio: ["ignore", "ignore", "inherit"]});
