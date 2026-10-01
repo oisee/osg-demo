@@ -243,26 +243,36 @@ await step("services", async () => {
   await expandRow("Services");
   await expandRow("OData (");
   await expandRow("ZOSD_FLEET_SRV");
-  await see("the entity sets", osdView.locator(".monaco-list-row", {hasText: "VoyageSet"}));
+  for (const method of [/ShipSet\s*get_entityset/, /VoyageSet\s*get_entityset/, /ShipSet\s*get_entity$/]) {
+    await see(`${method} in the System view`, osdView.locator(".monaco-list-row", {hasText: method}));
+  }
+  await see("the service's details", win.locator(".tab.active", {hasText: "ZOSD_FLEET_SRV · Details"}));
   await win.mouse.move(900, 470);
   await shot("vscode-services");
   // an entity set's row opens the method that serves it
   await osdView.locator(".monaco-list-row", {hasText: /ShipSet\s*get_entityset/}).first().click();
   await see("the method of ShipSet", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
+  await see("line 112", win.locator(".statusbar").getByText(/^Ln 112,/));
   await closePanels();
 });
 await step("http lens", async () => {
   await open("fleet.http");
-  await see("the lens over a GET", lens("ShipSet › GET_ENTITYSET → zcl_zosd_fleet_dpc_ext:"), 60000);
+  for (const [what, line] of [["ShipSet › GET_ENTITYSET", 112], ["ShipSet › GET_ENTITY ", 224], ["VoyageSet › GET_ENTITYSET", 297]]) {
+    await see(`the lens ${what}`, lens(`${what}`.trim() + ` → zcl_zosd_fleet_dpc_ext:${line} (static)`), 60000);
+  }
   await see("the unresolved lens", lens("unresolved: query options are unsupported"));
   await shot("vscode-http-lens");
 });
 await step("call", async () => {
   await lens("ShipSet › GET_ENTITYSET").click();
   await see("the DPC method", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
+  await see("line 112", win.locator(".statusbar").getByText(/^Ln 112,/));
   await see("the call lens", lens("Call ShipSet"), 60000);
   await lens("Call ShipSet").click();
-  await seeInWebview(/6 row\(s\)/);
+  // the answer of this call: its URL, its status and row count, its columns
+  await seeInWebview("/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json");
+  await seeInWebview(/HTTP 200 -- \d+ ms -- 6 row\(s\)/);
+  await seeInWebview("StatusText");
   await seeInWebview("Old Boiler");
   await win.mouse.move(900, 470);
   await win.waitForTimeout(1000);
@@ -273,9 +283,9 @@ await step("readers", async () => {
   await open("zcl_osd_fleet_report.clas.abap");
   // the lens sits over the definition, at the top
   await goto(1);
-  await see("the readers lens", lens(/read by \d+ · tests \d+ · services \d+/), 60000);
+  await see("the readers lens", lens("read by 1 · tests 0 · services 0"), 60000);
   await lens(/read by/).click();
-  await see("the readers", win.locator(".quick-input-widget .monaco-list-row").first(), 15000);
+  await see("the reader", win.locator(".quick-input-widget .monaco-list-row", {hasText: "ZCL_OSD_FLEET_TRAN"}), 15000);
   await win.waitForTimeout(800);
   await shot("vscode-readers");
   await win.keyboard.press("Escape");

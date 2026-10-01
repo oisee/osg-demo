@@ -5,7 +5,7 @@ person at a screen? Answer: yes. `test/vscode-shots.mjs` drives the desktop
 VS Code with Playwright's `_electron` under Xvfb. It first ran in GitHub
 Actions; it now runs on a workstation, and its pictures are committed to
 `book/img/` like those of `test/book-shots.mjs` and `test/cli-shots.mjs`.
-A run takes about three minutes, against about nine for a CI round trip.
+A run takes a few minutes, against about nine for a CI round trip.
 
 The script's header says how to run it. It takes eight pictures:
 

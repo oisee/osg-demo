@@ -17,8 +17,12 @@ uses it. The pictures are of the extension 0.4.1414 with the system started
    service's classes, `ZCL_ZOSD_FLEET_DPC_EXT` (the data provider, chapter 3),
    the model classes and two registries of the engine, and one row per
    entity-set method: `ShipSet get_entityset`, `VoyageSet get_entityset`,
-   `StatusVHSet get_entityset` and the three `get_entity`. A click on the service opens its details: the
-   DPC and MPC classes, a `$metadata` link and the entity sets.
+   `StatusVHSet get_entityset` and the three `get_entity`. A click on the
+   service opens its details: the DPC and MPC classes, a `$metadata` link and
+   the entity sets. With 0.4.1414 the details call every method "inherited
+   (generic)", even those `ZCL_ZOSD_FLEET_DPC_EXT` redefines, such as
+   `GET_ENTITYSET` of `ShipSet`; the rows of the tree and the lenses below get
+   it right (reported).
 
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
 
@@ -36,19 +40,23 @@ Client, httpYac and JetBrains also read.
 4. Open `http/fleet.http`. Expected: above each `GET` a line names what will
    answer it, `ZOSD_FLEET_SRV › ShipSet › GET_ENTITYSET →
    zcl_zosd_fleet_dpc_ext:112 (static) · last: not run`; the keyed request goes
-   to `GET_ENTITY` at line 224, the voyages to line 297. The last request has
-   a `$filter` and says `unresolved: query options are unsupported`.
+   to `GET_ENTITY` at line 224, the voyages to line 297, where the
+   redefinition serves a ship's voyages and passes a plain `VoyageSet` on to
+   the generated class. The last request has a `$filter` and says
+   `unresolved: query options are unsupported`.
 
    ![http/fleet.http: above each GET the DPC method that answers it; the $filter request unresolved](img/vscode-http-lens.png)
 
-5. Click the line above **All ships**. Expected: the DPC class opens at line
+5. Click the line above the `GET` of **All ships**. Expected: the DPC class opens at line
    112, `shipset_get_entityset`.
 
 "Static" means the extension worked the method out from the service's model
-and the class's code; it did not watch a request reach it. That is enough for
-a plain `GET` of a set or of one entity. Query options, `$expand`, writes and
-`$batch` reach other or more methods, so the extension says "unresolved"
-rather than guess.
+and the class's code; it did not watch a request reach it, and it names the
+method a request enters, not every method that then runs. The lens resolves a
+plain `GET` of a set or of one entity. Anything else it leaves "unresolved"
+rather than guess, even where the answer is simple: the `$filter` request
+enters `shipset_get_entityset` too, which reads the filter into ranges. With
+`$expand`, writes and `$batch`, other or more methods run.
 
 ## From the code to the HTTP answer
 
@@ -64,9 +72,8 @@ rather than guess.
    with the debugger attached, to stop on a breakpoint in the method (on a
    statement such as `lt_ship_id = ranges_for(`; a `DATA` line never stops).
    With the extension 0.4.1414 it did not stop in our run: the breakpoint
-   stayed unbound and the call answered as in step 6. This is reported; until
-   it is fixed, debug the method through the report of chapter 2 or a unit
-   test.
+   stayed unbound and the call answered as in step 6. This is reported to the
+   extension's owner.
 
 ## Who uses this class
 
@@ -93,7 +100,7 @@ open-steamgate's roadmap.
 
 One request of the file, with the case name the regression tools read:
 
-<!-- code: http/fleet.http lines 8-11 -->
+<!-- code: http/fleet.http lines 9-12 -->
 ```http
 ### All ships
 # @osd.id fleet.ships
