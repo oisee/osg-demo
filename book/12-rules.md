@@ -97,7 +97,7 @@ written by hand.
 
 The test class has one method per example, and, because the rule says
 `boundaries: auto`, one per boundary case the compiler derived from the DDIC
-types: a check date one day before, on and after a departure (`B_DEP_DATE_LT`,
+types: a departure one day before, on and after the check date (`B_DEP_DATE_LT`,
 `_EQ`, `_GT`), the same, another and a blank status, a matching and a missing
 ship, and zero and two voyages. A case is kept only if mutating its own
 condition changes the alerts. Each method inserts its rows into the
@@ -117,7 +117,13 @@ the answer is the example's `expect`, and deletes its rows again. The class is
    expects [] but the rule gives ["X001 Zephyr: in maintenance, voyage X00003
    departs 20270301"]`. The example on the check date is the boundary that
    catches the mistake. Put `>` back.
-3. `node tools/dsl-l2.mjs check <rule> --out <dir> ...` (same flags as build)
+3. Now edit the generated code by hand instead: in `ZCL_OSD_FLEET_L2_MAINT`,
+   change `AND voy~dep_date > iv_date` to `>=`, activate and rerun the tests.
+   Expected: exactly two methods turn red, `DEPARTS_ON_THE_CHECK_DATE` and
+   `B_DEP_DATE_EQ` (`Expected table to contain 0 rows, got 1`): the tests
+   compare the class with the rule's own reference form. The compiler guards
+   the rule; the generated tests guard the generated code. Restore the line.
+4. `node tools/dsl-l2.mjs check <rule> --out <dir> ...` (same flags as build)
    regenerates into a scratch folder and compares byte for byte; it exits 1
    when the committed class no longer matches its rule.
 

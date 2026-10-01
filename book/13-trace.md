@@ -33,7 +33,8 @@ Its entry in the trace file:
 The other lines read the same way: `INNER JOIN zosd_fleet_voy AS voy` comes
 from `forbid` (rule line 12), `ON voy~ship_id = ship~ship_id` from the first
 `where` comparison (line 14), `WHERE ship~status = 'M'` from `when` (line 11).
-The test class has its own trace: each test method points at its example.
+The test class has its own trace: each example's method points at its
+example, and each derived `B_...` method at the rule condition it tests.
 
 ## Why it matters
 

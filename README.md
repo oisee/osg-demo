@@ -67,7 +67,7 @@ CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser c
 
 | Where | What |
 |---|---|
-| `src/` | the ABAP objects, DDIC, SEGW model, CDS |
+| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to |
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
 | `book/`, `book/ru/` | the book in English and Russian; `book/build.sh` renders EPUB, PDF and HTML of both |

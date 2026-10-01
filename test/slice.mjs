@@ -449,11 +449,12 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     const refused = zip(repo, join(work, "refused.zip"));
     const said = refused.stdout + refused.stderr;
     expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
-    const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
+    const keys = [...said.matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]);
     const refusedKeys = [...new Set(keys)].sort().join(", ");
-    // the L2 rule file and the trace sidecars are files of this repository, which
-    // the zip tool reads as objects of unknown kinds; staging drops them too
-    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_L2_MAINT, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+    // the zip tool reads the L2 rule file (L2 MAINTENANCE_NO_VOYAGE) and the
+    // trace sidecars (filed under CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself
+    // travels) as objects; staging drops them with the local objects
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_L2_MAINT, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, L2 MAINTENANCE_NO_VOYAGE, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
@@ -655,12 +656,13 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
 await check("17 L2 fleet rule: built class in step, generated tests pass", async () => {
   const l2 = spawnSync(process.execPath, [join(repo, "test", "l2.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
   expect(l2.status === 0, `rule check: ${(l2.stdout + l2.stderr).slice(-400)}`);
-  // the rule check takes longer than the engine's keep-alive: a pooled socket
-  // may be closed by now, so the first request is retried once
-  await fetch(`${base}/sap/bc/adt/discovery`).catch(() => {});
+  // the rule check takes longer than the engine's keep-alive; a pooled socket
+  // closed meanwhile fails one fetch, so the token fetch (safe to repeat)
+  // is retried once
+  const tokenFetch = () => fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
   const want = [...readFileSync(join(repo, "src", "l2", "zcl_osd_fleet_l2_maint.clas.testclasses.abap"), "utf8")
     .matchAll(/^\s*METHODS (\w+) FOR TESTING/gm)].map((m) => m[1].toUpperCase());
-  const token = await fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
+  const token = await tokenFetch().catch(() => tokenFetch());
   const headers = {"x-csrf-token": token.headers.get("x-csrf-token"),
     cookie: (token.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ")};
   const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
