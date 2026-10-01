@@ -68,13 +68,19 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
    ![Call ShipSet: the DPC method on the left, its HTTP answer as a table on the right](img/vscode-call-entityset.png)
 
-7. **Attach debugger and call ShipSet**, beside it, sends the same request
-   with the debugger attached, to stop on a breakpoint in the method (on a
-   statement such as `lt_ship_id = ranges_for(`; a `DATA` line never stops).
-   In our run on 0.4.1414 it did not stop: the breakpoint stayed unbound (a
-   hollow dot) and the call answered as in step 6. On 0.4.1444 the breakpoint
-   still shows hollow before the call. This is reported to the extension's
-   owner.
+7. Set a breakpoint on the method's first statement, `lt_ship_id =
+   ranges_for(` (a `DATA` line never stops). Setting it attaches the
+   debugger, which takes a few seconds: wait until the dot is filled, not
+   hollow. Then click **Attach debugger and call ShipSet** beside the method.
+   Expected: the same request, sent with the debugger attached, stops on the
+   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. A click
+   while the dot is still hollow sends the request before the breakpoint is
+   bound, and the call answers as in step 6. With 0.4.1414 the breakpoint
+   stayed hollow; use 0.4.1444 or later. With 0.4.1444 it stopped reliably
+   only in a fresh VS Code window: once the method had run without the
+   debugger, as in step 6, and in some longer sessions, the call ran through
+   even with a filled dot, also after `osd: Stop` and `osd: Start`
+   (reported). Do this step first, before step 6, in a fresh window.
 
 ## Who uses this class
 

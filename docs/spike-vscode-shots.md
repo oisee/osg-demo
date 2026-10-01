@@ -50,6 +50,13 @@ there, and the script uses neither:
   `.abap` file opened as Plain Text and VS Code refused a breakpoint there;
   `debug.allowBreakpointsEverywhere` worked around it. Chapter 2 keeps it as a
   note for 0.4.1414.
+- **Attach debugger and call ShipSet (0.4.1414):** a breakpoint in the DPC
+  method stayed unbound and the call ran through. On 0.4.1444 it binds a few
+  seconds after it is set and the call stops on it; a click before that runs
+  through. Still open on 0.4.1444: after one plain "Call ShipSet", and in
+  some longer sessions, the debugged call runs through even with a filled
+  dot, also after osd: Stop and osd: Start. The script does not check this
+  call; chapter 15 says what was seen.
 - **Test tree (0.4.1414):** the Testing tree was built before the system
   served, so it had no workspace tests until **Test: Refresh Tests**. Chapter 1
   keeps it as a note for 0.4.1414; the script checks that the tree fills
@@ -61,10 +68,6 @@ Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
   the hover's first line carries the structure as JSON, which is where the
   script finds `S001`. Also on 0.4.1444. Chapter 2 says so.
-- **Attach debugger and call ShipSet:** on 0.4.1414 a breakpoint in the DPC
-  method stayed unbound and the call ran through; on 0.4.1444 the breakpoint
-  still showed hollow before the call (the call itself was not rechecked).
-  Chapter 15 says so.
 - **Service details:** the Details page lists redefined methods as
   "inherited (generic)"; also on 0.4.1444, as its picture shows. Chapter 15
   says so.
