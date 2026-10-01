@@ -135,7 +135,8 @@ The program is built with open-steamgate 0.5 or later.
 
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
   run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. This report keeps
-  to plain `SELECT ... INTO TABLE` into standard tables.
+  to plain `SELECT ... INTO TABLE` into standard tables and one
+  `SELECT COUNT(*)` into a variable.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
