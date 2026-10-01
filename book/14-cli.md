@@ -48,8 +48,8 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 ```
 
 It runs open-steamgate's `node tools/gogen/osabap.mjs` on the report, copies
-the result to `/tmp/fleet-cli/run/fleet` and runs the steps below, and a few
-more, as checks. With `GOOS`/`GOARCH` for another platform (for example
+the result to `/tmp/fleet-cli/run/fleet` and runs the steps below and a few
+more as checks. With `GOOS`/`GOARCH` for another platform (for example
 `GOOS=windows GOARCH=arm64`) it only builds and leaves `run/fleet.exe` there,
 to copy to that machine. In VS Code, F8 on a report (`osd run`) builds and
 runs it the same way.
@@ -107,7 +107,8 @@ ones `-help` shows.
 ## What it can and cannot do
 
 The report is built and checked against open-steamgate's `main`, past 0.4: a
-`MESSAGE` that ends the run needs #362, the selection texts as labels #363.
+`MESSAGE` that ends the run needs #362, the selection texts as labels #363,
+a comma inside a template of a chained `WRITE:` #364.
 
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
   run is one LUW, `COMMIT WORK` and `ROLLBACK WORK` work. In 0.4 twelve of
