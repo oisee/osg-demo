@@ -1,0 +1,27 @@
+# The fleet's OData service as requests (book chapter 15). Open this file in
+# VS Code with the system started: above a plain GET the extension names the
+# DPC method it enters, and a click opens that method; a request with query
+# options stays unresolved. REST Client and httpYac send the requests as they
+# are; set baseUrl to the address in the osd system output's line
+# "serving generation ... on http://127.0.0.1:<port>".
+@baseUrl = http://localhost:8099
+
+### All ships
+# @osd.id fleet.ships
+GET {{baseUrl}}/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet
+Accept: application/json
+
+### One ship
+# @osd.id fleet.ship
+GET {{baseUrl}}/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet('S001')
+Accept: application/json
+
+### All voyages
+# @osd.id fleet.voyages
+GET {{baseUrl}}/sap/opu/odata/sap/ZOSD_FLEET_SRV/VoyageSet
+Accept: application/json
+
+### The aloft ships: a query option, which the lens does not resolve
+# @osd.id fleet.ships.aloft
+GET {{baseUrl}}/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$filter=Status%20eq%20'A'
+Accept: application/json

@@ -71,4 +71,5 @@ at a line (0.4); chapter 1 says what to do on 0.3.1370.
 | Operations | 8 Business log, 9 Background jobs | BAL logs, a job, a job chain, a doctor |
 | Code that writes code | 10 Generated code, 11 Lift, 12 Rules, 13 Trace | templates and traces (L0, L1, L2), a lifted routine, a fleet rule compiled to ABAP with its proof, one line traced back to the rule |
 | Out of the server | 14 My ABAP escaped | a report compiled into a native command line program and terminal form |
+| The workbench | 15 From a service to its code | the System view, `.http` requests resolved to their DPC method, a call from the code to its HTTP answer, the readers of a class |
 | Appendices | A Run the checks, B Take it to a system (what travels), C Limits and glossary | the automated checks, the transport list, the fine print |

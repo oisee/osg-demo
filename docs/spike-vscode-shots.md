@@ -5,9 +5,9 @@ person at a screen? Answer: yes. `test/vscode-shots.mjs` drives the desktop
 VS Code with Playwright's `_electron` under Xvfb. It first ran in GitHub
 Actions; it now runs on a workstation, and its pictures are committed to
 `book/img/` like those of `test/book-shots.mjs` and `test/cli-shots.mjs`.
-A run takes about three minutes, against about nine for a CI round trip.
+A run takes a few minutes, against about nine for a CI round trip.
 
-The script's header says how to run it. It takes four pictures:
+The script's header says how to run it. It takes eight pictures:
 
 - F9 on `ZOSD_DEMO_HELLO`, with the greeting in the osd console
   (`vscode-classrun.png`, chapter 1);
@@ -15,7 +15,11 @@ The script's header says how to run it. It takes four pictures:
   chapter 1);
 - F8 Data Preview of `ZOSD_FLEET_SHIP` (`vscode-data-preview.png`, chapter 2);
 - the debugger stopped on `steam_check` in `ZCL_OSD_FLEET_REPORT`
-  (`vscode-debugger.png`, chapter 2).
+  (`vscode-debugger.png`, chapter 2);
+- for chapter 15: the System view with `ZOSD_FLEET_SRV` (`vscode-services.png`),
+  `http/fleet.http` with the method above each request (`vscode-http-lens.png`),
+  "Call ShipSet" with its HTTP answer (`vscode-call-entityset.png`), and the
+  readers of `ZCL_OSD_FLEET_REPORT` (`vscode-readers.png`).
 
 ## What it took
 
@@ -51,3 +55,5 @@ The first two are confirmed and fixed in the next 0.4.x patch.
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
   the hover's first line carries the structure as JSON, which is where the
   script finds `S001`. Chapter 2 says so.
+- **Attach debugger and call ShipSet:** a breakpoint in the DPC method stayed
+  unbound and the call ran through; chapter 15 says so.
