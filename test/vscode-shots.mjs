@@ -48,7 +48,9 @@ const app = await _electron.launch({
   executablePath: code,
   args: [ws, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud"),
     "--disable-workspace-trust", "--skip-welcome", "--skip-release-notes", "--disable-gpu"],
-  env: {...process.env, OSD_PACKS: ws},
+  // the workspace folder has an osd-pack.json and is layered on its own;
+  // OSD_PACKS as well would bring the same objects in twice
+  env: {...process.env, OSD_PACKS: ""},
   timeout: 120000,
 });
 const win = await app.firstWindow();
