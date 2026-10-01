@@ -126,7 +126,7 @@ const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 tmux("kill-session", "-t", "fleet-tui");
 must("new-session", "-d", "-s", "fleet-tui", "-x", "90", "-y", "22", `cd '${run}' && ./fleet -db fleet.sqlite; sleep 60`);
 try {
-  await screenWith("Status (A, D, M)");
+  for (const label of ["Status (A, D, M)", "Seed the six ships", "Ships from a CSV file"]) await screenWith(label);
   must("send-keys", "-t", "fleet-tui", "M");
   await sleep(500);
   await shoot("tui-form", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith(/Status \(A, D, M\)\s+M/)), 90));

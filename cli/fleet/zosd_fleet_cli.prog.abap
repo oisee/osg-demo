@@ -8,8 +8,8 @@ REPORT zosd_fleet_cli.
 *                                          add or change ships from a CSV
 * Its tables are the fleet's own ZOSD_FLEET_SHIP and ZOSD_FLEET_STAT; their
 * .tabl.xml beside it are copies of src/ddic that test/cli.mjs keeps in step.
-* Written for what the Go backend compiles: no inline declarations, no colon,
-* semicolon or comma inside literals or templates of chained WRITEs.
+* osabap does not compile CATCH ... INTO a global variable yet; the import
+* catches without INTO.
 
 PARAMETERS p_status TYPE c LENGTH 1.
 PARAMETERS p_seed AS CHECKBOX.
