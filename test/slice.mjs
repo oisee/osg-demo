@@ -649,7 +649,7 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
   expect(unit.ok, `ABAP Unit: HTTP ${unit.status}: ${report.slice(0, 200)}`);
   const methods = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1]);
   expect(methods.length === 4, `ABAP Unit ran ${methods.length} methods: ${methods.join(", ")}`);
-  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
+  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
   return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
 });
 
@@ -678,7 +678,7 @@ await check("17 L2 fleet rule: built class in step, generated tests pass", async
   const ran = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1].toUpperCase());
   expect(want.length >= 5 && ran.length === want.length && want.every((m) => ran.includes(m)),
     `ran ${ran.join(", ")}; the test class has ${want.join(", ")}`);
-  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
+  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
   return `class in step with the rule; ${ran.length} generated tests pass`;
 });
 
