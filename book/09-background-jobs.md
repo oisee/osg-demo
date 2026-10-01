@@ -159,7 +159,7 @@ START-OF-SELECTION.
   WRITE: / |Voyage step { p_run }: OK|.
 ```
 
-The waiter is closed first, with the run ID as event parameter:
+The readiness job, closed first with the run ID as its event parameter (the voyage job is released after it):
 
 <!-- code: src/zcl_osd_fleet_chain.clas.abap lines 72-97 -->
 ```abap

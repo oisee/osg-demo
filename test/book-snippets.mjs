@@ -21,13 +21,17 @@ const write = process.argv.includes("--write");
 const MARKER = /^<!-- code: (\S+)(?: (method) (\S+)| (lines) (\d+)-(\d+))? -->$/;
 
 function excerpt(file, kind, a, b) {
-  const lines = readFileSync(join(repo, file), "utf8").replace(/\n$/, "").split("\n");
+  const lines = readFileSync(join(repo, file), "utf8").replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
   let part = lines;
-  if (kind === "lines") part = lines.slice(Number(a) - 1, Number(b));
+  if (kind === "lines") {
+    if (Number(b) > lines.length || Number(a) < 1 || Number(a) > Number(b)) throw new Error(`${file}: lines ${a}-${b} outside 1-${lines.length}`);
+    part = lines.slice(Number(a) - 1, Number(b));
+  }
   if (kind === "method") {
     const start = lines.findIndex((l) => new RegExp(`^\\s*METHOD ${a.replace(/[~]/g, "\\~")}\\b`, "i").test(l));
     if (start < 0) throw new Error(`${file}: no METHOD ${a}`);
     const end = lines.findIndex((l, i) => i > start && /^\s*ENDMETHOD\./i.test(l));
+    if (end < 0) throw new Error(`${file}: METHOD ${a} has no ENDMETHOD.`);
     part = lines.slice(start, end + 1);
   }
   const indent = Math.min(...part.filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length));
@@ -49,6 +53,7 @@ for (const dir of ["book", "book/ru"]) {
       const open = i + 1;
       if (!/^```/.test(lines[open] ?? "")) throw new Error(`${dir}/${name}:${i + 1}: no code block after the marker`);
       const close = lines.findIndex((l, j) => j > open && /^```\s*$/.test(l));
+      if (close < 0) throw new Error(`${dir}/${name}:${i + 1}: the code block after the marker is not closed`);
       const have = lines.slice(open + 1, close);
       if (have.join("\n") === want.join("\n")) continue;
       if (write) {
