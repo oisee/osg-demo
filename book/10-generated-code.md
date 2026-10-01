@@ -7,7 +7,7 @@ way back to what made it:
 |---|---|---|---|
 | **L0** templates | a Mustache-style template and a JSON model | text; every line traced to its template line and model path | `ZCL_OSD_FLEET_TPL` (below); chapter 11's lift renders its recipe through it |
 | **L1** typed model | nothing by hand: a generator fills it | ABAP from recipes; lines traced to model nodes (`@id`), literals typed from the DDIC (`@type`) | not yet; the lift in chapter 11 borrows its recipe idea by hand |
-| **L2** domain rules | a rule in the domain's words (YAML) | an L1 model, then an ABAP check class and its test class | not yet; see the end of this chapter |
+| **L2** domain rules | a rule in the domain's words (YAML) | an L1 model, then an ABAP check class and its test class | chapters 12 and 13 |
 
 The rule between them: **the template renders, the model decides.**
 
@@ -113,8 +113,8 @@ and after the check date; the same, another and a blank status; a matching and
 a missing related row; zero and two related rows) and emits a case only if a
 mutant of its own condition changes the alerts.
 
-This demo does not have an L2 rule of its own yet; its tables would fit one
-(`ZOSD_FLEET_SHIP`, `ZOSD_FLEET_VOY`). The specification is open-steamgate's
+Chapter 12 writes such a rule for this demo's own tables, and chapter 13
+follows one generated line back to it. The specification is open-steamgate's
 [docs/dsl-l2.md](https://github.com/oisee/open-steamgate/blob/main/docs/dsl-l2.md).
 
 ## Under the hood

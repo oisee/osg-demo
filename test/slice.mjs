@@ -54,7 +54,10 @@
 //        grid rows;
 //    16. R4: ZCL_OSD_FLEET_LIFT's lifted region is what the lift recipe
 //        renders from BEFORE (test/lift.mjs), its classrun finds BEFORE and
-//        AFTER equal on the seeded voyages, and its ABAP Unit test passes.
+//        AFTER equal on the seeded voyages, and its ABAP Unit test passes;
+//    17. L2: ZCL_OSD_FLEET_L2_MAINT and its traces are what the fleet rule
+//        builds to (test/l2.mjs), and its generated ABAP Unit test (DANGEROUS,
+//        it writes its examples' rows and deletes them again) passes.
 //
 // SLICE_SKIP_UI=1 skips item 5 and says so; nothing else is skippable.
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
@@ -446,13 +449,16 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     const refused = zip(repo, join(work, "refused.zip"));
     const said = refused.stdout + refused.stderr;
     expect(refused.status !== 0 && !existsSync(join(work, "refused.zip")), "the unstaged folder was zipped");
-    const keys = [...said.matchAll(/^  ([A-Z]{4} \S+)  \(/gm)].map((m) => m[1]);
+    const keys = [...said.matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]);
     const refusedKeys = [...new Set(keys)].sort().join(", ");
-    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
+    // the zip tool reads the L2 rule file (L2 MAINTENANCE_NO_VOYAGE) and the
+    // trace sidecars (filed under CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself
+    // travels) as objects; staging drops them with the local objects
+    expect(refusedKeys === "CLAS ZCL_OSD_FLEET_DOCTOR, CLAS ZCL_OSD_FLEET_L2_MAINT, CLAS ZCL_OSD_FLEET_TPL, CLAS ZCL_OSD_FLEET_TRAN, L2 MAINTENANCE_NO_VOYAGE, TRAN ZOSD_FLEET", `refused: ${refusedKeys || said.slice(0, 300)}`);
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
-      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
     // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
@@ -643,8 +649,37 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
   expect(unit.ok, `ABAP Unit: HTTP ${unit.status}: ${report.slice(0, 200)}`);
   const methods = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1]);
   expect(methods.length === 4, `ABAP Unit ran ${methods.length} methods: ${methods.join(", ")}`);
-  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.indexOf("<alert"), report.indexOf("<alert") + 400)}`);
+  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
   return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
+});
+
+await check("17 L2 fleet rule: built class in step, generated tests pass", async () => {
+  const l2 = spawnSync(process.execPath, [join(repo, "test", "l2.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
+  expect(l2.status === 0, `rule check: ${(l2.stdout + l2.stderr).slice(-400)}`);
+  // the rule check takes longer than the engine's keep-alive; a pooled socket
+  // closed meanwhile fails one fetch, so the token fetch (safe to repeat)
+  // is retried once
+  const tokenFetch = () => fetch(`${base}/sap/bc/adt/discovery`, {headers: {"x-csrf-token": "fetch"}});
+  const want = [...readFileSync(join(repo, "src", "l2", "zcl_osd_fleet_l2_maint.clas.testclasses.abap"), "utf8")
+    .matchAll(/^\s*METHODS (\w+) FOR TESTING/gm)].map((m) => m[1].toUpperCase());
+  const token = await tokenFetch().catch(() => tokenFetch());
+  const headers = {"x-csrf-token": token.headers.get("x-csrf-token"),
+    cookie: (token.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ")};
+  const unit = await fetch(`${base}/sap/bc/adt/abapunit/testruns`, {method: "POST",
+    headers: {...headers, "content-type": "application/xml"}, body: `<?xml version="1.0" encoding="UTF-8"?>
+<aunit:runConfiguration xmlns:aunit="http://www.sap.com/adt/aunit"><external><coverage active="false"/></external>
+<options><uriType value="semantic"/><testDeterminationStrategy sameProgram="true" assignedTests="false"/>
+<testRiskLevels harmless="true" dangerous="true" critical="false"/><testDurations short="true" medium="true" long="true"/></options>
+<adtcore:objectSets xmlns:adtcore="http://www.sap.com/adt/core"><objectSet kind="inclusive"><adtcore:objectReferences>
+<adtcore:objectReference adtcore:uri="/sap/bc/adt/oo/classes/zcl_osd_fleet_l2_maint"/>
+</adtcore:objectReferences></objectSet></adtcore:objectSets></aunit:runConfiguration>`});
+  const report = await unit.text();
+  expect(unit.ok, `ABAP Unit: HTTP ${unit.status}: ${report.slice(0, 200)}`);
+  const ran = [...report.matchAll(/<testMethod [^>]*adtcore:name="([^"]+)"/g)].map((m) => m[1].toUpperCase());
+  expect(want.length >= 5 && ran.length === want.length && want.every((m) => ran.includes(m)),
+    `ran ${ran.join(", ")}; the test class has ${want.join(", ")}`);
+  expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
+  return `class in step with the rule; ${ran.length} generated tests pass`;
 });
 
 stop();
