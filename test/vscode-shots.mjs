@@ -112,7 +112,7 @@ const seeInWebview = async (text, timeout = 60000) => {
   const until = Date.now() + timeout;
   while (Date.now() < until) {
     for (const frame of win.frames()) {
-      if (await frame.getByText(text, {exact: true}).count().catch(() => 0)) return;
+      if (await frame.getByText(text, {exact: typeof text === "string"}).count().catch(() => 0)) return;
     }
     await win.waitForTimeout(500);
   }
@@ -171,6 +171,8 @@ await step("data preview", async () => {
   await palette("View: Hide Panel");
   await open("zosd_fleet_ship.tabl.xml");
   await win.keyboard.press("F8");
+  // all six ships, the last one included
+  await seeInWebview(/ZOSD_FLEET_SHIP -- 6 rows/);
   await seeInWebview("Old Boiler");
   await win.waitForTimeout(1000);
   await shot("vscode-data-preview");
@@ -189,6 +191,16 @@ await step("debugger", async () => {
   // the method's own variables, with ls_ship and its first ship
   await win.locator(".debug-view-content .monaco-list-row", {hasText: "Local:"}).first().click();
   await see("ls_ship", win.locator(".debug-view-content").getByText("ls_ship"));
+  // the first ship: the hover over ls_ship in the stopped line shows its fields
+  const line = win.locator(".view-line", {hasText: "steam_check( ls_ship-steam_pct )"}).first();
+  // the inner span is as wide as the text, the line itself as the editor
+  const span = line.locator(":scope > span").first();
+  const box = await span.boundingBox();
+  const text = await span.textContent();
+  const at = text.indexOf("ls_ship") + 2;
+  await win.mouse.move(box.x + box.width * at / text.length, box.y + box.height / 2);
+  // the widget's first line holds the structure as JSON, cut off on screen
+  await see("S001 in ls_ship", win.locator(".debug-hover-widget").filter({hasText: '"S001"'}), 15000);
   // away from the editor, where a hover would open over the code
   await win.mouse.move(200, 460);
   await win.waitForTimeout(1500);
