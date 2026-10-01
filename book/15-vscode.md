@@ -37,18 +37,18 @@ The repository has the service's requests in one file,
 [http/fleet.http](../http/fleet.http), in the `.http` format that REST
 Client, httpYac and JetBrains also read.
 
-4. Open `http/fleet.http`. Expected: above each `GET` a line names what will
-   answer it, `ZOSD_FLEET_SRV › ShipSet › GET_ENTITYSET →
+4. Open `http/fleet.http`. Expected: above each plain `GET` a line names the
+   DPC method the request enters, `ZOSD_FLEET_SRV › ShipSet › GET_ENTITYSET →
    zcl_zosd_fleet_dpc_ext:112 (static) · last: not run`; the keyed request goes
    to `GET_ENTITY` at line 224, the voyages to line 297, where the
    redefinition serves a ship's voyages and passes a plain `VoyageSet` on to
    the generated class. The last request has a `$filter` and says
    `unresolved: query options are unsupported`.
 
-   ![http/fleet.http: above each GET the DPC method that answers it; the $filter request unresolved](img/vscode-http-lens.png)
+   ![http/fleet.http: above each plain GET the DPC method it enters; the $filter request unresolved](img/vscode-http-lens.png)
 
-5. Click the line above the `GET` of **All ships**. Expected: the DPC class opens at line
-   112, `shipset_get_entityset`.
+5. Click the line above the `GET` of **All ships**. Expected: the DPC class
+   opens at line 112, `shipset_get_entityset`.
 
 "Static" means the extension worked the method out from the service's model
 and the class's code; it did not watch a request reach it, and it names the

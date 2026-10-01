@@ -273,7 +273,10 @@ await step("call", async () => {
   await seeInWebview("/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json");
   await seeInWebview(/HTTP 200 -- \d+ ms -- 6 row\(s\)/);
   await seeInWebview("StatusText");
-  await seeInWebview("Old Boiler");
+  // all six ships, and the status texts the method fills in
+  for (const ship of ["S001", "S002", "S003", "S004", "S005", "S006", "Albatross", "Old Boiler", "Aloft", "Docked", "Maintenance"]) {
+    await seeInWebview(ship);
+  }
   await win.mouse.move(900, 470);
   await win.waitForTimeout(1000);
   await shot("vscode-call-entityset");

@@ -36,18 +36,18 @@
 [http/fleet.http](../../http/fleet.http), в формате `.http`, который читают
 также REST Client, httpYac и JetBrains.
 
-4. Откройте `http/fleet.http`. Ожидается: над каждым `GET` строка называет, что
-   на него ответит, `ZOSD_FLEET_SRV › ShipSet › GET_ENTITYSET →
+4. Откройте `http/fleet.http`. Ожидается: над каждым простым `GET` строка
+   называет метод DPC, в который входит запрос, `ZOSD_FLEET_SRV › ShipSet › GET_ENTITYSET →
    zcl_zosd_fleet_dpc_ext:112 (static) · last: not run`; запрос по ключу идет к
    `GET_ENTITY` в строке 224, рейсы - к строке 297, где переопределение
    отдает рейсы корабля, а простой `VoyageSet` передает сгенерированному
    классу. В последнем запросе есть `$filter`, и над ним написано
    `unresolved: query options are unsupported`.
 
-   ![http/fleet.http: над каждым GET метод DPC, который на него отвечает; запрос с $filter не сопоставлен с методом](../img/vscode-http-lens.png)
+   ![http/fleet.http: над каждым простым GET метод DPC, в который он входит; запрос с $filter не сопоставлен с методом](../img/vscode-http-lens.png)
 
-5. Щелкните строку над `GET` запроса **All ships**. Ожидается: класс DPC открывается на
-   строке 112, `shipset_get_entityset`.
+5. Щелкните строку над `GET` запроса **All ships**. Ожидается: класс DPC
+   открывается на строке 112, `shipset_get_entityset`.
 
 «Static» значит, что расширение вывело метод из модели службы и кода класса, а
 не увидело, как запрос до него дошел, и называет метод, в который запрос
