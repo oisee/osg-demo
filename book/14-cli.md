@@ -106,21 +106,22 @@ ones `-help` shows.
 
 ## Where the selection screen comes from
 
-The selection screen and the dynpro behind it are older than SAP. IBM's
-CICS, the transaction monitor of the 3270 terminal era, described a screen
-as a map (BMS), sent it, and ended the task; the user's answer started a new
-task, which picked up its state and went on. CICS calls this
-pseudo-conversational processing: a chain of short tasks that looks to the
-user like one conversation, so nothing waits in the system while the user
-thinks. A dynpro does the same with PBO and PAI: one dialog step sends the
-screen, the next one reads it, and the work process is free in between.
-This program is the simplest case, one screen and one answer per run.
+The idea behind the selection screen and the dynpro is older than SAP.
+IBM's guide to CICS, the transaction monitor of the 3270 terminal era,
+describes pseudo-conversational processing: a CICS program sends a screen
+(often a predefined BMS map) and ends its task; the user's input starts a new
+task, which picks up the state passed on to it. A chain of short tasks looks
+to the user like one conversation, and no transaction exists while the
+program waits for input. SAP's dialog steps work alike: a dialog step is the
+PAI of the screen the user answered followed by the PBO of the next screen,
+and while a screen waits for input no work process is held. This program is
+the simplest case, one screen and one answer per run.
 
-The same book also describes giving old 3270 screens new faces without
-changing the program behind them, for example a web front end that drives
-the terminal dialog. SAP took that path from SAP GUI to the WEBGUI of
-chapter 2; the terminal form and `-sapgui` here are two more faces of one
-selection screen.
+The guide also describes giving existing 3270 programs a new presentation
+without changing them, for example a web front end that plays the terminal
+for the unchanged program. SAP's WEBGUI is a similar idea, the same screens
+rendered as HTML in a browser (chapter 2); the terminal form and `-sapgui`
+here are two more ways to show one selection screen.
 
 Source: IBM Redbooks, *Architect's Guide to IBM CICS on System z*:
 pseudo-conversational design in chapter 1 (p. 11); the presentation layer,
