@@ -108,7 +108,7 @@ ones `-help` shows.
 
 The report is built and checked against open-steamgate's `main`, past 0.4: a
 `MESSAGE` that ends the run needs #362, the selection texts as labels #363.
-Since #364 and #369 a comma inside a template of a chained `WRITE:` and
+Since #364 and #369, a comma inside a template of a chained `WRITE:` and
 `CATCH ... INTO` a global variable compile too.
 
 - **Open SQL only on the report's own tables**, in the file `-db` names; each
