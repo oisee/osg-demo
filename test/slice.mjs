@@ -468,7 +468,9 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const withSidecars = zip(sidecarStage, join(work, "with-sidecars.zip"));
     if (withSidecars.status === 0) {
-      const inZip = spawnSync("unzip", ["-Z1", join(work, "with-sidecars.zip")], {encoding: "utf8"}).stdout;
+      const listing = spawnSync("unzip", ["-Z1", join(work, "with-sidecars.zip")], {encoding: "utf8"});
+      expect(listing.status === 0 && listing.stdout.trim(), `could not list the zip: ${listing.error?.message ?? listing.stderr}`);
+      const inZip = listing.stdout;
       expect(!/\.l2\.yaml$|\.trace\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace\.json$/.test(l)).join(", ")}`);
     } else {
       const only = [...new Set([...(withSidecars.stdout + withSidecars.stderr).matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]))];
