@@ -81,9 +81,10 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 Импорт - все или ничего. Строка, в которой пар не число,
 `S008,Gauge,A,plenty,Tinmere`, дает `Error: ship S008, steam plenty is not a
 number; nothing loaded`, и ни один корабль из файла не сохраняется. Отчет
-откатывает изменения и завершается через `MESSAGE ... TYPE 'E'`, как в
-системе: строки, написанные до него, идут в stdout, сообщение - в stderr, код
-выхода 1, так что скрипт это видит.
+откатывает изменения и завершается через `MESSAGE ... TYPE 'E'`. В системе это
+завершает программу с сообщением в строке состояния; нативная программа пишет
+строки, выведенные до него, в stdout, сообщение - в stderr и выходит с кодом
+1, так что скрипт это видит.
 
 ## Та же программа в виде формы
 
@@ -114,8 +115,8 @@ number; nothing loaded`, и ни один корабль из файла не с
   `GROUP BY` и встроенные `@DATA( )` - нет, и одна такая форма делала
   недоступным весь метод. `main` компилирует все восемнадцать; этот отчет держится
   простого `SELECT ... INTO TABLE` в стандартные таблицы.
-- **Пока нет**: запятой в строковом шаблоне цепочки `WRITE:` (отчет сначала
-  кладет сообщение в переменную), `CATCH ... INTO` глобальной переменной и
+- **Пока нет**: запятой в строковом шаблоне цепочки `WRITE:` (пишите
+  `WRITE / ...` без двоеточия), `CATCH ... INTO` глобальной переменной и
   текстов экрана выбора в подписях. `MESSAGE`, завершающему запуск, нужен
   `main` open-steamgate начиная с #362.
 - **Файлы** через `OPEN`/`READ`/`TRANSFER DATASET` и `CL_GUI_FRONTEND_SERVICES`,
@@ -138,7 +139,7 @@ open-steamgate.
 
 Вся логика программы - это `START-OF-SELECTION` отчета:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 31-64 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 30-63 -->
 ```abap
 START-OF-SELECTION.
 * a selection screen on a system upper-cases P_STATUS; the command line does not
@@ -178,7 +179,7 @@ START-OF-SELECTION.
 
 И импорт CSV: обычные операторы `DATASET`, один LUW, откат на первой плохой строке:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 103-155 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 102-154 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.

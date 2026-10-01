@@ -72,7 +72,7 @@ const results = [];
 const check = (name, args, want) => {
   const r = spawnSync(fleet, args, {cwd: run, encoding: "utf8"});
   const out = `${r.stdout}${r.stderr}`;
-  const problems = want(out, r.status, r.stderr);
+  const problems = want(out, r.status, r.stderr, r.stdout);
   results.push(!problems);
   console.log(`${problems ? "FAIL" : "ok  "}  ${name}${problems ? ` -- ${problems}\n${out}` : ""}`);
 };
@@ -94,13 +94,14 @@ check("--status M", ["-db", "fleet.sqlite", "--status", "M"], (out, rc) =>
 check("--status m is upper-cased", ["-db", "fleet.sqlite", "--status", "m"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "S004 Cumulus Maintenance 15 Cloudhaven", "2 ships"));
 // a refused import ends the run with MESSAGE ... TYPE 'E': the message on
-// stderr, exit 1, no list
+// stderr, exit 1, no list; lines written before it stay on stdout
 const refused = (out, rc, err, message) => rc !== 1 ? `rc ${rc}` : has(err, message)
   || (/ships$/m.test(out) ? "the list was written after the message" : "");
 check("--file without -allow-read: refused by the sandbox", ["-db", "fleet.sqlite", "--file", "data/ships.csv"], (out, rc, err) =>
   refused(out, rc, err, "Error: cannot read data/ships.csv, Permission denied"));
-check("a ship with a bad number: refused", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc, err) =>
-  refused(out, rc, err, "Error: ship S008, steam plenty is not a number; nothing loaded"));
+check("a ship with a bad number: refused, after the --seed line", ["-db", "fleet.sqlite", "--seed", "-allow-read", "data", "-dataset-home", "data", "--file", "bad.csv"], (out, rc, err, stdout) =>
+  refused(out, rc, err, "Error: ship S008, steam plenty is not a number; nothing loaded")
+    || has(stdout, "Already 6 ships, nothing seeded"));
 check("... and nothing of that file kept", ["-db", "fleet.sqlite"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "6 ships") || (/^S0(08|10) /m.test(out) ? "a ship of the refused file was kept" : ""));
 check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "ships.csv"], (out, rc) =>

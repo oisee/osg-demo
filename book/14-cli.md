@@ -82,9 +82,10 @@ runs it the same way.
 The import is all or nothing. A line whose steam is not a number,
 `S008,Gauge,A,plenty,Tinmere`, gives `Error: ship S008, steam plenty is not a
 number; nothing loaded`, and none of the file's ships are kept. The report
-rolls back and ends with `MESSAGE ... TYPE 'E'`, as it would on a system: the
-lines written before it go to stdout, the message to stderr, and the exit
-code is 1, so a script can tell.
+rolls back and ends with `MESSAGE ... TYPE 'E'`. On a system that ends the
+program with the message in the status bar; the native program writes the
+lines it had before it to stdout, the message to stderr, and exits with 1, so
+a script can tell.
 
 ## The same program, as a form
 
@@ -113,9 +114,9 @@ The report is built and checked against open-steamgate's `main`, past 0.4.
   table, a `SELECT` loop with `GROUP BY` and inline `@DATA( )` did not, and
   one of them made the whole method unavailable. `main` compiles all eighteen;
   this report keeps to plain `SELECT ... INTO TABLE` into standard tables.
-- **Not yet**: a comma inside a string template of a chained `WRITE:` (the
-  report puts the message in a variable first), `CATCH ... INTO` a global
-  variable, and the report's selection texts as labels. A `MESSAGE` that ends
+- **Not yet**: a comma inside a string template of a chained `WRITE:` (write
+  it as `WRITE / ...` without the colon), `CATCH ... INTO` a global variable,
+  and the report's selection texts as labels. A `MESSAGE` that ends
   the run needs open-steamgate `main` from #362 on.
 - **Files** through `OPEN`/`READ`/`TRANSFER DATASET` and `CL_GUI_FRONTEND_SERVICES`,
   inside the roots `-allow-read` / `-allow-write` grant.
@@ -135,7 +136,7 @@ The specification is open-steamgate's
 
 The whole program logic is the report's `START-OF-SELECTION`:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 31-64 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 30-63 -->
 ```abap
 START-OF-SELECTION.
 * a selection screen on a system upper-cases P_STATUS; the command line does not
@@ -175,7 +176,7 @@ START-OF-SELECTION.
 
 And the CSV import: plain `DATASET` statements, one LUW, rolled back on the first bad line:
 
-<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 103-155 -->
+<!-- code: cli/fleet/zosd_fleet_cli.prog.abap lines 102-154 -->
 ```abap
 FORM load.
   DATA lv_subrc TYPE i.
