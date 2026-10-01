@@ -35,6 +35,9 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "extensions.autoUpdate": false,
   "security.workspace.trust.enabled": false,
   "osd.home": home,
+  "chat.disableAIFeatures": true,
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.tips.enabled": false,
 }, null, 2));
 // the CLI script beside the Electron binary installs extensions
 execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
@@ -79,7 +82,8 @@ const step = async (name, body) => {
 
 await step("workbench", () => shot("vscode-00-workbench"));
 await step("start", async () => {
-  await palette("osd: Start");
+  // the exact title: a shorter query picks "osd: Choose which system Start runs"
+  await palette("osd: Start (build + run this system)");
   // the system is up when its port answers; the extension's default URL
   for (let i = 0; i < 240; i++) {
     if (await fetch("http://localhost:3030/sap/bc/adt/discovery").then((r) => r.ok, () => false)) break;
