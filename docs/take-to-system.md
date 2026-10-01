@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the four local objects or the L2 rule and trace files are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET`, and with refusals for `L2 MAINTENANCE_NO_VOYAGE` and for the `.trace.json` files of `CLAS ZCL_OSD_FLEET_L2_MAINT` (the class itself travels), and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
+and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the four local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` and `TRAN ZOSD_FLEET` (an engine before open-steamgate #346 also refuses `L2 MAINTENANCE_NO_VOYAGE` and the `.trace.json` files of `CLAS ZCL_OSD_FLEET_L2_MAINT`, whose class itself travels; later ones skip those files) and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
 
 ## What travels and what does not
 
