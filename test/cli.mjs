@@ -5,11 +5,12 @@
 //
 // open-steamgate's osabap (tools/gogen/osabap.mjs) compiles
 // cli/fleet/zosd_fleet_cli.prog.abap, with the fleet tables' definitions
-// copied from src/ddic beside it, through the ABAP-to-Go transpiler into one
-// native binary. It needs Go 1.26 on PATH and the checkout's library clones at
-// their pins (npm run bootstrap). --keep DIR leaves the binary and its working
-// folder there (test/cli-shots.mjs uses them). With GOOS/GOARCH for another
-// platform it only builds, and says where the binary is.
+// (copies of src/ddic) and its selection texts (.prog.xml) beside it, through
+// the ABAP-to-Go transpiler into one native binary. It needs Go 1.26 on PATH
+// and the checkout's library clones at their pins (npm run bootstrap).
+// --keep DIR leaves the binary and its working folder there (test/cli-shots.mjs
+// uses them). With GOOS/GOARCH for another platform it only builds, and says
+// where the binary is.
 //
 // cli/fleet holds copies of the two fleet tables' .tabl.xml, because osabap
 // compiles only the tables beside a report; this script fails when they are
@@ -69,8 +70,8 @@ writeFileSync(join(run, "data", "bad.csv"), "S010,Plover,A,40,Tinmere\nS008,Gaug
 writeFileSync(join(run, "data", "last.csv"), "S009,Kestrel,A,50,Tinmere");
 
 const results = [];
-const check = (name, args, want) => {
-  const r = spawnSync(fleet, args, {cwd: run, encoding: "utf8"});
+const check = (name, args, want, input) => {
+  const r = spawnSync(fleet, args, {cwd: run, encoding: "utf8", input});
   const out = `${r.stdout}${r.stderr}`;
   const problems = want(out, r.status, r.stderr, r.stdout);
   results.push(!problems);
@@ -80,8 +81,11 @@ const check = (name, args, want) => {
 const has = (out, ...lines) => lines.filter((l) => (/^\d+ ships$/.test(l) ? !new RegExp(`^\\s*${l}\\s*$`, "m").test(out) : !out.includes(l)))
   .map((l) => `missing "${l}"`).join("; ");
 
-check("-help is the selection screen", ["-help"], (out, rc) =>
-  rc !== 0 ? `rc ${rc}` : has(out, "--status", "--seed", "--file", "-db FILE", "-allow-read DIR"));
+// each option on its line with its selection text from the .prog.xml
+const labels = [["--status", "Status \\(A, D, M\\)", "P_STATUS"], ["--seed", "Seed the six ships", "P_SEED"], ["--file", "Ships from a CSV file", "P_FILE"]];
+check("-help is the selection screen, with its texts", ["-help"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "-db FILE", "-allow-read DIR")
+    || labels.filter(([o, t, p]) => !new RegExp(`^[ \\t]*${o}[ \\t]+${t} \\(${p},`, "m").test(out)).map(([o]) => `${o} without its text`).join("; "));
 check("no -db: refused, rc 1", ["--status", "A"], (out, rc) =>
   rc !== 1 ? `rc ${rc}` : has(out, "keeps its rows in tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE"));
 check("--seed fills the tables", ["-db", "fleet.sqlite", "--seed"], (out, rc) =>
@@ -104,6 +108,10 @@ check("a ship with a bad number: refused, after the --seed line", ["-db", "fleet
     || has(stdout, "Already 6 ships, nothing seeded"));
 check("... and nothing of that file kept", ["-db", "fleet.sqlite"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "6 ships") || (/^S0(08|10) /m.test(out) ? "a ship of the refused file was kept" : ""));
+// without a terminal the selection screen is asked line by line
+check("no options, no terminal: the fields line by line", ["-db", "fleet.sqlite"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "Status (A, D, M)", "Seed the six ships", "Ships from a CSV file", "S004 Cumulus Maintenance 15 Cloudhaven", "2 ships")
+    || (out.includes("S001") ? "S001 is not in maintenance" : ""), "M\n\n\n");
 check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "ships.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Loaded 2 ships from ships.csv", "S004 Cumulus Docked 95 Cloudhaven", "S007 Zephyr Aloft 77 Cloudhaven", "7 ships")
     || (/S008|S010/.test(out) ? "a ship of the refused file was kept" : ""));
