@@ -1,0 +1,65 @@
+name: vscode shots (spike)
+
+# SPIKE: screenshots of VS Code with the open-steamgate extension under
+# xvfb-run (docs/spike-vscode-shots.md). Runs on pushes to spike/vscode-shots
+# and by hand; the screenshots are a workflow artifact, nothing is committed.
+on:
+  push:
+    branches: [spike/vscode-shots]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: demo
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: oisee/open-steamgate
+          ref: main
+          path: osd
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: osd/package-lock.json
+      - name: Install and bootstrap OSD, Playwright's Chromium deps
+        working-directory: osd
+        run: |
+          npm ci
+          npm run bootstrap
+          npx playwright install-deps chromium
+      - name: VS Code and the latest released extension
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sL -o "$RUNNER_TEMP/code.tgz" "https://update.code.visualstudio.com/latest/linux-x64/stable"
+          tar xzf "$RUNNER_TEMP/code.tgz" -C "$RUNNER_TEMP"
+          gh release download --repo oisee/open-steamgate --pattern '*.vsix' --dir "$RUNNER_TEMP/vsix" \
+            "$(gh release list --repo oisee/open-steamgate --limit 20 --json tagName,isDraft --jq '[.[]|select(.isDraft|not)|select(.tagName|startswith("vscode-"))][0].tagName')"
+          ls "$RUNNER_TEMP/vsix"
+      - name: A neutral copy of the demo as the workspace
+        run: cp -r demo /tmp/osg-demo && rm -rf /tmp/osg-demo/.git
+      - name: Take the shots
+        working-directory: demo
+        env:
+          CODE: ${{ runner.temp }}/VSCode-linux-x64/code
+          OSD_HOME: ${{ github.workspace }}/osd
+          WS: /tmp/osg-demo
+          OUT: ${{ runner.temp }}/shots
+        run: |
+          export VSIX=$(ls "$RUNNER_TEMP"/vsix/*.vsix | head -1)
+          xvfb-run -a --server-args="-screen 0 1280x800x24" node test/vscode-shots.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vscode-shots
+          path: ${{ runner.temp }}/shots
