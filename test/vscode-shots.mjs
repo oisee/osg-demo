@@ -167,6 +167,10 @@ await step("classrun", async () => {
 await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
   // test item points at
+  // no "Test: Refresh Tests": the Testing tree fills itself after osd: Start
+  // (0.4.1444). Ctrl+Shift+F10 runs only the test items of this file, so the
+  // result below proves they are there; on 0.4.1414 the same key, without a
+  // refresh, ran nothing
   await open("zosd_demo_hello.clas.abap");
   await win.waitForTimeout(3000);
   await win.keyboard.press("Control+Shift+F10");

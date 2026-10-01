@@ -41,20 +41,27 @@ The script's header says how to run it. It takes eight pictures:
 - Readiness: the status bar shows `osd <generation> · SQLite` once the system
   serves.
 
-## Found in the extension (0.4.1414, reported to its owner)
+## Found in the extension (reported to its owner)
 
-The first two are fixed in 0.4.1444, which the pictures now use; the script
-no longer needs their workarounds.
+Fixed in 0.4.1444, which the pictures now use; neither workaround applies
+there, and the script uses neither:
 
+- **Breakpoints (0.4.1414):** the extension declared no ABAP language, so an
+  `.abap` file opened as Plain Text and VS Code refused a breakpoint there;
+  `debug.allowBreakpointsEverywhere` worked around it. Chapter 2 keeps it as a
+  note for 0.4.1414.
+- **Test tree (0.4.1414):** the Testing tree was built before the system
+  served, so it had no workspace tests until **Test: Refresh Tests**. Chapter 1
+  keeps it as a note for 0.4.1414; the script checks that the tree fills
+  itself.
 
-- **Breakpoints:** the extension declares no ABAP language, so an `.abap` file
-  opens as Plain Text and VS Code refuses a breakpoint there.
-  `debug.allowBreakpointsEverywhere` works around it; chapter 2 says so.
-- **Test tree:** the Testing tree is built before the system serves, so it has
-  no workspace tests until **Test: Refresh Tests**; chapter 1 says so.
+Still open, seen on 0.4.1414 and again on 0.4.1444:
+
 - **Variables:** the Variables view and the debug hover show the runtime's
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
   the hover's first line carries the structure as JSON, which is where the
   script finds `S001`. Chapter 2 says so.
-- **Attach debugger and call ShipSet:** a breakpoint in the DPC method stayed
-  unbound and the call ran through; chapter 15 says so.
+- **Attach debugger and call ShipSet:** a breakpoint in the DPC method stays
+  unbound (on 0.4.1414 the call ran through); chapter 15 says so.
+- **Service details:** the Details page lists redefined methods as
+  "inherited (generic)"; chapter 15 says so.

@@ -71,9 +71,10 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 7. **Attach debugger and call ShipSet**, beside it, sends the same request
    with the debugger attached, to stop on a breakpoint in the method (on a
    statement such as `lt_ship_id = ranges_for(`; a `DATA` line never stops).
-   It does not stop yet: in our runs on 0.4.1414 and 0.4.1444 a breakpoint in
-   the method stayed unbound (a hollow dot), and on 0.4.1414 the call answered
-   as in step 6. This is reported to the extension's owner.
+   In our run on 0.4.1414 it did not stop: the breakpoint stayed unbound (a
+   hollow dot) and the call answered as in step 6. On 0.4.1444 the breakpoint
+   still shows hollow before the call. This is reported to the extension's
+   owner.
 
 ## Who uses this class
 
