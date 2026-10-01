@@ -22,7 +22,7 @@ statuses.
 
 ## This edition
 
-Written against open-steamgate 0.4.0 (`main` at 17ac360b, before the tag):
+Written against open-steamgate 0.4 (extension 0.4.1413, released 2026-10-01):
 `BP_JOB_SELECT` with SAP's `BTCSELECT` fields, F9 and Ctrl+Shift+F10 as
 described, and the DSL layers up to L2 slice 2. **This demo needs
 open-steamgate 0.4 or later.** On the extension 0.3.1370 the pack does not
@@ -36,8 +36,7 @@ for readers who meet its key behaviour elsewhere.
    pre-release): search for it in the Extensions view, or take the `.vsix`
    from the latest
    [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
-   (0.4 or later; until the 0.4 release is out, run the pack from an
-   open-steamgate checkout of `main` with `OSD_PACKS`, as shown below) and
+   (0.4.1413 or later) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
@@ -71,4 +70,5 @@ at a line (0.4); chapter 1 says what to do on 0.3.1370.
 | Out of the sandbox | 7 Take it to a system | an abapGit zip with what may travel |
 | Operations | 8 Business log, 9 Background jobs | BAL logs, a job, a job chain, a doctor |
 | Code that writes code | 10 Generated code, 11 Lift, 12 Rules, 13 Trace | templates and traces (L0, L1, L2), a lifted routine, a fleet rule compiled to ABAP with its proof, one line traced back to the rule |
+| Out of the server | 14 My ABAP escaped | a report compiled into a native command line program and terminal form |
 | Appendices | A Run the checks, B Take it to a system (what travels), C Limits and glossary | the automated checks, the transport list, the fine print |

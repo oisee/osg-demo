@@ -17,12 +17,18 @@ AND voy~dep_date > iv_date
 
 Ее запись в файле трассировки:
 
+<!-- code: src/l2/zcl_osd_fleet_l2_maint.clas.trace.json lines 224-230 -->
 ```json
-{"line": 32, "template_line": 102, "path": "/queries/1/where/2/pre",
- "node": "rule/maintenance-ship-no-voyage/forbid/where/2", "rule_line": 14}
+{
+ "line": 32,
+ "template_line": 134,
+ "path": "/queries/1/where/2/pre",
+ "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
+ "rule_line": 14
+},
 ```
 
-- `template_line` 102 - строка шаблона open-steamgate
+- `template_line` - строка шаблона open-steamgate
   `recipes/l2-check/template.tpl`, которая печатает условие `WHERE`;
 - `path` - место в модели L1, откуда взято значение: второе условие первого
   запроса;
@@ -41,9 +47,10 @@ AND voy~dep_date > iv_date
 
 Рецензент, увидевший строку в сгенерированном коде, одним поиском находит
 строку правила, которая ее создала, а строка, изменившаяся после пересборки,
-называет изменившуюся строку правила. Файл трассировки также записывает,
-какой шаблон и какая модель (хэш) дали класс, так что устаревшая трассировка
-заметна.
+называет изменившуюся строку правила. Файл трассировки также записывает
+шаблон (по пути) и модель (по хэшу), которые дали класс. Измененная модель
+видна по хэшу, измененный шаблон - нет, поэтому `test/l2.mjs` пересобирает и
+сравнивает файлы, и ловит это именно он.
 
 Прочитать весь файл:
 `node -e "for (const e of require('./src/l2/zcl_osd_fleet_l2_maint.clas.trace.json').lines) console.log(e.line, e.rule_line, e.node)"`.

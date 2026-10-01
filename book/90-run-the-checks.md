@@ -12,6 +12,7 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 | `test/jobs.mjs` | 7: one job, both chains, the doctor | SQLite file | yes |
 | `test/lift.mjs` | the lifted region is in step with its recipe | any | through slice check 16 |
 | `test/l2.mjs` | the L2 rule's class and traces are what the rule builds to (`--write` rebuilds) | any | through slice check 17 |
+| `test/cli.mjs` | builds the fleet's command line program with osabap (Go 1.26) and runs chapter 14's steps as checks | SQLite file | yes |
 | `test/book-snippets.mjs` | every code excerpt in the book equals its source in `src/` (`--write` refreshes them) | none needed | yes, first step |
 | `test/book-shots.mjs` | retakes the screenshots in `book/img/` from a running engine | SQLite | no, run by hand |
 
