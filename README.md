@@ -31,6 +31,8 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 9 | [Background jobs](book/09-background-jobs.md) | [Задания](book/ru/09-background-jobs.md) | a job, a chain of two, a failing chain that waits, a doctor | `ZCL_OSD_FLEET_JOB`, `ZCL_OSD_FLEET_CHAIN`, `ZCL_OSD_FLEET_DOCTOR` |
 | 10 | [Generated code](book/10-generated-code.md) | [Генерация](book/ru/10-generated-code.md) | a report from a template with a trace per line; the L0/L1/L2 layers | `ZCL_OSD_FLEET_TPL` |
 | 11 | [Lift a legacy routine](book/11-lift.md) | [Lift](book/ru/11-lift.md) | a SELECT in a loop rewritten from a model, proven equal | `ZCL_OSD_FLEET_LIFT` |
+| 12 | [Rules, code and proof](book/12-rules.md) | [Правила](book/ru/12-rules.md) | a fleet rule in YAML compiled to ABAP, proven by its examples | `ZCL_OSD_FLEET_L2_MAINT` |
+| 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json` |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -43,22 +45,23 @@ Chapters 10 and 11 use open-steamgate's generation layers, in which a generated 
 |---|---|---|---|
 | **L0** templates | a template and a JSON model | text, each line traced to template line and model path | chapter 10; chapter 11's lift renders its recipe this way |
 | **L1** typed model | nothing: a generator fills it | ABAP from recipes, typed literals, a trace per line | chapter 10 (overview; the demo has no L1 generator of its own) |
-| **L2** domain rules | a rule in the domain's words | a check class and its tests, traced to the rule's lines | chapter 10 (overview; no rule of its own yet) |
+| **L2** domain rules | a rule in the domain's words | a check class and its tests, traced to the rule's lines | chapters 12 and 13 |
 
 ## Check it
 
 In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then:
 
 ```
-OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 21 checks, SQLite; 20 run, the UI one is skipped
+OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
+OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
 ```
 
-CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check. [Appendix A](book/90-run-the-checks.md) says what each covers.
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
 ## Repository map
 

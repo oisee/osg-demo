@@ -10,7 +10,7 @@
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/zosd_fleet.tran.xml
+rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
@@ -20,7 +20,7 @@ rm -rf "$(dirname "$STAGE")"
 Получив саму папку, инструмент рассматривает ее как пак (pack): он компилирует `src/zosd_fleet.stg.yaml` в объекты SEGW, отдает предпочтение написанному вручную `ZCL_ZOSD_FLEET_DPC_EXT` перед сгенерированным и превращает `webapp/` в BSP-приложение с его узлом ICF. Ожидается: `/tmp/osg-demo.zip: ... deploy unit "osg-demo"`, затем что попало в архив, по типам объектов (инструмент дополняет (pad) имена IWSV/IWMO перед их версией, а строка SICF заканчивается идентификатором узла; здесь и то и другое сокращено):
 
 ```
-CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_chain, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_lift, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_chain, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_l2_maint, zcl_osd_fleet_lift, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
 DDLS  zc_osd_fleetcube
 IWMO  zosd_fleet_mdl 0001
 IWPR  zosd_fleet
@@ -60,6 +60,7 @@ NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows an
 | Плитка панели запуска | нет | Плитка - это `osd-pack.json`, который читает только панель запуска open-steamgate. В системе на inbound `AirshipFleet-display` в манифесте указывали бы каталог launchpad и целевое сопоставление; ни того, ни другого в zip нет. |
 | Начальные строки (`data/*.tabu.json`) | нет | Понадобились бы две вещи, и ни одной здесь нет: `.conf.json` рядом с каждым `.tabu.json` (инструкция abapGit: какая таблица, какое условие) и запись `TABU <table>` в модуле развертывания (без нее инструмент отвергает строки как `not-in-manifest`). При наличии обеих строки были бы записаны в мандант входа в систему, что бы ни стояло в их `MANDT`. |
 | `ZCL_OSD_FLEET_LIFT` и `ltcl_fleet_lift` | да | Обычный Open SQL над таблицами флота; после генерации поднятая область - обычный ABAP. Его HARMLESS-тесты читают начальные строки (seed), поэтому проходят только тогда, когда строки есть. `test/lift.mjs`, который заново генерирует область, требует open-steamgate и в систему не переносится. |
+| `ZCL_OSD_FLEET_L2_MAINT` и его тестовый класс | да | Сгенерирован из `src/l2/maintenance_no_voyage.l2.yaml` компилятором L2 open-steamgate, но после генерации это обычный Open SQL. Его тестовый класс имеет `DANGEROUS`: он вставляет строки своих примеров в таблицы флота и снова удаляет их. Файл правила и файлы `*.trace.json` - файлы этого репозитория и не переносятся. |
 | `ZCL_OSD_FLEET_DOCTOR` | нет | Он обращается к «доктору» заданий open-steamgate `ZCL_OSD_JOB_DOCTOR`; в системе на тот же вопрос отвечают SM37 и журнал задания. |
 | `ZCL_OSD_FLEET_TPL` | нет | Он формирует текст через `ZCL_OSD_TPL` и `ZCL_AJSON` среды выполнения open-steamgate; в системе нет ни того, ни другого, если оба не импортированы заранее. |
 | Транзакция `ZOSD_FLEET` и `ZCL_OSD_FLEET_TRAN` | нет | Класс реализует `ZIF_OSD_TRANSACTION`, интерфейс среды выполнения open-steamgate, которого в системе нет, поэтому ни того, ни другого нет в модуле развертывания. |

@@ -1,0 +1,56 @@
+# A fleet rule in DSL L2 (open-steamgate docs/dsl-l2.md). Build the check
+# class, its test class and their traces with, in an open-steamgate checkout:
+#   node tools/dsl-l2.mjs build <osg-demo>/src/l2/maintenance_no_voyage.l2.yaml \
+#     --out <osg-demo>/src/l2 --ddic <osg-demo>/src/ddic --ddic .local/lars/open-abap-core/src
+# The examples use ships X001-X003 and dates after the seeded voyages, so the
+# seed rows of chapters 1-11 never meet them.
+rule: maintenance-ship-no-voyage
+class: zcl_osd_fleet_l2_maint
+title: A ship in maintenance has no voyage departing after the check date
+for: ZOSD_FLEET_SHIP as ship
+when: ship.status = 'M'
+forbid:
+  exists: ZOSD_FLEET_VOY as voy
+  where: voy.ship_id = ship.ship_id and voy.dep_date > $date
+alert: "{ship.ship_id} {ship.name}: in maintenance, voyage {voy.voyage_id} departs {voy.dep_date}"
+boundaries: auto
+examples:
+  - name: flagged
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X001, name: Zephyr, status: M}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00001, ship_id: X001, dep_date: 20270305}]
+    expect:
+      - "X001 Zephyr: in maintenance, voyage X00001 departs 20270305"
+  - name: an earlier voyage
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X001, name: Zephyr, status: M}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00002, ship_id: X001, dep_date: 20270220}]
+    expect: []
+  - name: departs on the check date
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X001, name: Zephyr, status: M}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00003, ship_id: X001, dep_date: 20270301}]
+    expect: []
+  - name: a ship aloft is fine
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X002, name: Halcyon, status: A}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00004, ship_id: X002, dep_date: 20270310}]
+    expect: []
+  - name: one alert per voyage
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP:
+        - {ship_id: X001, name: Zephyr, status: M}
+        - {ship_id: X003, name: Skylark, status: M}
+      ZOSD_FLEET_VOY:
+        - {voyage_id: X00005, ship_id: X001, dep_date: 20270320}
+        - {voyage_id: X00006, ship_id: X001, dep_date: 20270302}
+        - {voyage_id: X00007, ship_id: X003, dep_date: 20270315}
+    expect:
+      - "X001 Zephyr: in maintenance, voyage X00006 departs 20270302"
+      - "X003 Skylark: in maintenance, voyage X00007 departs 20270315"
+      - "X001 Zephyr: in maintenance, voyage X00005 departs 20270320"
