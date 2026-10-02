@@ -19,6 +19,10 @@
 //     second schedule( ) answers the same instance; the classrun run again
 //     unschedules it at once, and the worker then finds nothing to run. The
 //     02:00 start itself is not run.
+//  6. G1, G2 (chapter 17): the watch set, the same stages under a governor
+//     with a glass of one open alert, runs in jobs and stops at its glass
+//     after one of S004's two alerts; ZCL_OSD_FLEET_WATCH_GLASS continues it
+//     with a reason, one more job runs, and the run completes with both.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -222,6 +226,52 @@ await check("N5 schedule: L3_NIGHT_D waits once; switched off, nothing waits", a
   const idle = JSON.parse(cli("work").stdout);
   expect(idle.kind === "empty", `the worker ran something: ${JSON.stringify(idle).slice(0, 300)}`);
   return `job count ${match[1]}, then deleted`;
+});
+
+// chapter 17: the watch set, the night set under a governor whose glass
+// is one open alert per run; the two S004 alerts cannot both get through
+let watch;
+await check("G1 governor: the run in jobs stops at its glass", async () => {
+  const text = await classrun("ZCL_OSD_FLEET_WATCH_JOBS");
+  const match = /^Watch set, mode P, run ([A-F0-9]{32}): SUBMITTED$/m.exec(text);
+  expect(match, `not submitted: ${text}`);
+  watch = match[1];
+  const worked = [];
+  for (let i = 0; i < 12; i++) {
+    const result = JSON.parse(cli("work").stdout);
+    if (result.kind === "empty") break;
+    worked.push(result);
+  }
+  expect(worked.length === 7 && worked.every((w) => w.kind === "completed"), `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
+  const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
+  // which of the two checks meets the glass depends on the order of the jobs
+  inOrder(state, [`Watch set, run ${watch}`, "Stage 1 candidates: DONE", "Stage 2 checks: PARTIAL",
+    /^ {2}(low-steam|maintenance)-voyage pile 2: GLASS \(GLASS\)$/,
+    "Budget: GLASS, glass 1, reserved 1, consumed 1, refunded 0",
+    "Event 1 WARN: glass 1, reserved 1", "Event 2 NARROW: glass 1, reserved 1",
+    "Event 3 GLASS: glass 1, reserved 1, amount 1, \"reservation does not fit\"",
+    /^Event 4 GLASS-STAGE: glass 1, reserved 1, amount 2$/, /^Alert (low-steam|maintenance)-voyage: S004 Cumulus: /, "1 alerts"]);
+  return `run ${watch}: GLASS after one alert`;
+});
+
+await check("G2 glass: a person continues with a reason; the run completes", async () => {
+  expect(watch, "nothing was submitted");
+  const text = await classrun("ZCL_OSD_FLEET_WATCH_GLASS");
+  expect(text.includes(`Continue run ${watch} with glass 2: X`), `not continued: ${text}`);
+  const worked = [];
+  for (let i = 0; i < 6; i++) {
+    const result = JSON.parse(cli("work").stdout);
+    if (result.kind === "empty") break;
+    worked.push(result);
+  }
+  expect(worked.length === 1 && worked[0].kind === "completed", `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
+  const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
+  inOrder(state, [`Watch set, run ${watch}`, "Stage 2 checks: DONE",
+    "Budget: NARROW, glass 2, reserved 2, consumed 2, refunded 0",
+    /^Event 5 CONTINUE: glass 2, reserved 1, amount 2, "S004 known: maintenance planned, owner informed" by \S+$/,
+    "Event 6 NARROW: glass 2, reserved 2", ...ALERTS]);
+  expect(!/GLASS \(|FAILED|PLANNED/.test(state.split("Budget:")[0]), `a pile is not DONE: ${state}`);
+  return `one more job, ${worked[0].run.jobName}; DONE with both alerts`;
 });
 
 stop();

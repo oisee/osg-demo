@@ -36,6 +36,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 14 | [My ABAP escaped from the server](book/14-cli.md) | [Сбежал с сервера](book/ru/14-cli.md) | a report compiled into a native CLI and terminal form, its own SQLite file | `ZOSD_FLEET_CLI` (`cli/`) |
 | 15 | [The workbench](book/15-vscode.md) | [Рабочее место](book/ru/15-vscode.md) | from a service to its code and back in VS Code: the System view, `.http` requests, a call to its HTTP answer | `http/fleet.http` |
 | 16 | [Orchestration: the night set](book/16-orchestration.md) | [Оркестрация](book/ru/16-orchestration.md) | a set of rules in stages: a filter fills a worklist, piles run as jobs, a gate opens the next stage once, a nightly schedule | `ZCL_OSD_FLEET_NIGHT` (`src/l3/`) |
+| 17 | [The governor](book/17-governor.md) | [Регулятор](book/ru/17-governor.md) | a budget of open alerts per run: the run stops at its glass, a person continues it with a reason | `ZCL_OSD_FLEET_WATCH` (`src/l3/`) |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -59,7 +60,7 @@ In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
-OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              # chapter 16's night set, 5 checks
+OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              # chapters 16 and 17: the night set and its governor, 7 checks
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
@@ -76,7 +77,7 @@ CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser c
 
 | Where | What |
 |---|---|
-| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to; `src/l3/` the night set (DSL L3), its rules, what they build to and its classruns |
+| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to; `src/l3/` the night set and the watch set (DSL L3, chapters 16 and 17), their rules, what they build to and their classruns |
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
 | `cli/` | the fleet's command line program (chapter 14), not part of the pack |

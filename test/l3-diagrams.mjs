@@ -1,4 +1,4 @@
-// Diagrams of the night set for book chapter 16, English and Russian, into
+// Diagrams of the night set for book chapters 16 and 17, English and Russian, into
 // book/img/l3-*.png and book/img/l3-*.ru.png:
 //
 //   OSD_HOME=<open-steamgate checkout> node test/l3-diagrams.mjs
@@ -7,7 +7,8 @@
 // their jobs, the worklist, the gate) and from docs/dsl-l3.md of
 // open-steamgate (the race at the gate, a failed pile), then photographed
 // with open-steamgate's Playwright Chromium. Nothing is read from a run: job
-// names and keys are those of the fleet's seed for 2026-10-01.
+// names and keys are those of the fleet's seed for 2026-10-01. The glass
+// picture (chapter 17) draws the run test/l3.mjs G1 and G2 check.
 import {mkdirSync} from "node:fs";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
@@ -252,7 +253,37 @@ function gate(t) {
   return svg(1045, 400, b);
 }
 
-const pictures = {shape, piles, timeline, gate};
+// 5. the governor's budget through one run of the watch set (chapter 17)
+function glass(t) {
+  let b = "";
+  b += text(20, 30, t("Budget of the run: open alerts people must answer", "Бюджет прогона: открытые сообщения, на которые отвечают люди"), {anchor: "start", weight: 700});
+  // the funnel
+  const f = [[t("hits", "попадания"), "2", C.job, C.jobe], [t("distinct keys", "разные ключи"), "2", C.s1, C.s1e],
+    [t("auto-closed", "закрыты сами"), "0", C.ghost, C.line], [t("open: need a person", "открыты: нужен человек"), "2", C.alert, C.alerte]];
+  f.forEach(([label, n, fill, stroke], i) => {
+    const w = 280 - i * 20, x = 20 + i * 10;
+    b += box(x, 48 + i * 40, w, 32, fill, stroke, [[`${label}: ${n}`, {size: 13}]], {r: 6});
+  });
+  b += text(20, 222, t("autoclose: none; glass = 1", "autoclose: none; стекло = 1"), {anchor: "start", size: 12, fill: C.soft, mono: true});
+  // the state line
+  const states = [["RUNNING", C.paper, C.line, 380], ["WARN", C.work, C.worke, 492], ["NARROW", C.work, C.worke, 604],
+    ["GLASS", C.fail, C.alerte, 716], ["CONTINUE", C.s2, C.s2e, 838], ["NARROW", C.work, C.worke, 965]];
+  b += `<line x1="380" y1="80" x2="1000" y2="80" stroke="${C.line}" stroke-width="2"/>`;
+  for (const [st, fill, stroke, x] of states) b += box(x - 48, 64, 96, 32, fill, stroke, [[st, {mono: true, size: 12, weight: 700}]], {r: 6});
+  const note = (x, y, lines, color = C.soft) => lines.forEach((l, i) => { b += text(x, y + i * 16, l, {size: 12, fill: color}); });
+  note(492, 116, [t("1st alert", "1-е"), t("1/1 ≥ warn", "1/1 ≥ warn")]);
+  note(604, 116, [t("≥ narrow_at:", "≥ narrow_at:"), t("one chain", "одна цепочка")]);
+  note(716, 116, [t("2nd alert", "2-е сообщение"), t("does not fit", "не помещается"), t("stage 2 PARTIAL", "этап 2 PARTIAL")], C.alerte);
+  note(838, 116, [t("a person:", "человек:"), t("glass 2 + reason", "стекло 2 + причина"), t("1 job again", "1 задание снова")], C.s2e);
+  note(965, 116, [t("reserved 2/2", "резерв 2/2"), t("stage 2 DONE", "этап 2 DONE")]);
+  b += box(340, 178, 690, 50, C.gate, C.gatee, [
+    [t("continue_glass( run, 2, 'S004 known: maintenance planned, owner informed' )", "continue_glass( прогон, 2, 'S004 known: maintenance planned, owner informed' )"), {mono: true, size: 11}],
+    [t("event CONTINUE: who, when, old and new glass, the reason", "событие CONTINUE: кто, когда, старое и новое стекло, причина"), {size: 12}]], {lh: 20});
+  b += arrow(838, 176, 838, 168, {color: C.gatee});
+  return svg(1045, 245, b);
+}
+
+const pictures = {shape, piles, timeline, gate, glass};
 const {chromium} = createRequire(join(home, "package.json"))("playwright");
 const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePath: process.env.SLICE_CHROMIUM} : {});
 try {
