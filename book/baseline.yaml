@@ -3,5 +3,5 @@
 # version. Strictly: any N.N.N number or vscode-v tag in those three files must
 # be this one, so a stale mention cannot slip through; an IP address, a dotted
 # date or another tool's version there would stop the build too.
-extension: "0.6.1504"
-tag: "vscode-v0.6.1504"
+extension: "0.6.1511"
+tag: "vscode-v0.6.1511"

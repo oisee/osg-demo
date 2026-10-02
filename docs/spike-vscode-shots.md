@@ -43,7 +43,7 @@ The script's header says how to run it. It takes eight pictures:
 
 ## Found in the extension (reported to its owner)
 
-The pictures use 0.6.1504, where four of the five are fixed and the script
+The pictures use 0.6.1511, where four of the five are fixed and the script
 needs no workaround:
 
 - **Breakpoints (0.4.1414, fixed in 0.4.1444):** the extension declared no
@@ -64,7 +64,7 @@ needs no workaround:
   session verifies breakpoints, and gave up. The script checks the debugged
   call after a plain one, in the long session.
 
-Still open on 0.6.1504:
+Still open on 0.6.1511:
 
 - **Variables:** the Variables view and the debug hover show the runtime's
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
