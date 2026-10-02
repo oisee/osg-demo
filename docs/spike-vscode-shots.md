@@ -43,8 +43,8 @@ The script's header says how to run it. It takes eight pictures:
 
 ## Found in the extension (reported to its owner)
 
-The pictures use 0.5.1486, where all but one are fixed and the script needs
-no workaround:
+The pictures use 0.5.1486, where four of the five are fixed and the script
+needs no workaround:
 
 - **Breakpoints (0.4.1414, fixed in 0.4.1444):** the extension declared no
   ABAP language, so an `.abap` file opened as Plain Text and VS Code refused a
@@ -52,16 +52,17 @@ no workaround:
 - **Test tree (0.4.1414, fixed in 0.4.1444):** the Testing tree was built
   before the system served, so it had no workspace tests until **Test:
   Refresh Tests**. The script checks that the tree fills itself.
-- **Service details (0.4.1414, 0.4.1444):** the Details page listed redefined
-  methods as "inherited (generic)"; 0.5 marks them "redefined" with their
-  line.
-- **Attach debugger and call ShipSet (0.4.1414–0.5.1467):** a breakpoint in
-  the DPC method could stay unbound, or stay bound and never hit: after a
-  plain "Call ShipSet", in a longer session, and on 0.5.1467 in every case,
-  also in chapter 2's classrun. js-debug attaches as two sessions and only the
-  child verifies breakpoints; the extension waited on the parent and dropped
-  the call. Fixed in 0.5.1486; the script checks the debugged call after a
-  plain one, in the long session.
+- **Service details (0.4.1414 and 0.4.1444; fixed in 0.5.1467):** the
+  Details page listed redefined methods as "inherited (generic)"; 0.5.1467
+  marks them "redefined" with their line.
+- **Attach debugger and call ShipSet (fixed in 0.5.1486):** on 0.4.1414 the
+  breakpoint in the DPC method stayed unbound (the Plain Text problem above).
+  On 0.4.1444 a bound breakpoint was not hit after a plain "Call ShipSet" or
+  in a longer session; the call ran through. On 0.5.1467 neither the debugged
+  DPC call nor chapter 2's debugged classrun sent its request at all: the
+  extension waited on js-debug's parent session, while only the child
+  session verifies breakpoints, and gave up. The script checks the debugged
+  call after a plain one, in the long session.
 
 Still open on 0.5.1486:
 

@@ -19,7 +19,7 @@ uses it. Start the system first (`osd: Start`, chapter 1).
    `StatusVHSet get_entityset` and the three `get_entity`. A click on the
    service opens its details: the DPC and MPC classes, a `$metadata` link and
    the entity sets. The methods `ZCL_ZOSD_FLEET_DPC_EXT` redefines are marked
-   "redefined" with their line, a link to it; the others are "inherited
+   "redefined" with a link to their line; the others are "inherited
    (generic)".
 
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
@@ -60,7 +60,8 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
 6. In `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
    `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
-   stops), and click **Attach debugger and call ShipSet** above the method.
+   stops), wait until its dot is filled, and click **Attach debugger and call
+   ShipSet** above the method.
    Expected: the request stops on the breakpoint. Stop the session (Shift+F5)
    and remove the breakpoint.
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
