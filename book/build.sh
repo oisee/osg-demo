@@ -26,8 +26,8 @@ shopt -s nullglob
 # one file name per line, regular files only (a directory named NN-x.md is not
 # a chapter); names may hold spaces
 chapters() { local f; for f in "$1"/[0-9][0-9]-*.md; do [ -f "$f" ] && printf '%s\n' "${f##*/}"; done; return 0; }
-mapfile -t names < <({ chapters .; echo 91-take-to-system.md; } | sort -u)
-mapfile -t ru_names < <(chapters ru | sort)
+mapfile -t names < <({ chapters .; echo 91-take-to-system.md; } | LC_ALL=C sort -u)
+mapfile -t ru_names < <(chapters ru | LC_ALL=C sort)
 if [ "${#names[@]}" -lt 2 ] || [ "${#ru_names[@]}" -lt 2 ]; then
   echo "book/build.sh: no chapters found (book/NN-*.md, book/ru/NN-*.md)" >&2
   exit 1
