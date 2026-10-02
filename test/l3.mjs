@@ -5,8 +5,9 @@
 //   OSD_HOME=<open-steamgate checkout> node test/l3.mjs [--print]
 //
 // A pile reads its keys with I BT ranges, which @abaplint/runtime expands in
-// SQL from 2.13.96; where the checkout has an older one,
-// `npm install --no-save @abaplint/runtime@2.13.96` in it.
+// SQL from 2.13.93; where the checkout has an older one,
+// `npm install --no-save @abaplint/runtime@2.13.96` in it (the version the
+// chapter was run with).
 //
 //  1. N1: ZCL_OSD_FLEET_NIGHT_RUN runs the set in one dialog step (mode S) for
 //     2026-10-01: the filter stage puts S001 S003 S004 S005 on the worklist
@@ -20,8 +21,9 @@
 //  4. N4: ZCL_OSD_FLEET_NIGHT_STATE shows that run DONE with the same
 //     worklist and the same two alerts as N1;
 //  5. N5: ZCL_OSD_FLEET_NIGHT_SCHEDULE schedules the driver L3_NIGHT_D, a
-//     second schedule( ) answers the same instance; the worker leaves it
-//     waiting for 02:00; the classrun run again unschedules it.
+//     second schedule( ) answers the same instance; one worker pass imports
+//     it from the facade's outbox and leaves it waiting for 02:00; the
+//     classrun run again unschedules it. The 02:00 start itself is not run.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -155,7 +157,11 @@ function inOrder(text, want) {
 
 await check("N1 mode S: the worklist busy, then two alerts on S004", async () => {
   const text = await classrun("ZCL_OSD_FLEET_NIGHT_RUN");
-  inOrder(text, [/^Night set, mode S, run [A-F0-9]{32}: DONE$/, "Stage 1 candidates: DONE", "Stage 2 checks: DONE",
+  inOrder(text, [/^Night set, mode S, run [A-F0-9]{32}: DONE$/, "Stage 1 candidates: DONE",
+    "  busy-ship pile 1 S001-S002: DONE, 1 keys", "  busy-ship pile 2 S003-S004: DONE, 2 keys",
+    "  busy-ship pile 3 S005-S006: DONE, 1 keys", "Stage 2 checks: DONE",
+    "  low-steam-voyage pile 1 S001-S003: DONE, 0 alerts", "  low-steam-voyage pile 2 S004-S005: DONE, 1 alerts",
+    "  maintenance-voyage pile 1 S001-S003: DONE, 0 alerts", "  maintenance-voyage pile 2 S004-S005: DONE, 1 alerts",
     "Worklist busy: S001 S003 S004 S005", ...ALERTS]);
   return "S001 S003 S004 S005; S004 low steam and in maintenance";
 });
@@ -167,9 +173,9 @@ await check("N2 mode P: stage 1 in three jobs, stage 2 waiting", async () => {
   expect(match, `not submitted: ${text}`);
   run = match[1];
   inOrder(text, ["Stage 1 candidates: OPEN",
-    /^ {2}busy-ship pile 1 S001-S002: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
-    /^ {2}busy-ship pile 2 S003-S004: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
-    /^ {2}busy-ship pile 3 S005-S006: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
+    "  busy-ship pile 1 S001-S002: PLANNED, 0 keys in job L3_NIGHT_101_0001",
+    "  busy-ship pile 2 S003-S004: PLANNED, 0 keys in job L3_NIGHT_101_0002",
+    "  busy-ship pile 3 S005-S006: PLANNED, 0 keys in job L3_NIGHT_101_0003",
     "Stage 2 checks: WAITING", "Worklist busy:", "0 alerts"]);
   return `run ${run}`;
 });
@@ -214,11 +220,14 @@ await check("N5 schedule: L3_NIGHT_D waits once; switched off, nothing waits", a
   const match = /^Scheduled L3_NIGHT_D (\S+); again: (\S+)$/m.exec(on);
   expect(match && match[1] === match[2], `not scheduled once: ${on}`);
   expect(on.includes(`Waiting: '${match[1]}'`), `not waiting: ${on}`);
-  // not due before 02:00 tomorrow: the worker leaves it waiting
-  const idle = JSON.parse(cli("work").stdout);
-  expect(idle.kind === "empty", `the worker ran something: ${JSON.stringify(idle).slice(0, 300)}`);
+  // the facade deletes only a job imported from its outbox: one worker pass
+  // imports it; due only at 02:00, it is left waiting, unless this runs just
+  // across 02:00 system time, when the driver runs and its successor waits
+  const pass = JSON.parse(cli("work").stdout);
+  const ranDriver = pass.kind === "completed" && pass.run?.jobName === "L3_NIGHT_D";
+  expect(pass.kind === "empty" || ranDriver, `the worker ran something else: ${JSON.stringify(pass).slice(0, 300)}`);
   const off = await classrun("ZCL_OSD_FLEET_NIGHT_SCHEDULE");
-  inOrder(off, [`Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted`, "Waiting: ''"]);
+  inOrder(off, [ranDriver ? /^Unscheduled L3_NIGHT_D \S+: 1 deleted$/ : `Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted`, "Waiting: ''"]);
   return `job count ${match[1]}, then deleted`;
 });
 

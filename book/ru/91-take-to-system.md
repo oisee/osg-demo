@@ -4,13 +4,13 @@
 
 ## Сборка офлайн-zip
 
-Используйте checkout open-steamgate на теге `vscode-v0.6.1504` или новее. Его `segw:zip` принимает `--unit` и `--manifest` и перебазирует манифест приложения под его расположение в BSP. Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без четырех объектов, работающих только локально (ниже), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
+Используйте checkout open-steamgate на теге `vscode-v0.6.1504` или новее. Его `segw:zip` принимает `--unit` и `--manifest` и перебазирует манифест приложения под его расположение в BSP. Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без объектов, работающих только локально (ниже: четыре объекта и папка ночного набора `src/l3`), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
 
 ```sh
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
+rm -r "$STAGE"/src/l3 "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если четыре локальных объекта оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN` и `TRAN ZOSD_FLEET` и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
+и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если локальные объекты оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN`, `TRAN ZOSD_FLEET` и каждого объекта из `src/l3` и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
 
 ## Что переносится в систему, а что нет
 
@@ -63,6 +63,7 @@ NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows an
 | `ZCL_OSD_FLEET_L2_MAINT` и его тестовый класс | да | Сгенерирован из `src/l2/maintenance_no_voyage.l2.yaml` компилятором L2 open-steamgate, но после генерации это обычный Open SQL. Его тестовый класс имеет `DANGEROUS`: он вставляет строки своих примеров в таблицы флота и снова удаляет их. В системе тесты предполагают, что ни у одного другого корабля на обслуживании нет рейса после 2027-03-01 и что ключи `X001`-`X003`/`X00001`-`X00007` свободны; существующая строка с таким ключом приведет к ошибке вставки, а teardown ее удалит, поэтому запускайте их только в песочнице. Файл правила и файлы `*.trace.json` - файлы этого репозитория и не переносятся. |
 | `ZCL_OSD_FLEET_DOCTOR` | нет | Он обращается к «доктору» заданий open-steamgate `ZCL_OSD_JOB_DOCTOR`; в системе на тот же вопрос отвечают SM37 и журнал задания. |
 | `ZCL_OSD_FLEET_TPL` | нет | Он формирует текст через `ZCL_OSD_TPL` и `ZCL_AJSON` среды выполнения open-steamgate; в системе нет ни того, ни другого, если оба не импортированы заранее. |
+| Ночной набор, `src/l3` (`ZCL_OSD_FLEET_NIGHT`, `ZOSD_FLEET_NIGHT`, его правила, порты и classrun) | нет | Он читает и пишет общие таблицы L3 open-steamgate (`ZOSD_L3_ALERT`, `ZOSD_L3_PILE`, `ZOSD_L3_STAGE`, `ZOSD_L3_WORK`, `ZOSD_L3_RUN`), которых в этом модуле нет; если сначала импортировать эти таблицы, его код — это стандартные функциональные модули заданий и Open SQL. |
 | Транзакция `ZOSD_FLEET` и `ZCL_OSD_FLEET_TRAN` | нет | Класс реализует `ZIF_OSD_TRANSACTION`, интерфейс среды выполнения open-steamgate, которого в системе нет, поэтому ни того, ни другого нет в модуле развертывания. |
 | `test/*.mjs`, `docs/`, `book/`, README | нет | Файлы этого репозитория, а не объекты ABAP. |
 

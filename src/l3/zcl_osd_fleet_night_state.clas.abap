@@ -1,7 +1,8 @@
 CLASS zcl_osd_fleet_night_state DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * Chapter 16: the latest run of the night set in jobs for 2026-10-01 (a run
 * with piles in jobs, whose first stage opened last): its gates, piles,
-* worklist and alerts, while its jobs run and after.
+* worklist and alerts, while its jobs run and after. A run none of whose
+* piles got a job (every JOB_OPEN failed) is not "in jobs" and is skipped.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
 ENDCLASS.

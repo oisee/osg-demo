@@ -18,6 +18,10 @@ CLASS zcl_osd_fleet_night_schedule IMPLEMENTATION.
     IF lv_count IS INITIAL.
       lv_count = zcl_osd_fleet_night=>schedule( ).
       COMMIT WORK.
+      IF lv_count IS INITIAL.
+        out->write( |Not scheduled: JOB_OPEN or JOB_CLOSE of { zcl_osd_fleet_night=>c_driver } failed| ).
+        RETURN.
+      ENDIF.
       lv_again = zcl_osd_fleet_night=>schedule( ).
       out->write( |Scheduled { zcl_osd_fleet_night=>c_driver } { lv_count }; again: { lv_again }| ).
     ELSE.

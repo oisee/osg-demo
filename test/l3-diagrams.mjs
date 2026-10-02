@@ -91,7 +91,7 @@ function shape(t) {
   b += text(730, 106, t("over the worklist only", "только по рабочему списку"), {size: 12, fill: C.soft});
   b += box(620, 118, 220, 40, C.paper, C.s2e, [["low-steam-voyage", {mono: true, weight: 700, size: 13}]]);
   b += box(620, 166, 220, 40, C.paper, C.s2e, [["maintenance-voyage", {mono: true, weight: 700, size: 13}]]);
-  b += text(730, 238, t("2 piles × 2 rules → 4 jobs", "2 стопки × 2 правила → 4 задания"), {size: 13});
+  b += text(730, 238, t("2 piles × 2 rules → 4 jobs", "2 стопки × 2 правила → 4 задания"), {size: 12});
   b += table(885, 115, 140, 100, C.alert, C.alerte, [[t("alerts", "alerts"), {weight: 700}], ["ZOSD_L3_ALERT", {mono: true, size: 11}], [t("2 lines, S004", "2 строки, S004"), {size: 12}]]);
   b += table(215, 330, 160, 86, C.paper, C.jobe, [[t("port ships", "порт ships"), {weight: 700}], ["ZOSD_FLEET_SHIP", {mono: true, size: 11}], [t("6 ships", "6 кораблей"), {size: 12}]]);
   b += table(430, 330, 260, 86, C.work, C.worke, [[t("worklist busy", "рабочий список busy"), {weight: 700}], ["ZOSD_L3_WORK", {mono: true, size: 11}], ["S001 S003 S004 S005", {mono: true, size: 12}]]);
@@ -101,7 +101,7 @@ function shape(t) {
   b += text(520, 250, t("pile of stage 1 is DONE", "когда этап 1 DONE"), {size: 12, fill: C.gatee});
   b += arrow(572, 165, 603, 165, {color: C.gatee});
   b += arrow(855, 165, 883, 165, {color: C.alerte});
-  b += arrow(295, 328, 295, 272, {label: t("keys by pile", "ключи по стопкам"), dx: 8, dy: 4, anchor: "start", size: 12});
+  b += arrow(255, 328, 255, 272, {label: t("by pile", "по стопкам"), dx: -8, dy: 4, anchor: "end", size: 12});
   b += arrow(380, 272, 470, 328, {label: t("keys( )", "keys( )"), color: C.worke, dx: 12, dy: 0, anchor: "start", size: 12});
   b += arrow(650, 328, 700, 272, {label: t("read", "чтение"), color: C.worke, dx: 10, dy: 8, anchor: "start", size: 12});
   return svg(1045, 435, b);
@@ -125,7 +125,7 @@ function piles(t) {
   b += text(640, 110, t("s stage, nn rule, pppp pile", "s этап, nn правило, pppp стопка"), {anchor: "start", size: 13, fill: C.soft});
   b += text(640, 132, t("busy-ship is rule 01 of stage 1", "busy-ship — правило 01 этапа 1"), {anchor: "start", size: 13, fill: C.soft});
 
-  b += arrow(300, 144, 300, 176, {color: C.worke});
+  for (const x of [92, 292, 492]) b += arrow(x, 142, x < 300 ? x + 60 : x < 400 ? x : x - 60, 178, {color: C.worke});
   b += box(20, 180, 600, 50, C.work, C.worke, [], {r: 10});
   b += text(36, 210, t("worklist busy", "список busy"), {anchor: "start", weight: 700, fill: C.worke});
   ["S001", "S002", "S003", "S004", "S005", "S006"].forEach((id, i) => {
@@ -158,7 +158,7 @@ function piles(t) {
     [t("ZOSD_L3_ALERT, one line per rule", "ZOSD_L3_ALERT, по строке на правило"), {size: 12, fill: C.alerte}]], {lh: 20});
   b += arrow(490, 389, 557, 389, {color: C.alerte});
   b += text(640, 300, t("A pile over a worklist checks its keys,", "Стопка по списку проверяет его ключи,"), {anchor: "start", size: 13, fill: C.soft});
-  b += text(640, 320, t("not every key between its bounds", "а не всё между её границами"), {anchor: "start", size: 13, fill: C.soft});
+  b += text(640, 320, t("not every key between its bounds", "а не все между ее границами"), {anchor: "start", size: 13, fill: C.soft});
   return svg(1045, 440, b);
 }
 
@@ -203,7 +203,7 @@ function timeline(t) {
     [t("1 row: plan stage 2, submit 4", "1 строка: план этапа 2, 4 задания"), {size: 12}]], {lh: 19});
   b += box(772, 278, 245, 66, C.paper, C.ink, [
     [t("the last pile of the run", "последняя стопка прогона"), {size: 12}],
-    [t("finalise every rule,", "закрыть каждое правило,"), {size: 12}],
+    [t("finalise every rule,", "завершить каждое правило,"), {size: 12}],
     [t("release the date's lock", "снять блокировку даты"), {size: 12}]], {lh: 19});
   b += text(20, 380, t("Here one worker on SQLite runs the jobs one after another; on a system the piles of a stage run", "Здесь один обработчик на SQLite выполняет задания по очереди; в системе стопки одного этапа"), {anchor: "start", size: 12, fill: C.soft});
   b += text(20, 398, t("side by side, in as many background work processes as are free. The order inside a stage is not fixed.", "идут рядом, в стольких фоновых процессах, сколько свободно. Порядок внутри этапа не задан."), {anchor: "start", size: 12, fill: C.soft});
@@ -229,26 +229,25 @@ function gate(t) {
   b += box(290, 240, 190, 58, C.ghost, C.line, [["sy-dbcnt = 0", {mono: true, size: 12, weight: 700}], [t("returns", "выходит"), {size: 12}]], {r: 6});
   b += arrow(180, 216, 140, 238, {color: C.s2e});
   b += arrow(340, 216, 380, 238, {color: C.soft});
-  b += text(260, 330, t("One statement decides: stage 2 opens once,", "Решает одна команда: этап 2 открывается один раз,"), {size: 12, fill: C.soft});
-  b += text(260, 348, t("whatever the timing. No named event, no lock", "как бы ни совпало время. Без событий и без"), {size: 12, fill: C.soft});
-  b += text(260, 366, t("held while the jobs run.", "блокировки на время работы заданий."), {size: 12, fill: C.soft});
+  b += text(260, 336, t("One statement decides: stage 2 opens once,", "Решает одна команда: этап 2 открывается один раз,"), {size: 12, fill: C.soft});
+  b += text(260, 354, t("whatever the timing. No named event.", "как бы ни совпало время. Без именованных событий."), {size: 12, fill: C.soft});
 
   b += box(530, 10, 505, 380, "#fbfbfd", "#d9dee4", [], {r: 12});
   b += text(782, 38, t("A pile fails (a set without resilience:)", "Стопка падает (набор без resilience:)"), {weight: 700, size: 14});
   b += box(555, 60, 140, 32, C.s1, C.s1e, [[t("pile 1 DONE", "стопка 1 DONE"), {size: 12}]], {r: 6});
   b += box(712, 60, 140, 32, C.fail, C.alerte, [[t("pile 2 FAILED", "стопка 2 FAILED"), {size: 12, weight: 700, fill: C.alerte}]], {r: 6});
   b += box(869, 60, 140, 32, C.s1, C.s1e, [[t("pile 3 DONE", "стопка 3 DONE"), {size: 12}]], {r: 6});
-  b += text(782, 122, t("the gate is never tried: not every pile is DONE", "шлюз не пробуется: не все стопки DONE"), {size: 12});
-  b += box(600, 140, 364, 40, C.paper, C.jobe, [["collect( )", {mono: true, size: 13, weight: 700}]], {r: 6});
-  b += arrow(782, 128, 782, 138);
+  b += text(782, 116, t("the gate is never tried: not every pile is DONE;", "шлюз не пробуется: не все стопки DONE;"), {size: 12});
+  b += text(782, 132, t("the run stays open and holds the date's lock", "прогон открыт и держит блокировку даты"), {size: 12, fill: C.soft});
+  b += box(600, 140, 364, 40, C.paper, C.jobe, [[t("collect( ), when someone calls it", "collect( ), когда его вызовут"), {mono: true, size: 13, weight: 700}]], {r: 6});
   b += box(570, 206, 200, 40, C.fail, C.alerte, [[t("stage 1 PARTIAL", "этап 1 PARTIAL"), {size: 12, weight: 700}]], {r: 6});
   b += box(795, 206, 200, 40, C.ghost, C.line, [[t("stage 2 NOT-RUN", "этап 2 NOT-RUN"), {size: 12, weight: 700}]], {r: 6});
   b += arrow(700, 182, 680, 204, {color: C.alerte});
   b += arrow(864, 182, 884, 204);
   b += text(782, 274, t("the gate closes, so no late job opens it;", "шлюз закрыт, опоздавшее задание его не откроет;"), {size: 12, fill: C.soft});
-  b += text(782, 292, t("the run is final, the lock released", "прогон окончен, блокировка снята"), {size: 12, fill: C.soft});
+  b += text(782, 292, t("then the run is final, the lock released", "тогда прогон окончен, блокировка снята"), {size: 12, fill: C.soft});
   b += box(560, 312, 445, 62, C.s2, C.s2e, [
-    [t("with resilience: a FAILED pile goes again (retry),", "с resilience: стопка FAILED идёт снова (retry),"), {size: 12}],
+    [t("with resilience: a FAILED pile goes again (retry),", "с resilience: стопка FAILED идет снова (retry),"), {size: 12}],
     [t("and a doctor job takes over what a dead job left", "а задание-доктор подбирает брошенное"), {size: 12}]], {lh: 20});
   return svg(1045, 400, b);
 }

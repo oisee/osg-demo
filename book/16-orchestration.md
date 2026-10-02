@@ -75,7 +75,7 @@ once. The two checks of stage 2 have the same `range`:
 [low_steam_voyage.l2.yaml](../src/l3/low_steam_voyage.l2.yaml) flags a ship
 under 30 % steam with a voyage ahead, and
 [maintenance_voyage.l2.yaml](../src/l3/maintenance_voyage.l2.yaml) is chapter
-12's rule.
+12's rule with a `range`, under its own name and class.
 
 ## Build it
 
@@ -92,11 +92,19 @@ node tools/dsl-l3.mjs build /path/to/osg-demo/src/l3/fleet_night.l3.yaml \
   --ddic /path/to/osg-demo/src/ddic --ddic src/dsl --ddic .local/lars/open-abap-core/src
 ```
 
-`src/dsl` holds the set's own tables (the worklist, the gate, the plan and the
-alert log). The compiler writes the runner `ZCL_OSD_FLEET_NIGHT`, the job
+`src/dsl` holds open-steamgate's generic L3 tables, which every set shares:
+the worklist, the gate, the plan, the alert log and the run lock
+(`ZOSD_L3_RUN`). The compiler writes the runner `ZCL_OSD_FLEET_NIGHT`, the job
 report `ZOSD_FLEET_NIGHT`, and the port classes `ZCL_L3_NIGHT_*`; they are
 committed in [src/l3](../src/l3). Four small classruns beside them show what
-the runner does.
+the runner does. They stay in the sandbox: the zip of appendix B leaves
+`src/l3` out, because a system would need those generic tables first.
+
+The piles read their keys with `I BT` ranges, in both modes below.
+`@abaplint/runtime` expands those in SQL from 2.13.93; an older one stops
+every pile with `IN, I BT not supported`. This chapter was run with 2.13.96.
+If `npm ls @abaplint/runtime` in your open-steamgate checkout shows an older
+version, run `npm install --no-save @abaplint/runtime@2.13.96` there first.
 
 ## One step first
 
@@ -121,7 +129,7 @@ Alert maintenance-voyage: S004 Cumulus: in maintenance, voyage V00016 departs 20
 2 alerts
 ```
 
-The run ID differs on every run. `S002 Glider` and `S006 Old Boiler` have no
+The run ID differs on every run. `S002 Nimbus` and `S006 Old Boiler` have no
 voyage after 2026-10-01, so the filter leaves them out, and the checks never
 look at them. `S004 Cumulus` is in maintenance at 15 % steam with a voyage on
 the 12th, so both checks flag it.
@@ -130,12 +138,6 @@ the 12th, so both checks flag it.
 
 Mode P is the same set in background jobs. As in chapter 9, this needs SQLite
 in a file: start OSD with `STG_DB=file`, `STG_DB_PATH` and `OSD_PACKS`.
-
-The piles read their keys with `I BT` ranges. `@abaplint/runtime` handles
-those in SQL from **2.13.96**. If `npm ls @abaplint/runtime` in your
-open-steamgate checkout shows an older version, run
-`npm install --no-save @abaplint/runtime@2.13.96` there first; otherwise every
-pile stops with `IN, I BT not supported`.
 
 1. Press **F9** on
    [ZCL_OSD_FLEET_NIGHT_JOBS](../src/l3/zcl_osd_fleet_night_jobs.clas.abap).
@@ -153,10 +155,13 @@ pile stops with `IN, I BT not supported`.
    0 alerts
    ```
 
+   If it answers `BUSY`, a run in jobs for that date is still open: run the
+   worker until its queue is empty, then press F9 again.
+
 2. Run the worker as in chapter 9: in the checkout, with the same `STG_DB` and
    `STG_DB_PATH` but without `OSD_PACKS`, run
    `node tools/osd-batch-runs.mjs work` until it answers `"kind": "empty"`,
-   or run `worker` once. The worker runs seven jobs. First come the three of
+   or keep `worker` running (Ctrl+C stops it). The worker runs seven jobs. First come the three of
    stage 1, in any order. The last of them opens stage 2 and submits four more,
    `L3_NIGHT_202_*` and `L3_NIGHT_203_*`, and the worker runs those too.
 3. Press **F9** on
@@ -185,14 +190,15 @@ stage 2, rule 3 (`maintenance-voyage`), pile 2.
 
 A pile of stage 2 is the worklist's keys between its bounds, each as `I EQ`.
 Pile 1 shows `S001-S003`, but it checks only `S001` and `S003`: `S002` lies
-between the bounds and is not on the worklist, so it is not checked.
+between the bounds and is not on the worklist, so it is not checked. A plain
+`BT` of the bounds would check keys the filter rejected.
 
 ## The gate
 
 Nothing waits for an event. Each pile job sets its pile `DONE`, commits, and
 calls `advance( )` for its stage. `advance( )` counts the stage's piles that
-are not `DONE`; while one is left, it returns. The job that finds none opens
-the next stage with one statement:
+are not `DONE`; while one is left, it returns. The job that finds none marks
+its stage `DONE` and opens the next one with one statement:
 
 <!-- code: src/l3/zcl_osd_fleet_night.clas.abap lines 471-477 -->
 ```abap
@@ -217,18 +223,23 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These two cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/main/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 
 - Two jobs can end stage 1 at the same moment, both see every pile `DONE`, and
   both send the `UPDATE`. One gets `sy-dbcnt = 1` and goes on; the other gets 0
   and returns. Stage 2 opens once.
-- A pile whose job fails is not `DONE`, so nobody tries the gate. The runner's
-  `collect( )` reads each open pile's job with `SHOW_JOBSTATE` and marks the
-  pile `FAILED`. Once the rest of the stage is final, it marks the stage
-  `PARTIAL` and every later stage `NOT-RUN`. That closes the gate, so a late
-  job cannot open it. The run is then final and the lock released.
+- A pile whose job fails is not `DONE`, so nobody tries the gate, and the run
+  stays open and holds the lock on its date. Something has to call the
+  runner's `collect( )`; nothing in the night set does on its own. `collect( )`
+  reads each open pile's job with `SHOW_JOBSTATE` and marks the pile `FAILED`.
+  Once the rest of the stage is final, it marks the stage `PARTIAL` and every
+  later stage `NOT-RUN`. That closes the gate, so a late job cannot open it.
+  Then the run is final and the lock released.
+- A job of a run that is already over, started again, can still set its pile
+  `RUNNING` and write alerts into a newer run of the date. Only sets with
+  `resilience:` refuse this in 0.6.1504; a fix for every set is in progress.
 
 A set can also declare `resilience:`: a failed pile goes again after a backoff,
 a doctor job takes over what a dead job left, and fuses can stop a run. The
@@ -245,6 +256,8 @@ Scheduled L3_NIGHT_D 11001000; again: 11001000
 Waiting: '11001000'
 ```
 
+The job count differs on every run.
+
 `schedule( )` opens the driver job `L3_NIGHT_D` and releases it for 02:00
 system time with a period of one day. The classrun calls it twice; the
 second call finds the waiting instance and schedules nothing. Each night the
@@ -257,11 +270,13 @@ Unscheduled L3_NIGHT_D 11001000: 1 deleted
 Waiting: ''
 ```
 
-`unschedule( )` deletes the instance that waits, which ends the chain. On
-0.6.1504 the job facade deletes a job only after the worker has seen it once:
-run `node tools/osd-batch-runs.mjs work` between the two presses. It answers
-`"kind": "empty"`, because the driver is not due. Without that, the second
-press answers `0 deleted` and the driver stays scheduled. This is reported.
+`unschedule( )` deletes the instance that waits, which ends the chain. The
+job facade deletes only a job it has imported from its outbox
+([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/job-standard-fms.md)),
+so run `node tools/osd-batch-runs.mjs work` (or `drain`) between the two
+presses. It imports the driver and answers `"kind": "empty"`, because the
+driver is not due before 02:00. Without that, the second press finds nothing it
+may delete and the driver stays scheduled.
 
 ## Compared with chapter 9
 
@@ -270,16 +285,17 @@ press answers `0 deleted` and the driver stays scheduled. This is reported.
 | Written as | ABAP: `JOB_OPEN`, `SUBMIT VIA JOB`, `JOB_CLOSE` with an event | YAML; the ABAP is generated |
 | Order | the second job waits for a named event | a gate row per stage, opened by one `UPDATE` |
 | Parallel work | one job per step | one job per rule and pile |
-| A step fails | the waiting job stays `WAITING`; the doctor explains it | `collect( )` makes the stage `PARTIAL` and the rest `NOT-RUN` |
-| Every night | not shown | `schedule( )`, `unschedule( )` |
+| A step fails | the waiting job stays `WAITING`; the doctor explains it | the run stays open until `collect( )` makes the stage `PARTIAL` and the rest `NOT-RUN` |
+| Every night | not shown | a periodic driver job, by time: `schedule( )`, `unschedule( )` |
 
 The set's gates are its own: they open only the set's next stage. Nothing
 outside the set can wait for them as it could for a named event. On SQLite
 one worker runs the jobs one after another. On a system, the piles of a stage
 run side by side in as many background work processes as are free, and the
-order of jobs within a stage is not fixed in either place. The generated
-runner, report and port classes use only standard job function modules and
-Open SQL, as chapter 9's jobs do.
+order of jobs within a stage is not fixed in either place. Mode P was run
+here only on SQLite with one worker, never on a system.
 
-`node test/l3.mjs` (appendix A) runs everything in this chapter against a real
+`node test/l3.mjs` (appendix A) runs this chapter's steps against a real
 engine: mode S, mode P with the worker, the state, and the schedule switch.
+It does not run the two cases of the gate picture, nor the driver's start at
+02:00: it checks that the driver waits and is deleted.
