@@ -4,11 +4,6 @@
 //
 //   OSD_HOME=<open-steamgate checkout> node test/l3.mjs [--print]
 //
-// A pile reads its keys with I BT ranges, which @abaplint/runtime expands in
-// SQL from 2.13.93; where the checkout has an older one,
-// `npm install --no-save @abaplint/runtime@2.13.96` in it (the version the
-// chapter was run with).
-//
 //  1. N1: ZCL_OSD_FLEET_NIGHT_RUN runs the set in one dialog step (mode S) for
 //     2026-10-01: the filter stage puts S001 S003 S004 S005 on the worklist
 //     busy, the checks stage flags S004 Cumulus twice;
@@ -21,9 +16,9 @@
 //  4. N4: ZCL_OSD_FLEET_NIGHT_STATE shows that run DONE with the same
 //     worklist and the same two alerts as N1;
 //  5. N5: ZCL_OSD_FLEET_NIGHT_SCHEDULE schedules the driver L3_NIGHT_D, a
-//     second schedule( ) answers the same instance; one worker pass imports
-//     it from the facade's outbox and leaves it waiting for 02:00; the
-//     classrun run again unschedules it. The 02:00 start itself is not run.
+//     second schedule( ) answers the same instance; the classrun run again
+//     unschedules it at once, and the worker then finds nothing to run. The
+//     02:00 start itself is not run.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -220,14 +215,12 @@ await check("N5 schedule: L3_NIGHT_D waits once; switched off, nothing waits", a
   const match = /^Scheduled L3_NIGHT_D (\S+); again: (\S+)$/m.exec(on);
   expect(match && match[1] === match[2], `not scheduled once: ${on}`);
   expect(on.includes(`Waiting: '${match[1]}'`), `not waiting: ${on}`);
-  // the facade deletes only a job imported from its outbox: one worker pass
-  // imports it; due only at 02:00, it is left waiting, unless this runs just
-  // across 02:00 system time, when the driver runs and its successor waits
-  const pass = JSON.parse(cli("work").stdout);
-  const ranDriver = pass.kind === "completed" && pass.run?.jobName === "L3_NIGHT_D";
-  expect(pass.kind === "empty" || ranDriver, `the worker ran something else: ${JSON.stringify(pass).slice(0, 300)}`);
+  // switched off at once: the facade deletes a job still in its outbox
   const off = await classrun("ZCL_OSD_FLEET_NIGHT_SCHEDULE");
-  inOrder(off, [ranDriver ? /^Unscheduled L3_NIGHT_D \S+: 1 deleted$/ : `Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted`, "Waiting: ''"]);
+  inOrder(off, [`Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted`, "Waiting: ''"]);
+  // and the worker finds nothing left to run
+  const idle = JSON.parse(cli("work").stdout);
+  expect(idle.kind === "empty", `the worker ran something: ${JSON.stringify(idle).slice(0, 300)}`);
   return `job count ${match[1]}, then deleted`;
 });
 

@@ -77,17 +77,6 @@ jobs:
         env:
           OSD_HOME: ${{ github.workspace }}/osd
         run: node test/jobs.mjs
-      # DSL L3 (chapter 16) reads a pile's keys with I BT ranges, which
-      # @abaplint/runtime expands in SQL from 2.13.93 (OSD's lockfile pinned
-      # 2.13.89 at the time of writing); 2.13.96 is what the chapter was run
-      # with. After every step above, on OSD's own runtime; never a downgrade
-      - name: Runtime with I BT in SQL
-        if: success() || failure()
-        working-directory: osd
-        run: |
-          node -e 'const [a,b,c]=require("@abaplint/runtime/package.json").version.split(".").map(Number);process.exit(a*1e6+b*1e3+c>=2013093?0:1)' \
-            || npm install --no-save --no-audit --no-fund @abaplint/runtime@2.13.96
-          node -p 'require("@abaplint/runtime/package.json").version'
       - name: Fleet night set in DSL L3 (chapter 16)
         if: success() || failure()
         working-directory: demo

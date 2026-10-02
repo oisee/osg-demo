@@ -100,12 +100,6 @@ committed in [src/l3](../src/l3). Four small classruns beside them show what
 the runner does. They stay in the sandbox: the zip of appendix B leaves
 `src/l3` out, because a system would need those generic tables first.
 
-The piles read their keys with `I BT` ranges, in both modes below.
-`@abaplint/runtime` expands those in SQL from 2.13.93; an older one stops
-every pile with `IN, I BT not supported`. This chapter was run with 2.13.96.
-If `npm ls @abaplint/runtime` in your open-steamgate checkout shows an older
-version, run `npm install --no-save @abaplint/runtime@2.13.96` there first.
-
 ## One step first
 
 Open [ZCL_OSD_FLEET_NIGHT_RUN](../src/l3/zcl_osd_fleet_night_run.clas.abap)
@@ -225,7 +219,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1531/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 
@@ -235,7 +229,8 @@ tests check them.
 - A pile whose job fails is not `DONE`, so nobody tries the gate, and the run
   stays open and holds the lock on its date. Something has to call the
   runner's `collect( )`; nothing in the night set does on its own. `collect( )`
-  reads each open pile's job with `SHOW_JOBSTATE` and marks the pile `FAILED`.
+  reads each open pile's job with `SHOW_JOBSTATE`; a job that ended without its
+  pile `DONE`, while the pile is still that job's, makes the pile `FAILED`.
   Once the rest of the stage is final, it marks the stage `PARTIAL` and every
   later stage `NOT-RUN`. That closes the gate, so a late job cannot open it.
   Then the run is final and the lock released.
@@ -272,13 +267,9 @@ Unscheduled L3_NIGHT_D 11001000: 1 deleted
 Waiting: ''
 ```
 
-`unschedule( )` deletes the instance that waits, which ends the chain. The
-job facade deletes only a job it has imported from its outbox
-([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/job-standard-fms.md)),
-so run `node tools/osd-batch-runs.mjs work` (or `drain`) between the two
-presses. It imports the driver and answers `"kind": "empty"`, because the
-driver is not due before 02:00. Without that, the second press finds nothing it
-may delete and the driver stays scheduled.
+`unschedule( )` deletes the instance that waits, which ends the chain. A
+`node tools/osd-batch-runs.mjs work` afterwards answers `"kind": "empty"`:
+nothing of the set is left to run (with the queue empty, as after step 2).
 
 ## Compared with chapter 9
 
