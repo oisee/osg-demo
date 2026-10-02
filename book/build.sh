@@ -37,6 +37,19 @@ if [ "$(printf '%s\n' "${names[@]}")" != "$(printf '%s\n' "${ru_names[@]}")" ]; 
   diff <(printf '%s\n' "${names[@]}") <(printf '%s\n' "${ru_names[@]}") >&2 || true
   exit 1
 fi
+# the extension and open-steamgate tag the book is written for (book/baseline.yaml)
+ext=$(sed -n 's/^extension: "\(.*\)"$/\1/p' baseline.yaml)
+tag=$(sed -n 's/^tag: "\(.*\)"$/\1/p' baseline.yaml)
+if [ -z "$ext" ] || [ -z "$tag" ]; then echo "book/build.sh: book/baseline.yaml needs extension and tag" >&2; exit 1; fi
+# every version and every vscode-v tag the preface (EN/RU) and README name must
+# be this one, and each must name it at least once: no stale mention survives
+for f in 00-preface.md ru/00-preface.md ../README.md; do
+  versions=$(grep -oE '(^|[^0-9.])[0-9]+\.[0-9]+\.[0-9]+' "$f" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -u || true)
+  tags=$(grep -oE 'vscode-v[0-9][0-9.]*[0-9]' "$f" | sort -u || true)
+  if [ "$versions" != "$ext" ] || { [ "$f" != ../README.md ] && [ "$tags" != "$tag" ]; }; then
+    echo "book/build.sh: $f names $(echo $versions $tags), book/baseline.yaml says $ext and $tag" >&2; exit 1
+  fi
+done
 for lang in $langs; do
   if [ "$lang" = en ]; then
     src=.
@@ -53,15 +66,29 @@ for lang in $langs; do
     if [ "$lang" = en ] && [ "$n" = 91-take-to-system.md ]; then files+=("$out/91-take-to-system.en.md")
     else files+=("$src/$n"); fi
   done
-  if [ "$lang" = en ]; then stamp="Version $version, $today"; else stamp="Версия $version, $today"; fi
+  if [ "$lang" = en ]; then
+    stamp="Version $version, $today"
+    made_for="For the open-steamgate VS Code extension $ext or later (tag $tag)"
+  else
+    stamp="Версия $version, $today"
+    made_for="Для расширения VS Code open-steamgate $ext или новее (тег $tag)"
+  fi
   title=$(sed -n 's/^title: "\(.*\)"$/\1/p' "metadata.$lang.yaml")
+  subtitle=$(sed -n 's/^subtitle: "\(.*\)"$/\1/p' "metadata.$lang.yaml")
+  # the title page: the book's version, and under it what it is written for
+  # (a quoted YAML string, its values escaped; its "\\\n" is a Markdown line break)
+  yq() { local s=${1//\\/\\\\}; printf '%s' "${s//\"/\\\"}"; }
+  printf 'date: "%s\\\\\\n%s"\n' "$(yq "$stamp")" "$(yq "$made_for")" > "$out/title-page.$lang.yaml"
+  # an EPUB's date must be a date, so there the line goes under the subtitle
+  printf 'subtitle: "%s\\\\\\n%s"\n' "$(yq "$subtitle")" "$(yq "$made_for")" > "$out/title-page-epub.$lang.yaml"
   base="$out/osg-demo-book-${version//\//-}.$lang"   # a tag with / stays one file name
   common=(--metadata-file="metadata.$lang.yaml" --lua-filter=pandoc-links.lua \
     --toc --toc-depth=2 --resource-path=".:$src" --highlight-style=tango)
   # the EPUB's title carries the version (a stamp in its date would leave
   # dc:date empty); the HTML and PDF say it under the subtitle
-  pandoc "${common[@]}" --metadata title="$title ($version)" -o "$base.epub" "${files[@]}"
-  pandoc "${common[@]}" --metadata date="$stamp" --standalone --embed-resources --css=book.css \
+  pandoc "${common[@]}" --metadata-file="$out/title-page-epub.$lang.yaml" --metadata title="$title ($version)" \
+    -o "$base.epub" "${files[@]}"
+  pandoc "${common[@]}" --metadata-file="$out/title-page.$lang.yaml" --standalone --embed-resources --css=book.css \
     -o "$base.html" "${files[@]}"
   weasyprint -q "$base.html" "$base.pdf"
   echo "book ($lang): $base.{epub,pdf,html}"
