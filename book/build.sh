@@ -18,9 +18,17 @@ done
 cd "$here"
 version=${BOOK_VERSION:-$(git describe --tags --always 2>/dev/null || echo dev)}
 today=$(date -u +%Y-%m-%d)
-names=(00-preface.md 01-hello.md 02-debug-tests-dumps.md 03-odata.md 04-fiori.md 05-cds.md \
-  06-amdp.md 07-take-to-system.md 08-business-log.md 09-background-jobs.md 10-generated-code.md \
-  11-lift.md 12-rules.md 13-trace.md 14-cli.md 15-vscode.md 90-run-the-checks.md 91-take-to-system.md 92-limits-glossary.md)
+# The chapters are the NN-*.md files, in the order of their number prefix; a
+# new chapter needs no edit here. Appendix B (91) has no English file of its
+# own: it is docs/take-to-system.md, below. Both languages must have the same
+# chapters, so neither falls behind unnoticed.
+chapters() { (cd "$1" && ls [0-9][0-9]-*.md); }
+names=($( { chapters .; echo 91-take-to-system.md; } | sort -u))
+if [ "${names[*]}" != "$(chapters ru | tr '\n' ' ' | sed 's/ $//')" ]; then
+  echo "book/build.sh: the English and Russian chapters differ:" >&2
+  diff <(printf '%s\n' "${names[@]}") <(chapters ru) >&2
+  exit 1
+fi
 for lang in $langs; do
   if [ "$lang" = en ]; then
     src=.
