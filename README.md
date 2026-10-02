@@ -35,6 +35,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json` |
 | 14 | [My ABAP escaped from the server](book/14-cli.md) | [Сбежал с сервера](book/ru/14-cli.md) | a report compiled into a native CLI and terminal form, its own SQLite file | `ZOSD_FLEET_CLI` (`cli/`) |
 | 15 | [The workbench](book/15-vscode.md) | [Рабочее место](book/ru/15-vscode.md) | from a service to its code and back in VS Code: the System view, `.http` requests, a call to its HTTP answer | `http/fleet.http` |
+| 16 | [Orchestration: the night set](book/16-orchestration.md) | [Оркестрация](book/ru/16-orchestration.md) | a set of rules in stages: a filter fills a worklist, piles run as jobs, a gate opens the next stage once, a nightly schedule | `ZCL_OSD_FLEET_NIGHT` (`src/l3/`) |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -48,6 +49,7 @@ Chapters 10 and 11 use open-steamgate's generation layers, in which a generated 
 | **L0** templates | a template and a JSON model | text, each line traced to template line and model path | chapter 10; chapter 11's lift renders its recipe this way |
 | **L1** typed model | nothing: a generator fills it | ABAP from recipes, typed literals, a trace per line | chapter 10 (overview; the demo has no L1 generator of its own) |
 | **L2** domain rules | a rule in the domain's words | a check class and its tests, traced to the rule's lines | chapters 12 and 13 |
+| **L3** sets of rules | stages, piles and a schedule over L2 rules | a runner that plans, submits and gates the jobs, its job report and ports | chapter 16 |
 
 ## Check it
 
@@ -57,6 +59,7 @@ In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
+OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              # chapter 16's night set, 5 checks (the runtime it needs: chapter 16)
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
@@ -67,13 +70,13 @@ OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         
 
 `test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2 and 15; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
-CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job and L3 checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
 ## Repository map
 
 | Where | What |
 |---|---|
-| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to |
+| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to; `src/l3/` the night set (DSL L3), its rules, what they build to and its classruns |
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
 | `cli/` | the fleet's command line program (chapter 14), not part of the pack |

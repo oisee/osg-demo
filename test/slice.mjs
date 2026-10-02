@@ -33,8 +33,9 @@
 //        (ASSERTION_FAILED), and prints again once the value is restored;
 //     9. ch3: the value help StatusVHSet('A') answers Aloft, and the voyages of
 //        S001 and S006 through ShipSet(..)/Voyages match the seed;
-//    10. ch7: segw:zip of this folder refuses exactly the four local objects,
-//        and of a copy without them carries every object the deploy unit
+//    10. ch7: segw:zip of this folder refuses exactly the local objects (four,
+//        and the night set in src/l3, which needs open-steamgate's ZOSD_L3_*
+//        tables), and of a copy without them carries every object the deploy unit
 //        lists and no seed rows (docs/take-to-system.md);
 //    11. ch5: the cube service ZC_OSD_FLEETCUBE_CDS answers one row per
 //        voyage, and $filter on the ship gives that ship's voyages;
@@ -63,7 +64,7 @@
 // SLICE_CHROMIUM=<path> launches that Chromium instead of the one the
 // engine's Playwright expects (for a machine with a different build).
 import {spawn, spawnSync} from "node:child_process";
-import {cpSync, existsSync, mkdtempSync, readFileSync, rmSync} from "node:fs";
+import {cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {createServer} from "node:net";
 import {createRequire} from "node:module";
@@ -455,7 +456,11 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // rule file (L2 MAINTENANCE_NO_VOYAGE) and the trace sidecars (filed under
     // CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself travels), which newer
     // ones skip (open-steamgate #346); staging drops them either way
-    const local = ["CLAS ZCL_OSD_FLEET_DOCTOR", "CLAS ZCL_OSD_FLEET_TPL", "CLAS ZCL_OSD_FLEET_TRAN", "TRAN ZOSD_FLEET"];
+    // the night set (chapter 16) stays local too: it needs open-steamgate's
+    // generic ZOSD_L3_* tables, which the unit does not carry
+    const night = readdirSync(join(repo, "src", "l3")).map((f) => /^(\w+)\.(clas|intf|prog)\.xml$/.exec(f)).filter(Boolean)
+      .map(([, name, type]) => `${type.toUpperCase()} ${name.toUpperCase()}`);
+    const local = ["CLAS ZCL_OSD_FLEET_DOCTOR", "CLAS ZCL_OSD_FLEET_TPL", "CLAS ZCL_OSD_FLEET_TRAN", "TRAN ZOSD_FLEET", ...night];
     const sidecars = ["CLAS ZCL_OSD_FLEET_L2_MAINT", "L2 MAINTENANCE_NO_VOYAGE"];
     const refusedSet = new Set(keys);
     expect(local.every((k) => refusedSet.has(k)) && [...refusedSet].every((k) => local.includes(k) || sidecars.includes(k)),
@@ -464,7 +469,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // the L2 sidecars alone: an engine with open-steamgate #346 skips them and
     // must not carry them; an older one refuses only them
     const sidecarStage = join(work, "with-sidecars", "osg-demo");
-    cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
+    cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/]l3([\\/]|$)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const withSidecars = zip(sidecarStage, join(work, "with-sidecars.zip"));
     if (withSidecars.status === 0) {
@@ -478,7 +483,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     }
 
     const stage = join(work, "osg-demo");
-    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p)
+    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/]l3([\\/]|$)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
