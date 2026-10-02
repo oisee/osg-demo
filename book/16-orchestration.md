@@ -156,14 +156,16 @@ in a file: start OSD with `STG_DB=file`, `STG_DB_PATH` and `OSD_PACKS`.
    ```
 
    If it answers `BUSY`, a run in jobs for that date is still open: run the
-   worker until its queue is empty, then press F9 again.
+   worker until its queue is empty, then press F9 again. If a pile of that
+   run failed, it stays open until `collect( )` (see below).
 
 2. Run the worker as in chapter 9: in the checkout, with the same `STG_DB` and
    `STG_DB_PATH` but without `OSD_PACKS`, run
    `node tools/osd-batch-runs.mjs work` until it answers `"kind": "empty"`,
-   or keep `worker` running (Ctrl+C stops it). The worker runs seven jobs. First come the three of
-   stage 1, in any order. The last of them opens stage 2 and submits four more,
-   `L3_NIGHT_202_*` and `L3_NIGHT_203_*`, and the worker runs those too.
+   or keep `worker` running (Ctrl+C stops it). The worker runs seven jobs.
+   First come the three of stage 1, in any order. The last of them opens
+   stage 2 and submits four more, `L3_NIGHT_202_*` and `L3_NIGHT_203_*`, and
+   the worker runs those too.
 3. Press **F9** on
    [ZCL_OSD_FLEET_NIGHT_STATE](../src/l3/zcl_osd_fleet_night_state.clas.abap).
    It finds the latest run in jobs for the date and prints it. Every pile is
@@ -222,7 +224,7 @@ the next night's run is let in.
 
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
-These two cases are not run in this chapter. They are how open-steamgate's
+These cases are not run in this chapter. They are how open-steamgate's
 [DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
@@ -239,7 +241,7 @@ tests check them.
   Then the run is final and the lock released.
 - A job of a run that is already over, started again, can still set its pile
   `RUNNING` and write alerts into a newer run of the date. Only sets with
-  `resilience:` refuse this in 0.6.1504; a fix for every set is in progress.
+  `resilience:` refuse this in 0.6.1504.
 
 A set can also declare `resilience:`: a failed pile goes again after a backoff,
 a doctor job takes over what a dead job left, and fuses can stop a run. The
