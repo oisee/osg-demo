@@ -8,7 +8,7 @@ This folder is an abapGit repository and an [open-steamgate](https://github.com/
 
 ## Quick start
 
-1. Install the **open-steamgate** extension, **0.6.1511 or later** (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
+1. Install the **open-steamgate** extension, **0.6.1531 or later** (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
 3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
 4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **osd console**. Chapter 1 goes on from there.
@@ -59,7 +59,7 @@ In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 STG_DB=duckdb node test/slice.mjs
 OSD_HOME=/path/to/open-steamgate node test/jobs.mjs                             # 7 job checks
-OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              # chapter 16's night set, 5 checks (the runtime it needs: chapter 16)
+OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              # chapter 16's night set, 5 checks
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/

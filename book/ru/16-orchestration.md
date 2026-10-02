@@ -102,13 +102,6 @@ node tools/dsl-l3.mjs build /path/to/osg-demo/src/l3/fleet_night.l3.yaml \
 исполнитель. Они остаются в песочнице: zip приложения B не берет `src/l3`,
 потому что системе сначала понадобились бы эти общие таблицы.
 
-Стопки читают свои ключи диапазонами `I BT`, в обоих режимах ниже.
-`@abaplint/runtime` умеет их в SQL начиная с 2.13.93; более старый
-останавливает каждую стопку с `IN, I BT not supported`. Глава выполнялась на
-2.13.96. Если `npm ls @abaplint/runtime` в вашем checkout open-steamgate
-показывает версию старше, сначала выполните там
-`npm install --no-save @abaplint/runtime@2.13.96`.
-
 ## Сначала в одном шаге
 
 Откройте [ZCL_OSD_FLEET_NIGHT_RUN](../../src/l3/zcl_osd_fleet_night_run.clas.abap)
@@ -233,7 +226,7 @@ ENDIF.
 ![Слева: условный UPDATE дает открыть этап 2 ровно одному из двух заданий. Справа: упавшая стопка оставляет этап 1 PARTIAL, а этап 2 NOT-RUN](../img/l3-gate.ru.png)
 
 Эти случаи в главе не выполняются. Так сгенерированный исполнитель
-описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/dsl-l3.md)
+описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1531/docs/dsl-l3.md)
 open-steamgate (раздел «The worklist and the gate»), и их проверяют ее
 собственные тесты.
 
@@ -282,14 +275,9 @@ Unscheduled L3_NIGHT_D 11001000: 1 deleted
 Waiting: ''
 ```
 
-`unschedule( )` удаляет ждущий экземпляр, и цепочка заканчивается. Фасад
-заданий удаляет только задание, которое он уже забрал из своей исходящей
-очереди
-([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/job-standard-fms.md)),
-поэтому между двумя нажатиями выполните `node tools/osd-batch-runs.mjs work`
-(или `drain`). Он забирает драйвер и отвечает `"kind": "empty"`, потому что
-драйверу не время до 02:00. Без этого второе нажатие не найдет, что можно
-удалить, и драйвер останется в расписании.
+`unschedule( )` удаляет ждущий экземпляр, и цепочка заканчивается.
+`node tools/osd-batch-runs.mjs work` после этого отвечает `"kind": "empty"`:
+от набора ничего не осталось к выполнению.
 
 ## Сравнение с главой 9
 

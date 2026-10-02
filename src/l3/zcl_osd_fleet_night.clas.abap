@@ -848,8 +848,8 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     IF rv_jobcount IS NOT INITIAL.
       RETURN.
     ENDIF.
-    lv_jobname = c_driver.
     lv_period = 1.
+    lv_jobname = c_driver.
     GET TIME.
     lv_date = sy-datum.
     lv_time = '020000'.
@@ -973,6 +973,8 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     DATA lv_final TYPE abap_bool VALUE abap_true.
     DATA lv_closed TYPE abap_bool.
     DATA lv_stamp TYPE timestampl.
+    DATA lv_job_name TYPE zosd_l3_pile-job_name.
+    DATA lv_job_count TYPE zosd_l3_pile-job_count.
     DATA ls_rule TYPE ty_rule.
     DATA lv_aborted TYPE btch0000-char1.
     DATA lv_finished TYPE btch0000-char1.
@@ -1015,16 +1017,27 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         ENDIF.
       ENDIF.
       IF lv_state <> 'OPEN'.
-        " the job is over: the row as it left it, DONE or not
+        " the job is over: the row as it left it, DONE or not. Only for the
+        " job whose state was read above: a pile given another job meanwhile
+        " (its planner's, or a later submit of it) is not this job's to fail
+        lv_job_name = ls_pile-job_name.
+        lv_job_count = ls_pile-job_count.
         SELECT SINGLE * FROM zosd_l3_pile INTO ls_pile
           WHERE set_name = c_set
             AND run_id = ls_pile-run_id
             AND rule_name = ls_pile-rule_name
             AND pile_no = ls_pile-pile_no.
-        IF ls_pile-status <> 'DONE'.
-          ls_pile-status = 'FAILED'.
+        IF ls_pile-status <> 'DONE'
+            AND ls_pile-job_name = lv_job_name AND ls_pile-job_count = lv_job_count.
+          " one UPDATE on the row as read, and on the job that was checked
           GET TIME STAMP FIELD ls_pile-ended.
-          UPDATE zosd_l3_pile FROM ls_pile.
+          UPDATE zosd_l3_pile SET status = 'FAILED' ended = ls_pile-ended
+            WHERE run_id = ls_pile-run_id
+              AND rule_name = ls_pile-rule_name
+              AND pile_no = ls_pile-pile_no
+              AND status = ls_pile-status
+              AND job_name = lv_job_name
+              AND job_count = lv_job_count.
         ENDIF.
       ENDIF.
     ENDLOOP.
