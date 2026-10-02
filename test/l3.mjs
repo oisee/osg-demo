@@ -22,7 +22,8 @@
 //  6. G1, G2 (chapter 17): the watch set, the same stages under a governor
 //     with a glass of one open alert, runs in jobs and stops at its glass
 //     after one of S004's two alerts; ZCL_OSD_FLEET_WATCH_GLASS continues it
-//     with a reason, one more job runs, and the run completes with both.
+//     with a reason, one job per pile the glass stopped runs, and the run
+//     completes with both alerts and its lock released.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -231,6 +232,7 @@ await check("N5 schedule: L3_NIGHT_D waits once; switched off, nothing waits", a
 // chapter 17: the watch set, the night set under a governor whose glass
 // is one open alert per run; the two S004 alerts cannot both get through
 let watch;
+let glassPiles = 0;
 await check("G1 governor: the run in jobs stops at its glass", async () => {
   const text = await classrun("ZCL_OSD_FLEET_WATCH_JOBS");
   const match = /^Watch set, mode P, run ([A-F0-9]{32}): SUBMITTED$/m.exec(text);
@@ -244,9 +246,11 @@ await check("G1 governor: the run in jobs stops at its glass", async () => {
   }
   expect(worked.length === 7 && worked.every((w) => w.kind === "completed"), `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
   const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
-  // which of the two checks meets the glass depends on the order of the jobs
-  inOrder(state, [`Watch set, run ${watch}`, "Stage 1 candidates: DONE", "Stage 2 checks: PARTIAL",
-    /^ {2}(low-steam|maintenance)-voyage pile 2: GLASS \(GLASS\)$/,
+  // which of the two checks meets the glass depends on the order of the
+  // jobs; a pile of no alert that ran after it stops at the glass too
+  glassPiles = state.split("\n").filter((l) => /^ {2}\S+ pile \d: GLASS /.test(l)).length;
+  expect(glassPiles >= 1 && /^ {2}(low-steam|maintenance)-voyage pile 2: GLASS \(GLASS\)$/m.test(state), `no pile 2 at the glass: ${state}`);
+  inOrder(state, [`Watch set, run ${watch}`, "Lock on 20261001: HELD", "Stage 1 candidates: DONE", "Stage 2 checks: PARTIAL",
     "Budget: GLASS, glass 1, reserved 1, consumed 1, refunded 0",
     "Event 1 WARN: glass 1, reserved 1", "Event 2 NARROW: glass 1, reserved 1",
     "Event 3 GLASS: glass 1, reserved 1, amount 1, \"reservation does not fit\"",
@@ -264,14 +268,17 @@ await check("G2 glass: a person continues with a reason; the run completes", asy
     if (result.kind === "empty") break;
     worked.push(result);
   }
-  expect(worked.length === 1 && worked[0].kind === "completed", `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
+  // one job per pile the glass stopped
+  expect(worked.length === glassPiles && worked.every((w) => w.kind === "completed"), `jobs (${glassPiles} at the glass): ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
   const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
-  inOrder(state, [`Watch set, run ${watch}`, "Stage 2 checks: DONE",
+  inOrder(state, [`Watch set, run ${watch}`, "Lock on 20261001: RELEASED", "Stage 2 checks: DONE",
     "Budget: NARROW, glass 2, reserved 2, consumed 2, refunded 0",
     /^Event 5 CONTINUE: glass 2, reserved 1, amount 2, "S004 known: maintenance planned, owner informed" by \S+$/,
     "Event 6 NARROW: glass 2, reserved 2", ...ALERTS]);
+  // the reason says why the pile was sent again, not how it ended
+  expect(/^ {2}(low-steam|maintenance)-voyage pile 2: DONE \(STALE-PLAN\)$/m.test(state), `no pile 2 sent again: ${state}`);
   expect(!/GLASS \(|FAILED|PLANNED/.test(state.split("Budget:")[0]), `a pile is not DONE: ${state}`);
-  return `one more job, ${worked[0].run.jobName}; DONE with both alerts`;
+  return `${worked.map((w) => w.run.jobName).join(" ")} again; DONE with both alerts, lock released`;
 });
 
 stop();

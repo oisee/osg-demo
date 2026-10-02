@@ -271,14 +271,14 @@ function glass(t) {
   b += `<line x1="380" y1="80" x2="1000" y2="80" stroke="${C.line}" stroke-width="2"/>`;
   for (const [st, fill, stroke, x] of states) b += box(x - 48, 64, 96, 32, fill, stroke, [[st, {mono: true, size: 12, weight: 700}]], {r: 6});
   const note = (x, y, lines, color = C.soft) => lines.forEach((l, i) => { b += text(x, y + i * 16, l, {size: 12, fill: color}); });
-  note(492, 116, [t("1st alert", "1-е"), t("1/1 ≥ warn", "1/1 ≥ warn")]);
-  note(604, 116, [t("≥ narrow_at:", "≥ narrow_at:"), t("one chain", "одна цепочка")]);
+  note(492, 116, [t("1st alert", "1-е сообщ."), t("1/1 ≥ warn", "1/1 ≥ warn")]);
+  note(604, 116, [t("≥ narrow_at:", "≥ narrow_at:"), t("no new chain", "нет новых")]);
   note(716, 116, [t("2nd alert", "2-е сообщение"), t("does not fit", "не помещается"), t("stage 2 PARTIAL", "этап 2 PARTIAL")], C.alerte);
-  note(838, 116, [t("a person:", "человек:"), t("glass 2 + reason", "стекло 2 + причина"), t("1 job again", "1 задание снова")], C.s2e);
+  note(838, 116, [t("a person:", "человек:"), t("glass 2 + reason", "стекло 2 + причина"), t("its piles again", "ее стопки снова")], C.s2e);
   note(965, 116, [t("reserved 2/2", "резерв 2/2"), t("stage 2 DONE", "этап 2 DONE")]);
   b += box(340, 178, 690, 50, C.gate, C.gatee, [
     [t("continue_glass( run, 2, 'S004 known: maintenance planned, owner informed' )", "continue_glass( прогон, 2, 'S004 known: maintenance planned, owner informed' )"), {mono: true, size: 11}],
-    [t("event CONTINUE: who, when, old and new glass, the reason", "событие CONTINUE: кто, когда, старое и новое стекло, причина"), {size: 12}]], {lh: 20});
+    [t("event CONTINUE: who, when, the new glass, the reason", "событие CONTINUE: кто, когда, новое стекло, причина"), {size: 12}]], {lh: 20});
   b += arrow(838, 176, 838, 168, {color: C.gatee});
   return svg(1045, 245, b);
 }

@@ -1,7 +1,8 @@
 CLASS zcl_osd_fleet_watch_state DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * Chapter 17: the latest run of the watch set for 2026-10-01, the one whose
-* first stage opened last: its gates and piles, its budget (ZOSD_L3_BUDGET)
-* and the events of the run (ZOSD_L3_EVENT), then its alerts.
+* first stage opened last: the date's lock (ZOSD_L3_RUN), its gates and
+* piles, its budget (ZOSD_L3_BUDGET), the events of the run (ZOSD_L3_EVENT),
+* then its alerts.
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun.
     CLASS-METHODS latest RETURNING VALUE(rv_run) TYPE zosd_l3_stage-run_id.
@@ -30,6 +31,7 @@ CLASS zcl_osd_fleet_watch_state IMPLEMENTATION.
     DATA lt_piles TYPE STANDARD TABLE OF zosd_l3_pile WITH DEFAULT KEY.
     DATA ls_pile TYPE zosd_l3_pile.
     DATA ls_budget TYPE zosd_l3_budget.
+    DATA ls_lock TYPE zosd_l3_run.
     DATA lt_events TYPE zcl_osd_fleet_watch=>tt_events.
     DATA ls_event TYPE zosd_l3_event.
     DATA lt_alerts TYPE STANDARD TABLE OF zosd_l3_alert WITH DEFAULT KEY.
@@ -42,6 +44,14 @@ CLASS zcl_osd_fleet_watch_state IMPLEMENTATION.
       RETURN.
     ENDIF.
     out->write( |Watch set, run { lv_run }| ).
+    SELECT SINGLE * FROM zosd_l3_run INTO ls_lock
+      WHERE set_name = zcl_osd_fleet_watch=>c_set
+        AND check_date = zcl_osd_fleet_night_run=>c_date.
+    IF sy-subrc = 0 AND ls_lock-run_id = lv_run.
+      out->write( |Lock on { zcl_osd_fleet_night_run=>c_date }: { ls_lock-status }| ).
+    ELSE.
+      out->write( |Lock on { zcl_osd_fleet_night_run=>c_date }: not this run's| ).
+    ENDIF.
 
     SELECT * FROM zosd_l3_stage INTO TABLE lt_stages WHERE run_id = lv_run.
     SORT lt_stages BY stage_no.

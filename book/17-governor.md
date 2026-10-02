@@ -30,12 +30,14 @@ settings:
   tunable: [budget.glass]
 ```
 
-- `resilience` is what a governor needs underneath: a failed pile goes again,
-  and a doctor job takes over what a dead job left (chapter 16 named it).
+- `resilience` is what a governor stands on: a failed pile can go again, and
+  `doctor( )` takes over what a dead job left. With a schedule the doctor runs
+  as a job; the watch set has no schedule, so here someone would call it.
 - `glass` is the budget: the number of open alerts a run may have. The name
   comes from "break the glass": past it, a person has to act.
 - `warn` and `narrow_at` are fractions of the glass. At `warn` the run notes
-  it once; at `narrow_at` it narrows to one chain of jobs at a time.
+  it once; at `narrow_at` it narrows: no new job is submitted while another
+  pile of the run is under way. Jobs already submitted still run.
 - `per_pile: 0` switches off a separate cap per pile.
 - `funnel` decides what counts. An alert counts once per rule, run and ship
   (`group_by: object`): two hits on one ship by one rule are one alert. The
@@ -47,11 +49,11 @@ settings:
 
 Build it like the night set (chapter 16) with `tools/dsl-l3.mjs build`. The
 compiler writes the runner `ZCL_OSD_FLEET_WATCH`, its job report
-`ZOSD_FLEET_WATCH`, the ports `ZCL_L3_WATCH_*`, and the settings classes
-`ZCL_L3_WATCH_CONF` and `ZL3_WATCH_CONF`. The budget lives in open-steamgate's
+`ZOSD_FLEET_WATCH`, the ports `ZCL_L3_WATCH_*`, and the settings class
+`ZCL_L3_WATCH_CONF` with its report `ZL3_WATCH_CONF`. The budget lives in open-steamgate's
 generic table `ZOSD_L3_BUDGET`, the history of the run in `ZOSD_L3_EVENT`.
 
-![The run's budget: two hits, two distinct keys, none closed on their own, two open; the budget states from RUNNING to GLASS, and a person's CONTINUE](img/l3-glass.png)
+![The run's budget: two hits, two distinct keys, none closed on their own, two open; the run's events and budget states up to GLASS, a person's CONTINUE, and the budget filling again](img/l3-glass.png)
 
 ## The run stops at its glass
 
@@ -69,6 +71,7 @@ Start OSD with a file database, as in chapter 16.
 
    ```
    Watch set, run B2179C23A3CF434380CA033254965E8D
+   Lock on 20261001: HELD
    Stage 1 candidates: DONE
      busy-ship pile 1: DONE
      busy-ship pile 2: DONE
@@ -88,13 +91,14 @@ Start OSD with a file database, as in chapter 16.
    ```
 
 The jobs of stage 2 run in any order, so on your run the other rule may be the
-one that got through.
+one that got through. And if the worker ran the second alert's job before a
+pile with no alert, that pile stops at the glass too, with nothing to write.
 
 Read it from the budget up:
 
-- Before a pile writes an alert, it reserves a place in the budget with one
-  conditional `UPDATE`. The first S004 alert fits: `reserved 1` of
-  `glass 1`.
+- Before a pile writes its alerts, it reserves one place per new ship and
+  rule, all in one conditional `UPDATE`. The first S004 alert fits:
+  `reserved 1` of `glass 1`.
 - The thresholds are checked after each admission, as reserved against
   glass. With a glass of one, the first alert already passes 0.7 and 0.8, so
   `WARN` (written once per run) and `NARROW` come at once.
@@ -102,8 +106,9 @@ Read it from the budget up:
   `GLASS`, the run's budget turns `GLASS`, and the stage is stopped:
   `GLASS-STAGE` with `amount 2`, the number of the stage it turned from `OPEN`
   to `PARTIAL`.
-- The run keeps its lock on the date. No new pile starts, `resume( )` and the
-  doctor leave it as it is: the budget does not refill on its own.
+- The run keeps its lock on the date (`Lock on 20261001: HELD`). No new pile
+  starts; `resume( )` and the doctor leave the run as it is: the budget does
+  not refill on its own.
 
 ## A person continues it
 
@@ -122,11 +127,13 @@ new glass must be higher than the old one, and the reason may not be empty.
 
 1. Press **F9** on it. Expected:
    `Continue run <ID> with glass 2: X`.
-2. Run the worker again. It runs one job: the pile that stopped at the glass.
+2. Run the worker again. It runs one job for each pile that stopped at the
+   glass; here one.
 3. Press **F9** on `ZCL_OSD_FLEET_WATCH_STATE` again. Expected, besides the
    lines above:
 
    ```
+   Lock on 20261001: RELEASED
    Stage 2 checks: DONE
      low-steam-voyage pile 2: DONE (STALE-PLAN)
    Budget: NARROW, glass 2, reserved 2, consumed 2, refunded 0
@@ -151,7 +158,7 @@ A governed set has three limits, and they answer different questions:
 | Limit | Counts | When it is passed |
 |---|---|---|
 | `budget.glass` | open alerts in the run, each ship once per rule | `GLASS`: the run waits for a person |
-| `budget.per_pile` | candidate open alerts in one pile | the pile is `HELD`; `release_pile( )` with a reason lets it go |
+| `budget.per_pile` | candidate open alerts in one pile | the pile is `HELD` and writes nothing; `release_pile( )` with a reason sets it back to `PLANNED`, then `resume( )` runs it |
 | `resilience.fuses.max_alerts` | every alert row of a rule in the run | the rule is `FUSED` and stops writing |
 
 The watch set uses only the glass. The other two are described in
@@ -165,9 +172,8 @@ open-steamgate's
   has none of its own here; `close: none`.
 - A run in one step (mode S) under a governor, and the race of two piles for
   the last place in the budget. open-steamgate's own tests run both.
-- A person on a screen. Here a classrun stands in for the person. A generated
-  console for runs, with the budget, the events and a button for "continue",
-  is in progress in open-steamgate and is not in 0.6.1531.
+- A person on a screen. Here a classrun stands in for the person; 0.6.1531
+  has no screen for it.
 
 `node test/l3.mjs` (appendix A) runs this chapter's steps against a real
 engine: the run that stops at its glass (G1) and the continuation that
