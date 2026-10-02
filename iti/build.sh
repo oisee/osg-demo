@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Chapter 18: rebuild src/iti/zcl_wasm_mandel.clas.abap from iti/mandel.c.
+# Chapter 18: rebuild iti/mandel.wasm and src/iti/zcl_wasm_mandel.clas.abap
+# from iti/mandel.c.
 #   ABAPITI=<abapiti checkout at the commit below> bash iti/build.sh
 # Needs clang with the wasm32 target and wasm-ld, and Go for abapiti. The
 # chapter was built with abapiti 3e92daf and clang 18.

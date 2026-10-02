@@ -48,7 +48,7 @@ const page = (t) => `<!doctype html><html><head><meta charset="utf-8"><style>
     <div class="arrow">↓ <code>abapiti compile wasm</code></div>
     <div class="step a"><b>ABAP</b><span><code>ZCL_WASM_MANDEL</code>: ${abapLines} ${t("lines; memory is an xstring, every i32 add wraps", "строк; память — xstring, каждое сложение i32 заворачивается")}</span></div>
     <div class="arrow">↓ <code>F9</code> ${t("on", "на")} <code>ZCL_OSD_FLEET_ITI</code></div>
-    <div class="step o"><b>${t("OSG draws it", "OSG рисует")}</b><span>${t("64 × 24 points, the same characters as the native C, byte for byte", "64 × 24 точки, те же символы, что у нативного C, байт в байт")}</span></div>
+    <div class="step o"><b>${t("open-steamgate draws it", "open-steamgate рисует")}</b><span>${t("64 × 24 points, the same characters as the native C, byte for byte", "64 × 24 точки, те же символы, что у нативного C, байт в байт")}</span></div>
   </div>
   <div class="term"><div class="bar">--- classrun ZCL_OSD_FLEET_ITI ---</div><pre>${esc(drawing)}</pre></div>
 </div></body></html>`;
