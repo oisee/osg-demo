@@ -18,10 +18,9 @@ uses it. Start the system first (`osd: Start`, chapter 1).
    entity-set method: `ShipSet get_entityset`, `VoyageSet get_entityset`,
    `StatusVHSet get_entityset` and the three `get_entity`. A click on the
    service opens its details: the DPC and MPC classes, a `$metadata` link and
-   the entity sets. With 0.4.1444, as in the picture, the details call every
-   method "inherited (generic)", even those `ZCL_ZOSD_FLEET_DPC_EXT`
-   redefines; the rows of the tree and the lenses below get it right, and
-   newer releases mark the redefined methods with their line number.
+   the entity sets. The methods `ZCL_ZOSD_FLEET_DPC_EXT` redefines are marked
+   "redefined" with their line, a link to it; the others are "inherited
+   (generic)".
 
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
 
@@ -59,15 +58,11 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
 ## From the code to the HTTP answer
 
-6. In a fresh VS Code window with the system started, open
-   `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
+6. In `ZCL_ZOSD_FLEET_DPC_EXT`, set a breakpoint on the first statement of
    `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
-   stops), and wait until its dot is filled. Then click **Attach debugger and
-   call ShipSet** above the method. Expected: the request stops on the
-   breakpoint. Stop the session (Shift+F5) and remove the breakpoint. After a
-   plain call (step 7) or in a longer session it may not stop, even with a
-   filled dot (a known issue of the extension), so do this step first, in a
-   fresh window.
+   stops), and click **Attach debugger and call ShipSet** above the method.
+   Expected: the request stops on the breakpoint. Stop the session (Shift+F5)
+   and remove the breakpoint.
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then

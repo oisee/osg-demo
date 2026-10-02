@@ -4,7 +4,7 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout at the tag `vscode-v0.5.1467` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the four objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout at the tag `vscode-v0.5.1486` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the four objects that only work locally (below), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo

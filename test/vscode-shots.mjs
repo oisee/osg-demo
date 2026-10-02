@@ -6,7 +6,7 @@
 //   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
 //
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.4.1444 --repo
+// - VSIX: a released extension (gh release download vscode-v0.5.1486 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
@@ -168,7 +168,7 @@ await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
   // test item points at
   // no "Test: Refresh Tests": the Testing tree fills itself after osd: Start
-  // (0.4.1444). Ctrl+Shift+F10 runs only the test items of this file, so the
+  // (since 0.4.1444). Ctrl+Shift+F10 runs only the test items of this file, so the
   // result below proves they are there; on 0.4.1414 the same key, without a
   // refresh, ran nothing
   await open("zosd_demo_hello.clas.abap");
@@ -294,7 +294,7 @@ await step("call", async () => {
 await step("call with debugger", async () => {
   // no picture: chapter 15 says the call stops on a breakpoint in the method.
   // On purpose after the plain call and in this long session: the case that
-  // ran through on 0.4.1444
+  // ran through before 0.5.1486
   const dpc = "src/zcl_zosd_fleet_dpc_ext.clas.abap";
   await closePanels();
   await open("zcl_zosd_fleet_dpc_ext.clas.abap");
