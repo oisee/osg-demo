@@ -1,0 +1,33 @@
+# Chapter 16, stage 2 of the night set: a ship below 30 % steam has no voyage
+# departing after the check date. Piled over the worklist `busy`.
+rule: low-steam-voyage
+class: zcl_osd_fleet_l3_steam
+title: A ship below 30 % steam has no voyage departing after the check date
+for: ZOSD_FLEET_SHIP as ship
+range: ship.ship_id
+when: ship.steam_pct < 30
+forbid:
+  exists: ZOSD_FLEET_VOY as voy
+  where: voy.ship_id = ship.ship_id and voy.dep_date > $date
+alert: "{ship.ship_id} {ship.name}: {ship.steam_pct} % steam, voyage {voy.voyage_id} departs {voy.dep_date}"
+boundaries: auto
+examples:
+  - name: flagged
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X001, name: Zephyr, status: A, steam_pct: 12}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00001, ship_id: X001, dep_date: 20270305}]
+    expect:
+      - "X001 Zephyr: 12 % steam, voyage X00001 departs 20270305"
+  - name: enough steam
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X002, name: Halcyon, status: A, steam_pct: 80}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00002, ship_id: X002, dep_date: 20270305}]
+    expect: []
+  - name: no voyage ahead
+    date: 20270301
+    rows:
+      ZOSD_FLEET_SHIP: [{ship_id: X003, name: Skylark, status: M, steam_pct: 0}]
+      ZOSD_FLEET_VOY: [{voyage_id: X00003, ship_id: X003, dep_date: 20270220}]
+    expect: []

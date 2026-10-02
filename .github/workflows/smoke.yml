@@ -77,3 +77,39 @@ jobs:
         env:
           OSD_HOME: ${{ github.workspace }}/osd
         run: node test/jobs.mjs
+      # DSL L3 (chapter 16) reads a pile's keys with I BT ranges, which only
+      # the transpiler pinned in OSD's libs.lock.json expands in SQL; built and
+      # linked as OSD's own CI does, after every step above has run on the
+      # published one
+      - name: Where the pinned transpiler lives
+        if: success() || failure()
+        working-directory: osd
+        run: |
+          echo "TRANSPILER=$RUNNER_TEMP/transpiler" >> "$GITHUB_ENV"
+          node tools/osd-lock.mjs github-env >> "$GITHUB_ENV"
+      - name: Restore the pinned transpiler build
+        if: success() || failure()
+        id: transpiler_cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/transpiler
+          key: transpiler-v1-${{ runner.os }}-${{ runner.arch }}-node24-${{ hashFiles('osd/libs.lock.json') }}-${{ hashFiles('osd/tools/osd-ci-transpiler-build.sh') }}
+      - name: Build the pinned transpiler
+        if: (success() || failure()) && steps.transpiler_cache.outputs.cache-hit != 'true'
+        working-directory: osd
+        run: bash tools/osd-ci-transpiler-build.sh build
+      - name: Verify and link the pinned transpiler
+        if: success() || failure()
+        working-directory: osd
+        run: |
+          bash tools/osd-ci-transpiler-build.sh verify
+          node tools/osd-link.mjs transpiler packages/transpiler
+          node tools/osd-link.mjs transpiler-cli packages/cli
+          node tools/osd-link.mjs runtime packages/runtime
+          node tools/osd-link.mjs core packages/transpiler/node_modules/@abaplint/core
+      - name: Fleet night set in DSL L3 (chapter 16)
+        if: success() || failure()
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+        run: node test/l3.mjs
