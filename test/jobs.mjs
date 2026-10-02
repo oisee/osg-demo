@@ -210,15 +210,16 @@ await check("J1b/J2 worker: good chain completes; failing chain stops before rea
   }
   const job = (name, count) => worked.find((w) => w.run?.jobName === name && w.run?.jobCount === count);
   const V = "ZOSD_FLEET_VOYAGE", R = "ZOSD_FLEET_READY";
-  const byCount = (count) => job(count === chains.good.voyage || count === chains.failing.voyage ? V : R, count);
-  const state = (count) => byCount(count)?.run?.state;
+  // a JOBCOUNT is unique per job name only, as on a system: the voyage and the
+  // readiness job of one chain can carry the same number
+  const voyage = (count) => job(V, count), ready = (count) => job(R, count);
   expect(worked.length === 3, `worked ${worked.length} steps, expected 3: ${worked.map((w) => `${w.run?.jobName} ${w.run?.state}`).join(", ")}`);
-  expect(state(chains.good.voyage) === "COMPLETED" && state(chains.good.ready) === "COMPLETED",
-    `good chain: voyage ${state(chains.good.voyage)}, ready ${state(chains.good.ready)}`);
-  const goodVoyageAt = worked.indexOf(byCount(chains.good.voyage));
-  expect(goodVoyageAt < worked.indexOf(byCount(chains.good.ready)), "readiness ran before its voyage job");
-  expect(state(chains.failing.voyage) === "FAILED", `failing voyage: ${state(chains.failing.voyage)}`);
-  expect(!byCount(chains.failing.ready), "the failing chain's readiness job ran");
+  expect(voyage(chains.good.voyage)?.run?.state === "COMPLETED" && ready(chains.good.ready)?.run?.state === "COMPLETED",
+    `good chain: voyage ${voyage(chains.good.voyage)?.run?.state}, ready ${ready(chains.good.ready)?.run?.state}`);
+  const goodVoyageAt = worked.indexOf(voyage(chains.good.voyage));
+  expect(goodVoyageAt >= 0 && goodVoyageAt < worked.indexOf(ready(chains.good.ready)), "readiness ran before its voyage job");
+  expect(voyage(chains.failing.voyage)?.run?.state === "FAILED", `failing voyage: ${voyage(chains.failing.voyage)?.run?.state}`);
+  expect(!ready(chains.failing.ready), "the failing chain's readiness job ran");
   const listed = JSON.parse(cli("list").stdout);
   const waiting = listed.find((r) => r.jobName === R && r.jobCount === chains.failing.ready);
   expect(waiting?.state === "WAITING", `failing chain's readiness job: ${waiting?.state}`);
@@ -249,8 +250,11 @@ await check("Doc1 doctor: the failing chain is stuck, with job doctor and BAL", 
   expect(chains.failing, "nothing was scheduled");
   const text = await classrun("ZCL_OSD_FLEET_DOCTOR", {readOnly: true});
   const f = chains.failing;
-  // job counts, run IDs, handles and times differ per run; mask them
-  const mask = (t) => t.replaceAll(f.run, "<RUN>").replaceAll(f.voyage, "<VOYAGE>").replaceAll(f.ready, "<READY>")
+  // job counts, run IDs, handles and times differ per run; mask them. A job
+  // count is unique per job name only, so it is masked together with its name
+  const mask = (t) => t.replaceAll(f.run, "<RUN>")
+    .replaceAll(`ZOSD_FLEET_VOYAGE/${f.voyage}`, "ZOSD_FLEET_VOYAGE/<VOYAGE>")
+    .replaceAll(`ZOSD_FLEET_READY/${f.ready}`, "ZOSD_FLEET_READY/<READY>")
     .replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z/g, "<T>").replace(/UTC \d{14}/g, "UTC <T>")
     .replace(/handle [A-F0-9]{32}/g, "handle <H>");
   const got = mask(text).split("\n").map((l) => l.trimEnd());
