@@ -68,10 +68,10 @@ for lang in $langs; do
   done
   if [ "$lang" = en ]; then
     stamp="Version $version, $today"
-    made_for="For the open-steamgate VS Code extension $ext or later and the open-steamgate tag $tag"
+    made_for="For the open-steamgate VS Code extension $ext or later (tag $tag)"
   else
     stamp="Версия $version, $today"
-    made_for="Для расширения VS Code open-steamgate $ext или новее и тега open-steamgate $tag"
+    made_for="Для расширения VS Code open-steamgate $ext или новее (тег $tag)"
   fi
   title=$(sed -n 's/^title: "\(.*\)"$/\1/p' "metadata.$lang.yaml")
   subtitle=$(sed -n 's/^subtitle: "\(.*\)"$/\1/p' "metadata.$lang.yaml")
