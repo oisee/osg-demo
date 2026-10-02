@@ -22,11 +22,19 @@ today=$(date -u +%Y-%m-%d)
 # new chapter needs no edit here. Appendix B (91) has no English file of its
 # own: it is docs/take-to-system.md, below. Both languages must have the same
 # chapters, so neither falls behind unnoticed.
-chapters() { (cd "$1" && ls [0-9][0-9]-*.md); }
-names=($( { chapters .; echo 91-take-to-system.md; } | sort -u))
-if [ "${names[*]}" != "$(chapters ru | tr '\n' ' ' | sed 's/ $//')" ]; then
+shopt -s nullglob
+# one file name per line, regular files only (a directory named NN-x.md is not
+# a chapter); names may hold spaces
+chapters() { local f; for f in "$1"/[0-9][0-9]-*.md; do [ -f "$f" ] && printf '%s\n' "${f##*/}"; done; return 0; }
+mapfile -t names < <({ chapters .; echo 91-take-to-system.md; } | sort -u)
+mapfile -t ru_names < <(chapters ru | sort)
+if [ "${#names[@]}" -lt 2 ] || [ "${#ru_names[@]}" -lt 2 ]; then
+  echo "book/build.sh: no chapters found (book/NN-*.md, book/ru/NN-*.md)" >&2
+  exit 1
+fi
+if [ "$(printf '%s\n' "${names[@]}")" != "$(printf '%s\n' "${ru_names[@]}")" ]; then
   echo "book/build.sh: the English and Russian chapters differ:" >&2
-  diff <(printf '%s\n' "${names[@]}") <(chapters ru) >&2
+  diff <(printf '%s\n' "${names[@]}") <(printf '%s\n' "${ru_names[@]}") >&2 || true
   exit 1
 fi
 for lang in $langs; do
