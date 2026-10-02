@@ -229,7 +229,8 @@ tests check them.
 - A pile whose job fails is not `DONE`, so nobody tries the gate, and the run
   stays open and holds the lock on its date. Something has to call the
   runner's `collect( )`; nothing in the night set does on its own. `collect( )`
-  reads each open pile's job with `SHOW_JOBSTATE` and marks the pile `FAILED`.
+  reads each open pile's job with `SHOW_JOBSTATE`; a job that ended without its
+  pile `DONE`, while the pile is still that job's, makes the pile `FAILED`.
   Once the rest of the stage is final, it marks the stage `PARTIAL` and every
   later stage `NOT-RUN`. That closes the gate, so a late job cannot open it.
   Then the run is final and the lock released.
@@ -268,7 +269,7 @@ Waiting: ''
 
 `unschedule( )` deletes the instance that waits, which ends the chain. A
 `node tools/osd-batch-runs.mjs work` afterwards answers `"kind": "empty"`:
-nothing of the set is left to run.
+nothing of the set is left to run (with the queue empty, as after step 2).
 
 ## Compared with chapter 9
 
