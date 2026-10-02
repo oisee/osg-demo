@@ -456,9 +456,10 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // rule file (L2 MAINTENANCE_NO_VOYAGE) and the trace sidecars (filed under
     // CLAS ZCL_OSD_FLEET_L2_MAINT, whose class itself travels), which newer
     // ones skip (open-steamgate #346); staging drops them either way
-    // the night set (chapter 16) stays local too: it needs open-steamgate's
-    // generic ZOSD_L3_* tables, which the unit does not carry
-    const night = readdirSync(join(repo, "src", "l3")).map((f) => /^(\w+)\.(clas|intf|prog)\.xml$/.exec(f)).filter(Boolean)
+    // the night and watch sets (chapters 16, 17) stay local too: they need
+    // open-steamgate's generic ZOSD_L3_* tables, which the unit does not
+    // carry; so does chapter 18's C-in-ABAP toy in src/iti
+    const night = ["l3", "iti"].flatMap((d) => readdirSync(join(repo, "src", d))).map((f) => /^(\w+)\.(clas|intf|prog)\.xml$/.exec(f)).filter(Boolean)
       .map(([, name, type]) => `${type.toUpperCase()} ${name.toUpperCase()}`);
     const local = ["CLAS ZCL_OSD_FLEET_DOCTOR", "CLAS ZCL_OSD_FLEET_TPL", "CLAS ZCL_OSD_FLEET_TRAN", "TRAN ZOSD_FLEET", ...night];
     const sidecars = ["CLAS ZCL_OSD_FLEET_L2_MAINT", "L2 MAINTENANCE_NO_VOYAGE"];
@@ -469,7 +470,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // the L2 sidecars alone: an engine with open-steamgate #346 skips them and
     // must not carry them; an older one refuses only them
     const sidecarStage = join(work, "with-sidecars", "osg-demo");
-    cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/]l3([\\/]|$)/.test(p)
+    cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const withSidecars = zip(sidecarStage, join(work, "with-sidecars.zip"));
     if (withSidecars.status === 0) {
@@ -483,7 +484,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     }
 
     const stage = join(work, "osg-demo");
-    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/]l3([\\/]|$)/.test(p)
+    cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);

@@ -83,3 +83,9 @@ jobs:
         env:
           OSD_HOME: ${{ github.workspace }}/osd
         run: node test/l3.mjs
+      - name: C in ABAP (chapter 18)
+        if: success() || failure()
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+        run: node test/iti.mjs
