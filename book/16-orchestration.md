@@ -225,7 +225,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 
@@ -241,7 +241,7 @@ tests check them.
   Then the run is final and the lock released.
 - A job of a run that is already over, started again, can still set its pile
   `RUNNING` and write alerts into a newer run of the date. Only sets with
-  `resilience:` refuse this in 0.6.1504.
+  `resilience:` refuse this.
 
 A set can also declare `resilience:`: a failed pile goes again after a backoff,
 a doctor job takes over what a dead job left, and fuses can stop a run. The
@@ -274,7 +274,7 @@ Waiting: ''
 
 `unschedule( )` deletes the instance that waits, which ends the chain. The
 job facade deletes only a job it has imported from its outbox
-([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/job-standard-fms.md)),
+([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/job-standard-fms.md)),
 so run `node tools/osd-batch-runs.mjs work` (or `drain`) between the two
 presses. It imports the driver and answers `"kind": "empty"`, because the
 driver is not due before 02:00. Without that, the second press finds nothing it

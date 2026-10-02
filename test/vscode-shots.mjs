@@ -3,10 +3,11 @@
 // like the other pictures:
 //
 //   CODE=<VS Code binary> VSIX=<extension .vsix> OSD_HOME=<open-steamgate checkout> \
-//   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
+//   WS=<a copy of this repository> OUT=book/img \
+//   xvfb-run -a -s "-screen 0 1440x900x24" node test/vscode-shots.mjs
 //
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.6.1504 --repo
+// - VSIX: a released extension (gh release download vscode-v0.6.1511 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);

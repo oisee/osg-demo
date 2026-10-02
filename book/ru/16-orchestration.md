@@ -233,7 +233,7 @@ ENDIF.
 ![Слева: условный UPDATE дает открыть этап 2 ровно одному из двух заданий. Справа: упавшая стопка оставляет этап 1 PARTIAL, а этап 2 NOT-RUN](../img/l3-gate.ru.png)
 
 Эти случаи в главе не выполняются. Так сгенерированный исполнитель
-описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/dsl-l3.md)
+описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/dsl-l3.md)
 open-steamgate (раздел «The worklist and the gate»), и их проверяют ее
 собственные тесты.
 
@@ -250,7 +250,7 @@ open-steamgate (раздел «The worklist and the gate»), и их прове�
   блокировка снята.
 - Задание уже завершенного прогона, запущенное снова, еще может перевести
   свою стопку в `RUNNING` и записать сообщения в более новый прогон той же
-  даты. В 0.6.1504 это отвергают только наборы с `resilience:`.
+  даты. Это отвергают только наборы с `resilience:`.
 
 Набор может также объявить `resilience:`: упавшая стопка повторяется после
 паузы, задание-доктор подбирает то, что оставило умершее задание, а
@@ -285,7 +285,7 @@ Waiting: ''
 `unschedule( )` удаляет ждущий экземпляр, и цепочка заканчивается. Фасад
 заданий удаляет только задание, которое он уже забрал из своей исходящей
 очереди
-([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1504/docs/job-standard-fms.md)),
+([docs/job-standard-fms.md](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1511/docs/job-standard-fms.md)),
 поэтому между двумя нажатиями выполните `node tools/osd-batch-runs.mjs work`
 (или `drain`). Он забирает драйвер и отвечает `"kind": "empty"`, потому что
 драйверу не время до 02:00. Без этого второе нажатие не найдет, что можно
