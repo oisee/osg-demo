@@ -2,12 +2,11 @@
 // DSL L3) against a real open-steamgate engine, with STG_DB=file like
 // test/jobs.mjs, the only backend that schedules jobs today:
 //
-//   OSD_HOME=<open-steamgate checkout> node test/l3.mjs
+//   OSD_HOME=<open-steamgate checkout> node test/l3.mjs [--print]
 //
-// The checkout must run on the transpiler pinned in its libs.lock.json (as
-// open-steamgate's CI builds it, tools/osd-ci-transpiler-build.sh, then
-// tools/osd-link.mjs): a pile reads its keys with I BT ranges, which the
-// published @abaplint/runtime does not expand in SQL.
+// A pile reads its keys with I BT ranges, which @abaplint/runtime expands in
+// SQL from 2.13.96; where the checkout has an older one,
+// `npm install --no-save @abaplint/runtime@2.13.96` in it.
 //
 //  1. N1: ZCL_OSD_FLEET_NIGHT_RUN runs the set in one dialog step (mode S) for
 //     2026-10-01: the filter stage puts S001 S003 S004 S005 on the worklist
@@ -30,6 +29,8 @@ import {createServer} from "node:net";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
+// --print shows each classrun's output, as the chapter quotes it
+const print = process.argv.includes("--print");
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const home = process.env.OSD_HOME;
 if (home === undefined || home === "") {
@@ -105,6 +106,7 @@ async function classrun(name, {readOnly = false} = {}) {
   };
   const res = await once(`${base}/sap/bc/adt/oo/classrun/${name}`, {method: "POST", headers}, readOnly);
   const text = await res.text();
+  if (print) console.log(`--- ${name}\n${text.trimEnd()}`);
   expect(res.ok, `${name}: HTTP ${res.status}: ${text.slice(0, 200)}`);
   return text;
 }
@@ -165,9 +167,9 @@ await check("N2 mode P: stage 1 in three jobs, stage 2 waiting", async () => {
   expect(match, `not submitted: ${text}`);
   run = match[1];
   inOrder(text, ["Stage 1 candidates: OPEN",
-    /^ {2}busy-ship pile 1 S001-S002: PLANNED, 0 in job L3_NIGHT_\S+$/,
-    /^ {2}busy-ship pile 2 S003-S004: PLANNED, 0 in job L3_NIGHT_\S+$/,
-    /^ {2}busy-ship pile 3 S005-S006: PLANNED, 0 in job L3_NIGHT_\S+$/,
+    /^ {2}busy-ship pile 1 S001-S002: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
+    /^ {2}busy-ship pile 2 S003-S004: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
+    /^ {2}busy-ship pile 3 S005-S006: PLANNED, 0 keys in job L3_NIGHT_\S+$/,
     "Stage 2 checks: WAITING", "Worklist busy:", "0 alerts"]);
   return `run ${run}`;
 });
@@ -195,8 +197,13 @@ await check("N4 state: the jobs' run DONE, the same worklist and alerts as mode 
   expect(run, "nothing was submitted");
   const text = await classrun("ZCL_OSD_FLEET_NIGHT_STATE", {readOnly: true});
   inOrder(text, [`Night set, run ${run}`, "Stage 1 candidates: DONE",
-    /^ {2}busy-ship pile 1 S001-S002: DONE/, /^ {2}busy-ship pile 3 S005-S006: DONE/,
-    "Stage 2 checks: DONE", /^ {2}low-steam-voyage pile 1 .*: DONE/, /^ {2}maintenance-voyage pile 2 .*: DONE/,
+    "  busy-ship pile 1 S001-S002: DONE, 1 keys in job L3_NIGHT_101_0001",
+    "  busy-ship pile 2 S003-S004: DONE, 2 keys in job L3_NIGHT_101_0002",
+    "  busy-ship pile 3 S005-S006: DONE, 1 keys in job L3_NIGHT_101_0003",
+    "Stage 2 checks: DONE", "  low-steam-voyage pile 1 S001-S003: DONE, 0 alerts in job L3_NIGHT_202_0001",
+    "  low-steam-voyage pile 2 S004-S005: DONE, 1 alerts in job L3_NIGHT_202_0002",
+    "  maintenance-voyage pile 1 S001-S003: DONE, 0 alerts in job L3_NIGHT_203_0001",
+    "  maintenance-voyage pile 2 S004-S005: DONE, 1 alerts in job L3_NIGHT_203_0002",
     "Worklist busy: S001 S003 S004 S005", ...ALERTS]);
   expect(!/PLANNED|WAITING|OPEN|FAILED/.test(text), `a pile or stage is not final: ${text}`);
   return "DONE, 2 alerts";

@@ -35,8 +35,14 @@ CLASS zcl_osd_fleet_night_run IMPLEMENTATION.
     DATA ls_work TYPE zosd_l3_work.
     DATA lt_alerts TYPE STANDARD TABLE OF zosd_l3_alert WITH DEFAULT KEY.
     DATA ls_alert TYPE zosd_l3_alert.
+    DATA lt_rules TYPE zcl_osd_fleet_night=>tt_rule.
+    DATA ls_rule TYPE zcl_osd_fleet_night=>ty_rule.
     DATA lv_keys TYPE string.
     DATA lv_job TYPE string.
+    DATA lv_count TYPE string.
+
+    " a filter pile counts the keys it selected, a check pile its alerts
+    lt_rules = zcl_osd_fleet_night=>rules( ).
 
     SELECT * FROM zosd_l3_stage INTO TABLE lt_stages WHERE run_id = iv_run.
     SORT lt_stages BY stage_no.
@@ -49,8 +55,14 @@ CLASS zcl_osd_fleet_night_run IMPLEMENTATION.
         IF ls_pile-job_name IS NOT INITIAL.
           lv_job = | in job { ls_pile-job_name }|.
         ENDIF.
+        READ TABLE lt_rules INTO ls_rule WITH KEY rule = ls_pile-rule_name.
+        IF sy-subrc = 0 AND ls_rule-filter = abap_true.
+          lv_count = |{ ls_pile-alerts } keys|.
+        ELSE.
+          lv_count = |{ ls_pile-alerts } alerts|.
+        ENDIF.
         APPEND |  { ls_pile-rule_name } pile { ls_pile-pile_no } { ls_pile-range_low }-{ ls_pile-range_high }: |
-          && |{ ls_pile-status }, { ls_pile-alerts }{ lv_job }| TO rt_lines.
+          && |{ ls_pile-status }, { lv_count }{ lv_job }| TO rt_lines.
       ENDLOOP.
     ENDLOOP.
 
