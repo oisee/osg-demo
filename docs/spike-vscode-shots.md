@@ -43,28 +43,30 @@ The script's header says how to run it. It takes eight pictures:
 
 ## Found in the extension (reported to its owner)
 
-Fixed in 0.4.1444, which the pictures now use; neither workaround applies
-there, and the script uses neither:
+The pictures use 0.5.1486, where four of the five are fixed and the script
+needs no workaround:
 
-- **Breakpoints (0.4.1414):** the extension declared no ABAP language, so an
-  `.abap` file opened as Plain Text and VS Code refused a breakpoint there;
-  `debug.allowBreakpointsEverywhere` worked around it.
-- **Test tree (0.4.1414):** the Testing tree was built before the system
-  served, so it had no workspace tests until **Test: Refresh Tests**. The
-  script checks that the tree fills itself.
+- **Breakpoints (0.4.1414, fixed in 0.4.1444):** the extension declared no
+  ABAP language, so an `.abap` file opened as Plain Text and VS Code refused a
+  breakpoint there; `debug.allowBreakpointsEverywhere` worked around it.
+- **Test tree (0.4.1414, fixed in 0.4.1444):** the Testing tree was built
+  before the system served, so it had no workspace tests until **Test:
+  Refresh Tests**. The script checks that the tree fills itself.
+- **Service details (0.4.1414 and 0.4.1444; fixed in 0.5.1467):** the
+  Details page listed redefined methods as "inherited (generic)"; 0.5.1467
+  marks them "redefined" with their line.
+- **Attach debugger and call ShipSet (fixed in 0.5.1486):** on 0.4.1414 the
+  breakpoint in the DPC method stayed unbound (the Plain Text problem above).
+  On 0.4.1444 a bound breakpoint was not hit after a plain "Call ShipSet" or
+  in a longer session; the call ran through. On 0.5.1467 neither the debugged
+  DPC call nor chapter 2's debugged classrun sent its request at all: the
+  extension waited on js-debug's parent session, while only the child
+  session verifies breakpoints, and gave up. The script checks the debugged
+  call after a plain one, in the long session.
 
-Still open (seen on 0.4.1414; what was rechecked on 0.4.1444 is said per item):
+Still open on 0.5.1486:
 
 - **Variables:** the Variables view and the debug hover show the runtime's
   JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
   the hover's first line carries the structure as JSON, which is where the
-  script finds `S001`. Also on 0.4.1444. Chapter 2 says so.
-- **Attach debugger and call ShipSet:** on 0.4.1414 a breakpoint in the DPC
-  method stayed unbound and the call ran through. On 0.4.1444 it stopped in
-  our runs in a fresh window, with the dot filled before the click; after a
-  plain "Call ShipSet" (also after osd: Stop and osd: Start), or in a longer
-  session, it did not, even with a filled dot. The script does not check this
-  call; chapter 15 says what was seen.
-- **Service details:** on 0.4.1414 and 0.4.1444 the Details page lists
-  redefined methods as "inherited (generic)", as chapter 15's picture shows
-  and its text says; on 0.5.1467 it marks them "redefined" with their line.
+  script finds `S001`. Chapter 2 says so.

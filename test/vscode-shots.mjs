@@ -6,7 +6,7 @@
 //   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
 //
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.4.1444 --repo
+// - VSIX: a released extension (gh release download vscode-v0.5.1486 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
@@ -168,7 +168,7 @@ await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
   // test item points at
   // no "Test: Refresh Tests": the Testing tree fills itself after osd: Start
-  // (0.4.1444). Ctrl+Shift+F10 runs only the test items of this file, so the
+  // (since 0.4.1444). Ctrl+Shift+F10 runs only the test items of this file, so the
   // result below proves they are there; on 0.4.1414 the same key, without a
   // refresh, ran nothing
   await open("zosd_demo_hello.clas.abap");
@@ -276,8 +276,10 @@ await step("call", async () => {
   await lens("ShipSet › GET_ENTITYSET").click();
   await see("the DPC method", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
   await see("line 112", win.locator(".statusbar").getByText(/^Ln 112,/));
-  await see("the call lens", lens("Call ShipSet"), 60000);
-  await lens("Call ShipSet").click();
+  // the plain call, not "Attach debugger and call ShipSet" beside it
+  const plainCall = lens(/^▶\s*Call ShipSet$/);
+  await see("the call lens", plainCall, 60000);
+  await plainCall.click();
   // the answer of this call: its URL, its status and row count, its columns
   await seeInWebview("/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json");
   await seeInWebview(/HTTP 200 -- \d+ ms -- 6 row\(s\)/);
@@ -291,8 +293,38 @@ await step("call", async () => {
   await win.waitForTimeout(1000);
   await shot("vscode-call-entityset");
 });
+await step("call with debugger", async () => {
+  // no picture: chapter 15 says the call stops on a breakpoint in the method.
+  // On purpose after the plain call and in this long session: the case that
+  // ran through before 0.5.1486
+  const dpc = "src/zcl_zosd_fleet_dpc_ext.clas.abap";
+  await closePanels();
+  await open("zcl_zosd_fleet_dpc_ext.clas.abap");
+  const at = lineOf(dpc, "lt_ship_id = ranges_for(");
+  await goto(at);
+  await win.keyboard.press("Control+Shift+B");
+  await see("a bound breakpoint", win.locator(".cgmr.codicon-debug-breakpoint:not(.codicon-debug-breakpoint-unverified)"), 60000);
+  await goto(lineOf(dpc, "METHOD shipset_get_entityset.") - 1);
+  await see("the call lens", lens("Attach debugger and call ShipSet"), 60000);
+  try {
+    await lens("Attach debugger and call ShipSet").click();
+    await see("the stop in shipset_get_entityset", win.getByText("Paused On Breakpoint"), 60000);
+  } finally {
+    // whatever happened, no session and no breakpoint for the later pictures
+    await win.keyboard.press("Shift+F5");
+    await win.waitForTimeout(2000);
+    await open("zcl_zosd_fleet_dpc_ext.clas.abap");
+    await goto(at);
+    await win.keyboard.press("Control+Shift+B");
+  }
+  await win.locator(".cgmr.codicon-debug-breakpoint").first().waitFor({state: "detached", timeout: 15000})
+    .catch(() => { throw new Error("the DPC breakpoint is still set"); });
+});
 await step("readers", async () => {
   await closePanels();
+  // back to the System view the earlier pictures show, not Run and Debug
+  await palette("View: Show OSD");
+  await win.keyboard.press("Escape");
   await open("zcl_osd_fleet_report.clas.abap");
   // the lens sits over the definition, at the top
   await goto(1);
