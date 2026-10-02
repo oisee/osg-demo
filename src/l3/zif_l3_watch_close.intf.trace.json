@@ -1,0 +1,57 @@
+{
+ "generator": "dsl-l3",
+ "set": "src/l3/fleet_watch.l3.yaml",
+ "template": "recipes/l3-ports/iface-autoclose.tpl",
+ "model": "sha256:203629b94aba55fde03aee3470b7642972ff1c6b7466d49549f467f266512bcd",
+ "lines": [
+  {
+   "line": 1,
+   "template_line": 1,
+   "path": "/source",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 2,
+   "template_line": 2,
+   "path": "/port",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 3,
+   "template_line": 3,
+   "path": "/iface",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 4,
+   "template_line": 4,
+   "path": "/",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 5,
+   "template_line": 5,
+   "path": "/",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 6,
+   "template_line": 6,
+   "path": "/",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  },
+  {
+   "line": 7,
+   "template_line": 7,
+   "path": "/",
+   "node": "set/watch/port/close",
+   "set_line": 39
+  }
+ ]
+}

@@ -1,0 +1,92 @@
+{
+ "generator": "dsl-l3",
+ "set": "src/l3/fleet_watch.l3.yaml",
+ "template": "recipes/l3-ports/source-table.tpl",
+ "model": "sha256:f55769f340aa9ea244fe6b52e0405dc4fa4384456d1eebe9f95a43a485405672",
+ "lines": [
+  {
+   "line": 1,
+   "template_line": 1,
+   "path": "/source",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 2,
+   "template_line": 2,
+   "path": "/port",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 3,
+   "template_line": 3,
+   "path": "/class",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 4,
+   "template_line": 4,
+   "path": "/",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 5,
+   "template_line": 5,
+   "path": "/iface",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 6,
+   "template_line": 6,
+   "path": "/",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 7,
+   "template_line": 7,
+   "path": "/",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 8,
+   "template_line": 8,
+   "path": "/class",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 9,
+   "template_line": 9,
+   "path": "/iface",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 10,
+   "template_line": 10,
+   "path": "/table",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 11,
+   "template_line": 11,
+   "path": "/",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  },
+  {
+   "line": 12,
+   "template_line": 12,
+   "path": "/",
+   "node": "set/watch/port/ships/variant/table",
+   "set_line": 30
+  }
+ ]
+}
