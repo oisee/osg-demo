@@ -11,6 +11,7 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 | `test/slice.mjs` | 22: tables and seed, F8 preview, classruns, the BAL audit, the service tree, OData, the tile (UI, skippable), unit tests, a dump, the zip, AMDP, both ALV grids, the template report, the lift, the L2 rule and its 15 generated tests | SQLite, DuckDB | yes, both, with the UI check skipped |
 | `test/jobs.mjs` | 7: one job, both chains, the doctor | SQLite file | yes |
 | `test/l3.mjs` | 7: chapter 16's night set in one step, in jobs through the worker (seven jobs, the gate between the stages), its state, the schedule switched on and off; chapter 17's watch set stopping at its glass and continued with a reason; `--print` shows the classruns' output | SQLite file | yes, last |
+| `test/iti.mjs` | 2: chapter 18's C, compiled natively (when `cc` is there), prints `iti/mandel.expected.txt`; the classrun of the class abapiti made from it prints the same | SQLite file | yes |
 | `test/lift.mjs` | the lifted region is in step with its recipe | any | through slice check 16 |
 | `test/l2.mjs` | the L2 rule's class and traces are what the rule builds to (`--write` rebuilds) | any | through slice check 17 |
 | `test/cli.mjs` | builds the fleet's command line program with osabap (Go 1.26) and runs chapter 14's steps as checks | SQLite file | yes |
@@ -18,5 +19,6 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 | `test/book-shots.mjs` | retakes the screenshots in `book/img/` from a running engine | SQLite | no, run by hand |
 | `test/cli-shots.mjs` | retakes chapter 14's terminal and TUI pictures from the program `test/cli.mjs --keep` left | SQLite file | no, run by hand |
 | `test/l3-diagrams.mjs` | redraws the diagrams of chapters 16 and 17, English and Russian | none needed (Chromium from the checkout) | no, run by hand |
+| `test/iti-diagram.mjs` | redraws chapter 18's picture, English and Russian | none needed (Chromium from the checkout) | no, run by hand |
 | `test/vscode-shots.mjs` | retakes the VS Code pictures of chapters 1, 2 and 15: VS Code and the released extension under Xvfb, each picture taken once its state is on screen | SQLite | no, run by hand |
 

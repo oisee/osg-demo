@@ -4,13 +4,13 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout at the tag `vscode-v0.6.1531` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the objects that only work locally (below: four objects and the night set's folder `src/l3`), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout at the tag `vscode-v0.6.1531` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the objects that only work locally (below: four objects and the folders `src/l3` and `src/iti`), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm -r "$STAGE"/src/l3 "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
+rm -r "$STAGE"/src/l3 "$STAGE"/src/iti "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
@@ -33,7 +33,7 @@ WAPA  zosg_demo
 NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
 ```
 
-and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN`, `TRAN ZOSD_FLEET` and each object in `src/l3`, and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
+and the same `NOT carried` line for `zosd_fleet_stat` and `zosd_fleet_voy`. If the local objects are left in the copy, the command exits with `not-in-manifest` for `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN`, `TRAN ZOSD_FLEET` and each object in `src/l3` and `src/iti`, and writes no zip; an older zip at the same path is left as it was, so remove it before retrying.
 
 ## What travels and what does not
 
@@ -64,6 +64,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | `ZCL_OSD_FLEET_DOCTOR` | no | It asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR`; on a system, SM37 and the job log answer the same question. |
 | `ZCL_OSD_FLEET_TPL` | no | It renders through `ZCL_OSD_TPL` and `ZCL_AJSON` of the open-steamgate runtime; a system has neither unless both are imported first. |
 | The night and watch sets, `src/l3` (`ZCL_OSD_FLEET_NIGHT`, `ZCL_OSD_FLEET_WATCH`, their job reports, rules, ports, settings and classruns) | no | They read and write open-steamgate's generic L3 tables (`ZOSD_L3_ALERT`, `ZOSD_L3_PILE`, `ZOSD_L3_STAGE`, `ZOSD_L3_WORK`, `ZOSD_L3_RUN`, and for the watch set the governor's and settings' tables), which this unit does not carry; with those tables imported first, their code is the standard job function modules and Open SQL. |
+| C in ABAP, `src/iti` (`ZCL_WASM_MANDEL`, `ZCL_OSD_FLEET_ITI`, chapter 18) | no | A toy, left out so the unit stays the fleet. Classes abapiti generates have run on A4H by abapiti's own records; this one was not tried on a system from this repository. |
 | Transaction `ZOSD_FLEET` and `ZCL_OSD_FLEET_TRAN` | no | The class implements `ZIF_OSD_TRANSACTION`, an interface of the open-steamgate runtime that a system does not have, so neither is in the deploy unit. |
 | `test/*.mjs`, `docs/`, `book/`, the README | no | Files for this repository, not ABAP objects. |
 
