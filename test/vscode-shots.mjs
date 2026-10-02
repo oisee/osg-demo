@@ -6,7 +6,7 @@
 //   WS=<a copy of this repository> OUT=book/img xvfb-run -a node test/vscode-shots.mjs
 //
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.5.1486 --repo
+// - VSIX: a released extension (gh release download vscode-v0.6.1504 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
