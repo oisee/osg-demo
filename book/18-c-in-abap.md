@@ -39,8 +39,8 @@ int mandel(int cx, int cy, int max) {
 
 ## Into ABAP
 
-[iti/build.sh](../iti/build.sh) does it in two steps (and builds abapiti
-first). Run it with `ABAPITI` set to an abapiti checkout; it needs clang with
+[iti/build.sh](../iti/build.sh) does it in two steps, and also builds
+abapiti. Run it with `ABAPITI` set to an abapiti checkout; it needs clang with
 the `wasm32` target, `wasm-ld` and Go:
 
 ```

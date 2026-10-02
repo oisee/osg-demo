@@ -121,9 +121,9 @@ for (;;) {
 }
 
 const expected = readFileSync(join(repo, "iti", "mandel.expected.txt"), "utf8");
-// only the transport is normalised: CRLF and the final newline; every space
+// only the transport is normalised: CRLF and one final newline; every space
 // and every row of the drawing counts
-const lines = (text) => text.replace(/\r\n/g, "\n").replace(/\n+$/, "");
+const lines = (text) => text.replace(/\r\n/g, "\n").replace(/\n$/, "");
 
 await check("I1 native: the same C prints the expected drawing", async () => {
   const cc = spawnSync("cc", ["--version"], {encoding: "utf8"});
