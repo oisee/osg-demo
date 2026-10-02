@@ -54,8 +54,9 @@ settings:
 Собирается так же, как ночной набор (глава 16), через
 `tools/dsl-l3.mjs build`. Компилятор пишет исполнитель `ZCL_OSD_FLEET_WATCH`,
 его отчет для заданий `ZOSD_FLEET_WATCH`, порты `ZCL_L3_WATCH_*` и класс
-настроек `ZCL_L3_WATCH_CONF` с его отчетом `ZL3_WATCH_CONF`. Бюджет лежит в общей таблице
-open-steamgate `ZOSD_L3_BUDGET`, история прогона — в `ZOSD_L3_EVENT`.
+настроек `ZCL_L3_WATCH_CONF` с его отчетом `ZL3_WATCH_CONF`. Бюджет лежит в
+общей таблице open-steamgate `ZOSD_L3_BUDGET`, история прогона — в
+`ZOSD_L3_EVENT`.
 
 ![Бюджет прогона: два попадания, два разных ключа, ни одного закрытого самим, два открытых; события и состояния бюджета до GLASS, CONTINUE человека и снова заполненный бюджет](../img/l3-glass.ru.png)
 

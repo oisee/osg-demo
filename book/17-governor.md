@@ -50,8 +50,9 @@ settings:
 Build it like the night set (chapter 16) with `tools/dsl-l3.mjs build`. The
 compiler writes the runner `ZCL_OSD_FLEET_WATCH`, its job report
 `ZOSD_FLEET_WATCH`, the ports `ZCL_L3_WATCH_*`, and the settings class
-`ZCL_L3_WATCH_CONF` with its report `ZL3_WATCH_CONF`. The budget lives in open-steamgate's
-generic table `ZOSD_L3_BUDGET`, the history of the run in `ZOSD_L3_EVENT`.
+`ZCL_L3_WATCH_CONF` with its report `ZL3_WATCH_CONF`. The budget lives in
+open-steamgate's generic table `ZOSD_L3_BUDGET`, the history of the run in
+`ZOSD_L3_EVENT`.
 
 ![The run's budget: two hits, two distinct keys, none closed on their own, two open; the run's events and budget states up to GLASS, a person's CONTINUE, and the budget filling again](img/l3-glass.png)
 
