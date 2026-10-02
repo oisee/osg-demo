@@ -1,0 +1,4 @@
+# What the book is written for: the one place that says it. book/build.sh puts
+# it on the title page and stops if the preface (EN/RU) or README names another.
+extension: "0.6.1504"
+tag: "vscode-v0.6.1504"
