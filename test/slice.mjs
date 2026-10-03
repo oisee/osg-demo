@@ -682,7 +682,15 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
 
 await check("17 L2 fleet rule: built class in step, generated tests pass", async () => {
   const l2 = spawnSync(process.execPath, [join(repo, "test", "l2.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
-  expect(l2.status === 0, `rule check: ${(l2.stdout + l2.stderr).slice(-400)}`);
+  // the committed rule output is the book's tag's; against a newer engine its
+  // generator may have moved, and SLICE_L2_DRIFT=warn (the CI's main canary)
+  // reports that drift instead of failing on it
+  const drifted = l2.status !== 0 && /drifted/.test(l2.stdout + l2.stderr);
+  if (drifted && process.env.SLICE_L2_DRIFT === "warn") {
+    console.log(`warn  17 the L2 rule's output drifted from this engine's generator: ${(l2.stdout + l2.stderr).split("\n").find((l) => /drifted/.test(l))}`);
+  } else {
+    expect(l2.status === 0, `rule check: ${(l2.stdout + l2.stderr).slice(-400)}`);
+  }
   // the rule check takes longer than the engine's keep-alive; a pooled socket
   // closed meanwhile fails one fetch, so the token fetch (safe to repeat)
   // is retried once
