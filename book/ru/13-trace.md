@@ -21,7 +21,7 @@ AND voy~dep_date > iv_date
 ```json
 {
  "line": 32,
- "template_line": 150,
+ "template_line": 189,
  "path": "/queries/1/where/2/pre",
  "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
  "rule_line": 14
@@ -29,7 +29,8 @@ AND voy~dep_date > iv_date
 ```
 
 - `template_line` - строка шаблона open-steamgate
-  `recipes/l2-check/template.tpl`, которая печатает условие `WHERE`;
+  `recipes/l2-check/template.tpl`, которая печатает условие `WHERE`; номер
+  сдвигается вместе с шаблоном, так что в вашем checkout он может быть другим;
 - `path` - место в модели L1, откуда взято значение: второе условие первого
   запроса;
 - `node` - узел модели: второе сравнение в `forbid` / `where` правила;
