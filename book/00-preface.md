@@ -71,5 +71,5 @@ only while execution is paused at a line.
 | Out of the server | 14 My ABAP escaped | a report compiled into a native command line program and terminal form |
 | The workbench | 15 From a service to its code | the System view, `.http` requests resolved to their DPC method, a call from the code to its HTTP answer, the readers of a class |
 | Orchestration | 16 The night set, 17 The governor | a set of rules in YAML (DSL L3): a filter stage, a worklist, piles run as jobs, a gate that opens the next stage once, a nightly schedule; a budget of open alerts per run that stops it until a person continues it with a reason |
-| Because we can | 18 C in ABAP | a C function compiled to WebAssembly and by abapiti to an ABAP class, drawing the Mandelbrot set in the classrun console, byte for byte as native C |
+| Because we can | 18 JavaScript and C in ABAP | QuickJS running as ABAP on a real kernel (abapiti's result); in your sandbox, a C function compiled to WebAssembly and by abapiti to an ABAP class, drawing the Mandelbrot set in the classrun console, byte for byte as native C |
 | Appendices | A Run the checks, B Take it to a system (what travels), C Limits and glossary | the automated checks, the transport list, the fine print |
