@@ -17,10 +17,21 @@ defaults:
   run:
     shell: bash
 
+# Two targets. "tag" checks the demo against the open-steamgate tag the book
+# is written for (book/baseline.yaml): the book's contract, and the result a
+# pull request is judged by. "main" checks it against open-steamgate main as
+# a canary: it shows early what main is about to break for this repository,
+# and does not fail the run (continue-on-error).
 jobs:
   fleet:
+    name: fleet (${{ matrix.target }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    continue-on-error: ${{ matrix.target == 'main' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [tag, main]
     steps:
       - name: Check out the demo
         uses: actions/checkout@v5
@@ -29,11 +40,23 @@ jobs:
       - name: Book excerpts in step with src
         working-directory: demo
         run: node test/book-snippets.mjs
-      - name: Check out current OSD main
+      - name: Which open-steamgate to check against
+        id: osd
+        working-directory: demo
+        run: |
+          if [ "${{ matrix.target }}" = tag ]; then
+            ref=$(sed -n 's/^tag: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' book/baseline.yaml)
+            test -n "$ref" || { echo "::error::no tag in book/baseline.yaml"; exit 1; }
+          else
+            ref=main
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "open-steamgate ref: $ref"
+      - name: Check out open-steamgate
         uses: actions/checkout@v5
         with:
           repository: oisee/open-steamgate
-          ref: main
+          ref: ${{ steps.osd.outputs.ref }}
           path: osd
       - name: Record the runtime under test
         run: git -C osd rev-parse HEAD
@@ -52,12 +75,14 @@ jobs:
         env:
           OSD_HOME: ${{ github.workspace }}/osd
           SLICE_SKIP_UI: "1"
+          SLICE_L2_DRIFT: ${{ matrix.target == 'main' && 'warn' || '' }}
         run: node test/slice.mjs
       - name: Fleet smoke on DuckDB
         working-directory: demo
         env:
           OSD_HOME: ${{ github.workspace }}/osd
           SLICE_SKIP_UI: "1"
+          SLICE_L2_DRIFT: ${{ matrix.target == 'main' && 'warn' || '' }}
           STG_DB: duckdb
         run: node test/slice.mjs
       - uses: actions/setup-go@v6

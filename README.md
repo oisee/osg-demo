@@ -73,7 +73,7 @@ OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         
 
 `test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2 and 15; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
-CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job and L3 checks against open-steamgate `main` on every change ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the job, L3 and C-in-ABAP checks on every change, against the open-steamgate tag the book is written for (`book/baseline.yaml`; that result decides); the same run against open-steamgate `main` is a canary that warns early and does not fail the run ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
 ## Repository map
 
