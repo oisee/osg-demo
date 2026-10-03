@@ -30,10 +30,9 @@ this chapter did not repeat them.
   `Map` with a `RegExp` work. A ninth shows `printf` from C reaching ABAP as
   `abapiti says 42`. Every answer equals the same wasm run in wazero.
 - On open-steamgate's Go runtime (osgo, which is not in 0.6.1531) the same
-  nine pass; the nine tests took about 2 seconds on the kernel and about 90
-  on osgo. On
-  open-steamgate's JavaScript runtime, the one the VS Code extension runs,
-  QuickJS has not been tried yet.
+  nine pass; the nine tests took about 2 seconds on the kernel and about 90 on
+  osgo. On open-steamgate's JavaScript runtime, the one the VS Code extension
+  runs, QuickJS has not been tried yet.
 
 The same road, at the size of one function, is something you can walk in
 your own sandbox: the rest of this chapter takes thirteen lines of C into
