@@ -20,7 +20,7 @@ Its entry in the trace file:
 ```json
 {
  "line": 32,
- "template_line": 150,
+ "template_line": 189,
  "path": "/queries/1/where/2/pre",
  "node": "rule/maintenance-ship-no-voyage/forbid/where/2",
  "rule_line": 14
@@ -28,7 +28,8 @@ Its entry in the trace file:
 ```
 
 - `template_line` is the line of open-steamgate's
-  `recipes/l2-check/template.tpl` that prints a `WHERE` condition;
+  `recipes/l2-check/template.tpl` that prints a `WHERE` condition; the
+  number moves with that template, so your checkout may show another one;
 - `path` is where in the L1 model the value came from: the second condition
   of the first query;
 - `node` is the model node: the second comparison of the rule's `forbid` /
