@@ -37,7 +37,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 15 | [The workbench](book/15-vscode.md) | [Рабочее место](book/ru/15-vscode.md) | from a service to its code and back in VS Code: the System view, `.http` requests, a call to its HTTP answer | `http/fleet.http` |
 | 16 | [Orchestration: the night set](book/16-orchestration.md) | [Оркестрация](book/ru/16-orchestration.md) | a set of rules in stages: a filter fills a worklist, piles run as jobs, a gate opens the next stage once, a nightly schedule | `ZCL_OSD_FLEET_NIGHT` (`src/l3/`) |
 | 17 | [The governor](book/17-governor.md) | [Регулятор](book/ru/17-governor.md) | a budget of open alerts per run: the run stops at its glass, a person continues it with a reason | `ZCL_OSD_FLEET_WATCH` (`src/l3/`) |
-| 18 | [Because we can: C in ABAP](book/18-c-in-abap.md) | [C в ABAP](book/ru/18-c-in-abap.md) | a C function via WebAssembly and abapiti into an ABAP class, drawing the Mandelbrot set like native C | `ZCL_WASM_MANDEL` (`src/iti/`, `iti/`) |
+| 18 | [Because we can: JavaScript and C in ABAP](book/18-c-in-abap.md) | [JavaScript и C в ABAP](book/ru/18-c-in-abap.md) | QuickJS as ABAP on a real kernel (abapiti's result); a C function via WebAssembly and abapiti into an ABAP class, drawing the Mandelbrot set like native C | `ZCL_WASM_MANDEL` (`src/iti/`, `iti/`) |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
