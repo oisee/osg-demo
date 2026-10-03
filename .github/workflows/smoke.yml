@@ -45,7 +45,7 @@ jobs:
         working-directory: demo
         run: |
           if [ "${{ matrix.target }}" = tag ]; then
-            ref=$(sed -n 's/^tag: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' book/baseline.yaml)
+            ref=$(sed -e 's/ *#.*$//' book/baseline.yaml | sed -n 's/^tag: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p')
             test -n "$ref" || { echo "::error::no tag in book/baseline.yaml"; exit 1; }
           else
             ref=main
