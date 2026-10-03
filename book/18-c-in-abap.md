@@ -20,17 +20,18 @@ measurements, recorded in its
 this chapter did not repeat them.
 
 - QuickJS (release 2024-01-13), built for WebAssembly without SIMD, with a
-  small driver `qjs_eval( n )`: 1.0 MB of wasm.
+  small driver `qjs_eval(n)`: 1.0 MB of wasm.
 - abapiti makes of it 253,000 lines of ABAP: a state class, 13 chunk classes
-  of about 20,000 lines each, 13 interfaces between them, and a facade
+  of up to 20,000 lines each, 13 interfaces between them, and a facade
   `ZCL_QJS`.
 - On A4H all 28 objects activate one by one in 87 seconds. Nine ABAP Unit
-  tests pass in about 2.2 seconds, each a line of JavaScript evaluated inside
+  tests pass in about 2.2 seconds. Eight evaluate a line of JavaScript inside
   ABAP: `1+2` is 3, `fib(15)` is 610, an array sorts, `JSON.stringify` and a
-  `Map` with a `RegExp` work, and `printf` from C reaches ABAP as
-  `abapiti says 42`. Every answer equals the native run of the same wasm.
+  `Map` with a `RegExp` work. A ninth shows `printf` from C reaching ABAP as
+  `abapiti says 42`. Every answer equals the same wasm run in wazero.
 - On open-steamgate's Go runtime (osgo, which is not in 0.6.1531) the same
-  nine pass, about forty times slower than the kernel in execution. On
+  nine pass; the nine tests took about 2 seconds on the kernel and about 90
+  on osgo. On
   open-steamgate's JavaScript runtime, the one the VS Code extension runs,
   QuickJS has not been tried yet.
 
@@ -200,12 +201,14 @@ chapter did not repeat them.
   job and about 1.3 s on the abaplint JavaScript runtime, some 120 times
   slower. On A4H the checksums matched the native ones for every size
   measured, from 1 to 500.
-- **What the kernel refuses.** Some code that abaplint, the JavaScript
-  runtime and osgo accept, A4H does not: `BIT-AND` on integers, and a write
-  at an offset into an `xstring`. Both had to go another way.
-- **Thirty characters.** Two long export names of QuickJS, cut to ABAP's 30
+- **What the kernel refuses.** Some code that passed abapiti's other checks
+  the kernel refuses: `BIT-AND` on integers, and assigning at an offset into
+  an `xstring` (`mv_mem+off(len) = ...`). abapiti's helpers now avoid both
+  (abapiti #21); for the memory it is the `REPLACE SECTION ... IN BYTE MODE`
+  shown above.
+- **Thirty characters.** Two long export names, cut to ABAP's 30
   characters, came out the same: "A method implementation cannot uniquely be
-  determined". abapiti now makes the names unique.
+  determined". Since abapiti #21 the names are unique.
 - **The structure stack.** One C `switch` became 288 nested `DO 1 TIMES`;
   the kernel stops at about 128 ("Structure stack full"). abapiti flattens
   it now, to at most 63 levels.
