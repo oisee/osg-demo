@@ -2,6 +2,7 @@
 // book/img/l3-*.png and book/img/l3-*.ru.png:
 //
 //   OSD_HOME=<open-steamgate checkout> node test/l3-diagrams.mjs
+//   SHOTS_ONLY=glass OUT=<staging directory> limits the refresh to chapter 17.
 //
 // Drawn here as SVG from what test/l3.mjs checks (the stages, the piles and
 // their jobs, the worklist, the gate) and from docs/dsl-l3.md of
@@ -20,7 +21,7 @@ if (!home) {
   console.error("l3-diagrams: set OSD_HOME to an open-steamgate checkout");
   process.exit(2);
 }
-const out = join(repo, "book", "img");
+const out = process.env.OUT ? resolve(process.env.OUT) : join(repo, "book", "img");
 mkdirSync(out, {recursive: true});
 
 const C = {
@@ -273,9 +274,9 @@ function glass(t) {
   const note = (x, y, lines, color = C.soft) => lines.forEach((l, i) => { b += text(x, y + i * 16, l, {size: 12, fill: color}); });
   note(492, 116, [t("1st alert", "1-е сообщ."), t("1/1 ≥ warn", "1/1 ≥ warn")]);
   note(604, 116, [t("≥ narrow_at:", "≥ narrow_at:"), t("no new chain", "без новых"), t("", "заданий")]);
-  note(716, 116, [t("2nd alert", "2-е сообщение"), t("does not fit", "не помещается"), t("stage 2 PARTIAL", "этап 2 PARTIAL")], C.alerte);
+  note(716, 116, [t("2nd alert", "2-е сообщение"), t("does not fit", "не помещается"), t("stage 2 PARTIAL", "этап 2 PARTIAL"), "Doctor RUNNING"], C.alerte);
   note(838, 116, [t("a person:", "человек:"), t("glass 2 + reason", "стекло 2 + причина"), t("its piles again", "стопки стекла"), t("", "снова")], C.s2e);
-  note(965, 116, [t("reserved 2/2", "резерв 2/2"), t("stage 2 DONE", "этап 2 DONE")]);
+  note(965, 116, [t("reserved 2/2", "резерв 2/2"), t("stage 2 DONE", "этап 2 DONE"), "Doctor STOPPED"]);
   b += box(340, 178, 690, 50, C.gate, C.gatee, [
     [t("continue_glass( run, 2, 'S004 known: maintenance planned, owner informed' )", "continue_glass( прогон, 2, 'S004 known: maintenance planned, owner informed' )"), {mono: true, size: 11}],
     [t("event CONTINUE: who, when, the new glass, the reason", "событие CONTINUE: кто, когда, новое стекло, причина"), {size: 12}]], {lh: 20});
@@ -289,6 +290,7 @@ const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePa
 try {
   const tab = await browser.newPage({deviceScaleFactor: 2});
   for (const [name, draw] of Object.entries(pictures)) {
+    if (process.env.SHOTS_ONLY && name !== process.env.SHOTS_ONLY) continue;
     for (const [lang, suffix] of [["en", ""], ["ru", ".ru"]]) {
       const t = (en, ru) => (lang === "en" ? en : ru);
       await tab.setContent(`<!doctype html><html><body style="margin:0">${draw(t)}</body></html>`);
