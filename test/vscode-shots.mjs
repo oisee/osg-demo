@@ -96,9 +96,12 @@ const open = async (file) => {
   await win.keyboard.press("Enter");
   await win.waitForTimeout(1500);
 };
-const shot = async (name) => {
+const shot = async (name, {allowDirty = false} = {}) => {
   await win.mouse.move(900, 470);
   await win.waitForTimeout(500);
+  if (!allowDirty && await win.locator(".tabs-container .tab.dirty").count()) {
+    throw new Error("an editor tab is dirty before capture");
+  }
   const status = await win.locator(".statusbar").innerText();
   if (!/OSD generation [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
     throw new Error("the status bar must show SQLite · warm before capture");
@@ -193,6 +196,8 @@ const closePanels = async () => {
 };
 
 await step("start", async () => {
+  // Wait for extension activation before asking the palette for its command.
+  await see("system status", win.locator(".statusbar").getByText(/OSD (stopped|running)\b/), 120000);
   // the exact title: a shorter query picks "osd: Choose which system Start runs"
   await palette("osd: Start (build + run this system)");
   // the system is up when the status bar shows its labelled serving generation;
@@ -204,6 +209,7 @@ await step("start", async () => {
       throw new Error("the system did not start");
     });
   await see("jobs status", win.locator(".statusbar").getByText(/OSD jobs:/));
+  await see("warm generation", win.locator(".statusbar").getByText(/OSD generation [0-9a-f]{7,} · SQLite · warm\b/), 300000);
   await win.waitForTimeout(3000);
 });
 if (failed) {
@@ -271,24 +277,31 @@ await step("kernel diagnostics", async () => {
   // Demonstrate a rejected form with an unsaved edit. The actual class
   // correctly uses bytes; editing the buffer does not rebuild the system.
   await open("zcl_wasm_mandel.clas.abap");
-  const originalLine = readFileSync(join(ws, "src", "iti", "zcl_wasm_mandel.clas.abap"), "utf8").split("\n")[141];
-  await goto(142);
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Shift+End");
-  await win.keyboard.insertText("    DATA lv_a TYPE i. DATA lv_b TYPE i. DATA lv_r TYPE i.");
-  await goto(144);
-  await palette("View: Toggle Problems");
-  await see("OSD kernel diagnostic", win.locator(".panel").getByText(/OSD kernel/));
-  await see("support link", win.locator(".panel a").filter({hasText: /bit|offset|kernel/i}));
-  await shot("vscode-kernel-diagnostic");
-  await palette("View: Focus Active Editor Group");
-  await goto(142);
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Shift+End");
-  await win.keyboard.insertText(originalLine);
-  await see("original byte operands restored", win.locator(".view-line", {hasText: /DATA.lv_a.TYPE.x.LENGTH.4/}));
+  try {
+    await goto(142);
+    await win.keyboard.press("Home");
+    await win.keyboard.press("Home");
+    await win.keyboard.press("Shift+End");
+    await win.keyboard.insertText("    DATA lv_a TYPE i. DATA lv_b TYPE i. DATA lv_r TYPE i.");
+    await goto(144);
+    await palette("View: Toggle Problems");
+    await see("OSD kernel diagnostic", win.locator(".panel").getByText(/OSD kernel/));
+    await see("support link", win.locator(".panel a").filter({hasText: /bit|offset|kernel/i}));
+    if (await win.locator(".tabs-container .tab.dirty").count() !== 1) {
+      throw new Error("the diagnostic example must have exactly one dirty editor tab");
+    }
+    await shot("vscode-kernel-diagnostic", {allowDirty: true});
+  } finally {
+    await palette("View: Focus Active Editor Group");
+    // workbench.action.files.revert clears the unsaved buffer, including its
+    // dirty state; typing the original text back still leaves a dirty tab.
+    await palette("File: Revert File");
+    await win.locator(".tabs-container .tab.dirty").waitFor({state: "detached", timeout: 15000});
+    await see("original byte operands restored", win.locator(".view-line", {hasText: /DATA.lv_a.TYPE.x.LENGTH.4/}));
+    await win.keyboard.press("Control+w");
+    await win.locator('.tabs-container .tab').filter({hasText: "zcl_wasm_mandel.clas.abap"})
+      .waitFor({state: "detached", timeout: 15000});
+  }
   await closePanels();
 });
 
