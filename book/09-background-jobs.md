@@ -17,7 +17,8 @@ default; `off` disables it. The **OSD jobs** status bar shows the worker's
 state; click it for its output. It runs released jobs without a terminal.
 The steps below use a checkout and a manually driven worker to show the
 queue before and after each step.
-<!-- shot: OSD jobs status bar and worker output for the fleet audit -->
+
+![OSD jobs: the supervised worker completes ZOSD_FLEET_AUDIT](img/vscode-fleet-jobs.png)
 
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`

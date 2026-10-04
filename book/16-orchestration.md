@@ -133,7 +133,9 @@ the 12th, so both checks flag it.
 Mode P is the same set in background jobs. As in chapter 9, this needs SQLite
 in a file. In VS Code, **osd: Start** uses file SQLite by default and
 supervises the worker (`osd.jobs.worker=auto`); the jobs run without a terminal.
-<!-- shot: OSD jobs status and output while the night set runs -->
+
+![OSD jobs: the worker’s status and completed night-set pile jobs](img/vscode-night-jobs.png)
+
 For the queue snapshots below, use the checkout route with `STG_DB=file`,
 `STG_DB_PATH` and `OSD_PACKS`, and drive the worker yourself.
 

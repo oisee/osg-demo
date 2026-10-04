@@ -62,9 +62,12 @@ runner's recovery path itself. At GLASS the daemon stays alive but queues no
 pass; it stops itself when no run holds a lock. The state classrun prints
 `Doctor: RUNNING since …` or `Doctor: STOPPED since …` with pass/tick details.
 These are local observations, not a test on a real system.
-<!-- shot: watch state at GLASS with Doctor RUNNING, then final state with Doctor STOPPED -->
 
-![The run's budget: two hits, two distinct keys, none closed on their own, two open; the run's events and budget states up to GLASS, a person's CONTINUE, and the budget filling again](img/l3-glass.png)
+![The run's budget: two hits, two distinct keys, none closed on their own, two open; the run's events and budget states up to GLASS, a person's CONTINUE, and the budget filling again; Doctor RUNNING at GLASS and STOPPED after completion](img/l3-glass.png)
+
+![Watch state at GLASS: Doctor RUNNING, lock HELD, one open alert](img/vscode-watch-glass.png)
+
+![After CONTINUE: Doctor STOPPED, lock RELEASED, both checks DONE and two open alerts](img/vscode-watch-final.png)
 
 ## The run stops at its glass
 

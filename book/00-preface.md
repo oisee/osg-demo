@@ -23,8 +23,8 @@ statuses.
 ## This edition
 
 The book is written for the open-steamgate VS Code extension **0.6.1621 or
-later**; its pictures await the phase 2 refresh.
-<!-- shot: refresh the extension pictures for the book baseline -->
+later**; its workbench pictures were captured with the released **0.6.1621**
+extension.
 
 Where a chapter works in an
 open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the
