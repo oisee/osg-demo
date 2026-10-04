@@ -96,4 +96,4 @@ To read the stable records:
 `node -e "for (const o of require('./src/l2/zcl_osd_fleet_l2_maint.clas.trace.json').outputs) for (const e of o.lines) console.log(o.file, e.line ?? e.lines, e.sources)"`.
 
 The contract is open-steamgate's
-[trace format v1](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/trace-format.md).
+[trace format v1](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/trace-format.md).
