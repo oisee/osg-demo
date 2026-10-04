@@ -293,10 +293,15 @@ await step("kernel diagnostics", async () => {
 });
 
 // Jobs are run by the extension's supervised worker, not an external CLI.
+const outputAutoScroll = async (enabled) => {
+  const toggle = win.locator(enabled ? ".panel .codicon-unlock:visible" : ".panel .codicon-lock:visible");
+  if (await toggle.count()) await toggle.click();
+};
 const runClass = async (file, text, maximize = false) => {
   // Each assertion reads this invocation, never a previous state snapshot.
   await palette("Output: Focus on Output View");
   await win.locator(".panel select:visible").selectOption({label: "osd console"});
+  await outputAutoScroll(true);
   await win.locator(".panel .codicon-clear-all:visible").click();
   await open(file);
   await win.keyboard.press("F9");
@@ -309,6 +314,11 @@ const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
   await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
   await win.locator(".quick-input-list .monaco-list-row").filter({hasText: "Job worker"}).click();
+  // Output normally follows the last row; this summary puts newest runs first.
+  await palette("Output: Focus on Output View");
+  await outputAutoScroll(false);
+  await win.keyboard.press("Control+Home");
+  await win.keyboard.press("Escape");
   await seeOutput(/OSD jobs — latest 200 runs, newest first/);
 };
 await step("fleet jobs", async () => {
