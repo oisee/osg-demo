@@ -29,10 +29,12 @@ this chapter did not repeat them.
   ABAP: `1+2` is 3, `fib(15)` is 610, an array sorts, `JSON.stringify` and a
   `Map` with a `RegExp` work. A ninth shows `printf` from C reaching ABAP as
   `abapiti says 42`. Every answer equals the same wasm run in wazero.
-- On open-steamgate's Go runtime (osgo, which is not in 0.6.1531) the same
-  nine pass; the nine tests took about 2 seconds on the kernel and about 90 on
-  osgo. On open-steamgate's JavaScript runtime, the one the VS Code extension
-  runs, QuickJS has not been tried yet.
+- On open-steamgate's Go runtime (osgo, available in the book's tag) the
+  same nine pass; abapiti's measurement was about 2 seconds on the kernel
+  and about 90 on osgo. The tag's [support evidence](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/osg-support.md)
+  also records nine passing tests on osgo. On the JavaScript runtime used by
+  VS Code, its QuickJS run built successfully but timed out after 30 minutes
+  without class results. That is an unmeasured result, not a passing run.
 
 The same road, at the size of one function, is something you can walk in
 your own sandbox: the rest of this chapter takes thirteen lines of C into

@@ -7,6 +7,20 @@ service to the method that answers it, from a request in a file to the same
 method, from the method to the HTTP answer, and from a class to the code that
 uses it. Start the system first (`osd: Start`, chapter 1).
 
+When editing ABAP, the Problems view also shows **OSD kernel** diagnostics
+for forms the SAP kernel rejects, even when the local runtime can execute
+them. `osg.kernelStrict` defaults to `error`: it reports errors but permits
+execution. `warning` lowers their severity; `refuse` also blocks object runs
+and tests; `off` disables these diagnostics. Their support links explain the
+finding. This scanner covers known forms; a clean view does not prove that a
+whole object will activate on a system.
+<!-- shot: OSD kernel diagnostic in Problems and its support link -->
+
+The debugger and worker behavior is described in the tag's
+[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/editors/vscode/README.md);
+`osg.kernelStrict` is declared in its
+[settings](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/editors/vscode/package.json).
+
 ## From a service to its code
 
 1. Open the OSD view: the airship in the activity bar. Expected: a row
@@ -22,6 +36,7 @@ uses it. Start the system first (`osd: Start`, chapter 1).
    "redefined" with a link to their line; the others are "inherited
    (generic)".
 
+   <!-- shot: vscode-services — refresh for the new extension baseline and status bar -->
    ![The System view: ZOSD_FLEET_SRV with its classes and entity-set methods, and its details](img/vscode-services.png)
 
 3. Click **ShipSet get_entityset**. Expected:
@@ -43,6 +58,7 @@ Client, httpYac and JetBrains also read.
    the generated class. The last request has a `$filter` and says
    `unresolved: query options are unsupported`.
 
+   <!-- shot: vscode-http-lens — refresh for the new extension baseline and status bar -->
    ![http/fleet.http: above each plain GET the DPC method it enters; the $filter request unresolved](img/vscode-http-lens.png)
 
 5. Click the line above the `GET` of **All ships**. Expected: the DPC class
@@ -62,14 +78,17 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    `shipset_get_entityset`, `lt_ship_id = ranges_for(` (a `DATA` line never
    stops), wait until its dot is filled, and click **Attach debugger and call
    ShipSet** above the method.
-   Expected: the request stops on the breakpoint. Stop the session (Shift+F5)
-   and remove the breakpoint.
+   Expected: the request stops on the breakpoint. Variables and hover show
+   ABAP values; expand structures to their components and tables to numbered
+   rows, as in chapter 2. Stop the session (Shift+F5) and remove the breakpoint.
+   <!-- shot: debugger in shipset_get_entityset with ABAP values -->
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
    `HTTP 200`, the time and `6 row(s)`, and the six ships as a table with
    `StatusText` filled by the method. **raw JSON** shows the answer as it came.
 
+   <!-- shot: vscode-call-entityset — refresh for the new extension baseline and status bar -->
    ![Call ShipSet: the DPC method on the left, its HTTP answer as a table on the right](img/vscode-call-entityset.png)
 
 ## Who uses this class
@@ -81,6 +100,7 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    choice opens it. The class's own test class sits in the class's own
    include and is not listed.
 
+   <!-- shot: vscode-readers — refresh for the new extension baseline and status bar -->
    ![Readers of ZCL_OSD_FLEET_REPORT: one class uses it](img/vscode-readers.png)
 
 ## Send the requests yourself

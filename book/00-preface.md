@@ -24,7 +24,9 @@ statuses.
 
 The book is written for the open-steamgate VS Code extension **0.6.1621 or
 later**; its pictures await the phase 2 refresh.
-<!-- shot: refresh the extension pictures for the book baseline --> Where a chapter works in an
+<!-- shot: refresh the extension pictures for the book baseline -->
+
+Where a chapter works in an
 open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the
 checks of appendix A), use the tag **`vscode-v0.6.1621` or later**. Where the
 extension does not yet do what a step needs, the step says so.

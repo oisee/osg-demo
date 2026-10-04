@@ -32,7 +32,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 10 | [Generated code](book/10-generated-code.md) | [Генерация](book/ru/10-generated-code.md) | a report from a template with a trace per line; the L0/L1/L2 layers | `ZCL_OSD_FLEET_TPL` |
 | 11 | [Lift a legacy routine](book/11-lift.md) | [Lift](book/ru/11-lift.md) | a SELECT in a loop rewritten from a model, proven equal | `ZCL_OSD_FLEET_LIFT` |
 | 12 | [Rules, code and proof](book/12-rules.md) | [Правила](book/ru/12-rules.md) | a fleet rule in YAML compiled to ABAP, proven by its examples | `ZCL_OSD_FLEET_L2_MAINT` |
-| 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json` |
+| 13 | [Where did this line come from?](book/13-trace.md) | [Трассировка](book/ru/13-trace.md) | one generated line followed back to its rule line | `*.trace.json`, `*.trace.meta.json` |
 | 14 | [My ABAP escaped from the server](book/14-cli.md) | [Сбежал с сервера](book/ru/14-cli.md) | a report compiled into a native CLI and terminal form, its own SQLite file | `ZOSD_FLEET_CLI` (`cli/`) |
 | 15 | [The workbench](book/15-vscode.md) | [Рабочее место](book/ru/15-vscode.md) | from a service to its code and back in VS Code: the System view, `.http` requests, a call to its HTTP answer | `http/fleet.http` |
 | 16 | [Orchestration: the night set](book/16-orchestration.md) | [Оркестрация](book/ru/16-orchestration.md) | a set of rules in stages: a filter fills a worklist, piles run as jobs, a gate opens the next stage once, a nightly schedule | `ZCL_OSD_FLEET_NIGHT` (`src/l3/`) |

@@ -45,7 +45,8 @@ node tools/dsl-l2.mjs build /path/to/osg-demo/src/l2/maintenance_no_voyage.l2.ya
 The compiler checks every table, field and literal against the DDIC; a mistake
 names the rule's file and line (an example name that would make a method name
 longer than 30 characters is refused the same way). It writes the check class
-`ZCL_OSD_FLEET_L2_MAINT`, its test class, and a trace file beside each.
+`ZCL_OSD_FLEET_L2_MAINT`, its test class, and a v1 trace with a metadata companion beside each
+(chapter 13).
 
 ## The generated check
 

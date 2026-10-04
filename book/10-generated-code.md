@@ -44,8 +44,10 @@ plain JSON make it typed: every node a template reads carries a stable `@id`
 (`entity/Travel/property/TravelId`), and a value that stems from the DDIC
 carries `@type` (built-in type, length, decimals), so the `literal` filter
 writes `'0123'` for a NUMC 4 and refuses a value that does not fit. The trace
-of a rendered file can be written beside it as `<object>.trace.json`, one entry
-per output line: line, template line, model path and model node. Profiles
+of a rendered file can be written beside it as `<object>.trace.json`:
+v1 records output lines or ranges, source nodes/selectors and recipe locations.
+Physical template lines, model paths and hashes go in `.trace.meta.json`
+(chapter 13); the in-memory L0 trace above still carries template lines. Profiles
 check the rendered text (for ABAP: line length, trailing blanks, 7-bit
 identifiers) and point a violation at the template line that caused it.
 

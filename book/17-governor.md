@@ -31,8 +31,8 @@ settings:
 ```
 
 - `resilience` is what a governor stands on: a failed pile can go again, and
-  `doctor( )` takes over what a dead job left. With a schedule the doctor runs
-  as a job; the watch set has no schedule, so here someone would call it.
+  `doctor( )` takes over what a dead job left. The default doctor comes on
+  its own: a mode P run starts a daemon, even without a schedule.
 - `glass` is the budget: the number of open alerts a run may have. The name
   comes from "break the glass": past it, a person has to act.
 - `warn` and `narrow_at` are fractions of the glass. At `warn` the run notes
@@ -54,6 +54,16 @@ compiler writes the runner `ZCL_OSD_FLEET_WATCH`, its job report
 open-steamgate's generic table `ZOSD_L3_BUDGET`, the history of the run in
 `ZOSD_L3_EVENT`.
 
+It also writes `ZCL_L3_WATCH_DMN`, a subclass of
+`CL_ABAP_DAEMON_EXT_BASE`, and the dispatcher report `ZL3_WATCH_DOC`.
+A timer (ten seconds by default) or a pile's completion message makes the
+daemon queue a doctor pass as a job. The callback does not execute the
+runner's recovery path itself. At GLASS the daemon stays alive but queues no
+pass; it stops itself when no run holds a lock. The state classrun prints
+`Doctor: RUNNING since …` or `Doctor: STOPPED since …` with pass/tick details.
+These are local observations, not a test on a real system.
+<!-- shot: watch state at GLASS with Doctor RUNNING, then final state with Doctor STOPPED -->
+
 ![The run's budget: two hits, two distinct keys, none closed on their own, two open; the run's events and budget states up to GLASS, a person's CONTINUE, and the budget filling again](img/l3-glass.png)
 
 ## The run stops at its glass
@@ -64,8 +74,9 @@ Start OSD with a file database, as in chapter 16.
    [ZCL_OSD_FLEET_WATCH_JOBS](../src/l3/zcl_osd_fleet_watch_jobs.clas.abap). It
    starts the set in jobs for 2026-10-01 and prints
    `Watch set, mode P, run <ID>: SUBMITTED`.
-2. Run the worker until its queue is empty, as in chapter 16. It runs seven
-   jobs, as for the night set.
+2. Run the worker until its queue is empty, as in chapter 16, or let the
+   extension's worker run them. There are seven pile jobs, plus doctor
+   dispatcher jobs; the number of passes depends on the timer and messages.
 3. Press **F9** on
    [ZCL_OSD_FLEET_WATCH_STATE](../src/l3/zcl_osd_fleet_watch_state.clas.abap).
    It prints the latest run of the set for the date:
@@ -164,7 +175,7 @@ A governed set has three limits, and they answer different questions:
 
 The watch set uses only the glass. The other two are described in
 open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1531/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/dsl-l3.md)
 ("Governor: the manual-handling budget", "Fuses"), and are not run here.
 
 ## What this chapter does not show
@@ -173,9 +184,10 @@ open-steamgate's
   has none of its own here; `close: none`.
 - A run in one step (mode S) under a governor, and the race of two piles for
   the last place in the budget. open-steamgate's own tests run both.
-- A person on a screen. Here a classrun stands in for the person; 0.6.1531
-  has no screen for it.
+- A person on a screen. Here a classrun stands in for the person; the tag
+  has a generated L3 cockpit, but this demo does not generate or test it.
 
 `node test/l3.mjs` (appendix A) runs this chapter's steps against a real
 engine: the run that stops at its glass (G1) and the continuation that
-completes it (G2).
+completes it (G2). It also checks that the daemon starts without a schedule,
+leaves the glass unchanged across a timer tick, and stops after completion.

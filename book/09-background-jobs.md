@@ -11,6 +11,14 @@ background work process would.
 The audit also runs as a background job step. This needs SQLite in a file:
 other backends refuse to schedule jobs.
 
+With the extension, **osd: Start** also starts the worker on the default
+`osd.database.system=sqlite` file database. `osd.jobs.worker=auto` is the
+default; `off` disables it. The **OSD jobs** status bar shows the worker's
+state; click it for its output. It runs released jobs without a terminal.
+The steps below use a checkout and a manually driven worker to show the
+queue before and after each step.
+<!-- shot: OSD jobs status bar and worker output for the fleet audit -->
+
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
    in the open-steamgate checkout.
@@ -20,7 +28,7 @@ other backends refuse to schedule jobs.
    (`P_RUN`) and the expected ship count (`P_SHIPS`), releases the job with
    `JOB_CLOSE`, and prints `Fleet job ZOSD_FLEET_AUDIT <count> released; run <ID>`.
    Nothing runs yet: the job waits for a worker.
-3. Nothing in OSD works queued jobs on its own. In the same checkout and with
+3. For this checkout run, drive the worker yourself. In the same checkout and with
    the same `STG_DB` and `STG_DB_PATH`, but without `OSD_PACKS` (with it, the
    worker reseeds the pack's tables), run
    `node tools/osd-batch-runs.mjs work` (or `worker` to keep it running).
@@ -63,10 +71,10 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
    `COMPLETED`, readiness `A` `COMPLETED` (always after voyage `A`), and
    voyage `B` `"kind": "failed"`, `FAILED` (that `work` exits 1).
    `node tools/osd-batch-runs.mjs list` still shows readiness `B` as
-   `WAITING`: its event was never raised. It stays in the local operations
-   store until you remove that store (`OSD_OPERATIONS_DB`, or
-   `osd-operations.sqlite` next to `STG_DB_PATH`) or use a fresh directory;
-   the facade has no `BP_JOB_DELETE` yet.
+   `WAITING`: its event was never raised. Leave it there for the doctor below.
+   The facade now supports `BP_JOB_DELETE` for a waiting job; this exercise
+   does not call it. For a fresh exercise, use a new database directory.
+   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/job-standard-fms.md).
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
