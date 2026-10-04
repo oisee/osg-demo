@@ -15,7 +15,11 @@
 диагностику. Ссылки на описание поддержки объясняют замечание. Сканер
 проверяет известные конструкции; чистое представление не доказывает, что
 весь объект активируется на системе.
-<!-- shot: диагностика OSD kernel в Problems и ссылка на описание поддержки -->
+
+На снимке показана временная правка примера Мандельброта: байтовые операнды
+заменены целыми числами для демонстрации диагностики.
+
+![Problems: OSD kernel отклоняет BIT-AND для целых чисел; ссылка ведёт к объяснению поддержки](../img/vscode-kernel-diagnostic.png)
 
 Поведение отладчика и обработчика описано в
 [руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/editors/vscode/README.md);
@@ -37,8 +41,7 @@
    «redefined» с номером строки и ссылкой на нее; остальные - «inherited
    (generic)».
 
-   <!-- shot: vscode-services — обновить для новой версии расширения и строки состояния -->
-   ![Представление System: ZOSD_FLEET_SRV с классами и методами наборов сущностей, и ее описание](../img/vscode-services.png)
+   ![ZOSD_FLEET_SRV: классы и методы entity set в System, рядом сведения о сервисе и модели](../img/vscode-services.png)
 
 3. Щелкните **ShipSet get_entityset**. Ожидается: открывается
    [zcl_zosd_fleet_dpc_ext.clas.abap](../../src/zcl_zosd_fleet_dpc_ext.clas.abap)
@@ -59,8 +62,7 @@
    классу. В последнем запросе есть `$filter`, и над ним написано
    `unresolved: query options are unsupported`.
 
-   <!-- shot: vscode-http-lens — обновить для новой версии расширения и строки состояния -->
-   ![http/fleet.http: над каждым простым GET метод DPC, в который он входит; запрос с $filter не сопоставлен с методом](../img/vscode-http-lens.png)
+   ![Статические маршруты CodeLens над тремя обычными GET; запрос с $filter остаётся unresolved](../img/vscode-http-lens.png)
 
 5. Щелкните строку над `GET` запроса **All ships**. Ожидается: класс DPC
    открывается на строке 112, `shipset_get_entityset`.
@@ -82,7 +84,9 @@
    запрос останавливается на точке останова. Variables и подсказка показывают
    значения ABAP; структуры раскрываются в компоненты, таблицы — в
    пронумерованные строки, как в главе 2. Остановите сеанс (Shift+F5) и уберите точку.
-   <!-- shot: отладчик в shipset_get_entityset со значениями ABAP -->
+
+   ![Остановка в shipset_get_entityset: переменные запроса показаны как значения ABAP](../img/vscode-debug-entityset.png)
+
 7. Над тем же методом щелкните **▶ Call ShipSet**. Ожидается: рядом с кодом
    отправленный запрос,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, затем
@@ -90,8 +94,7 @@
    `StatusText`, который заполнил метод. **raw JSON** показывает ответ как
    есть.
 
-   <!-- shot: vscode-call-entityset — обновить для новой версии расширения и строки состояния -->
-   ![Call ShipSet: слева метод DPC, справа его HTTP-ответ таблицей](../img/vscode-call-entityset.png)
+   ![Call ShipSet: код DPC рядом с HTTP 200 и шестью строками кораблей с StatusText](../img/vscode-call-entityset.png)
 
 ## Кто использует этот класс
 
@@ -102,8 +105,7 @@
    открывает его. Собственный тестовый класс лежит в include самого класса и
    в списке не появляется.
 
-   <!-- shot: vscode-readers — обновить для новой версии расширения и строки состояния -->
-   ![Кто использует ZCL_OSD_FLEET_REPORT: один класс](../img/vscode-readers.png)
+   ![Readers для ZCL_OSD_FLEET_REPORT: список показывает ZCL_OSD_FLEET_TRAN](../img/vscode-readers.png)
 
 ## Отправить запросы самому
 

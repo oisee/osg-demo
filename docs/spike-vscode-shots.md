@@ -7,7 +7,7 @@ Actions; it now runs on a workstation, and its pictures are committed to
 `book/img/` like those of `test/book-shots.mjs` and `test/cli-shots.mjs`.
 A run takes a few minutes, against about nine for a CI round trip.
 
-The script's header says how to run it. It takes eight pictures:
+The script's header says how to run it. It takes fourteen pictures:
 
 - F9 on `ZOSD_DEMO_HELLO`, with the greeting in the osd console
   (`vscode-classrun.png`, chapter 1);
@@ -20,6 +20,18 @@ The script's header says how to run it. It takes eight pictures:
   `http/fleet.http` with the method above each request (`vscode-http-lens.png`),
   "Call ShipSet" with its HTTP answer (`vscode-call-entityset.png`), and the
   readers of `ZCL_OSD_FLEET_REPORT` (`vscode-readers.png`).
+
+The 0.6.1621 refresh adds the kernel diagnostic with its support link, the
+OData breakpoint with ABAP variables, the fleet and night-set worker output,
+and the watch state at GLASS (Doctor RUNNING) and after completion (Doctor
+STOPPED). Each classrun assertion reads fresh, visible output; Monaco’s
+non-breaking spaces are normalized for the assertion. Worker JSON is wrapped.
+Job scenes run before attaching the debugger: runtime reloads can race the released worker’s SQLite recovery. The console is cleared
+before the debugger pictures.
+The final watch picture uses the normal Output exclusion filter to omit the
+audit event’s user name. The service-details source links contain absolute
+paths in this release, so the normal Output panel is sized to keep those links below the visible
+details area. No image is copied to OUT unless all steps pass.
 
 ## What it took
 
@@ -43,8 +55,7 @@ The script's header says how to run it. It takes eight pictures:
 
 ## Found in the extension (reported to its owner)
 
-The pictures use 0.6.1531, where four of the five are fixed and the script
-needs no workaround:
+The earlier 0.6.1531 refresh had already fixed these four issues:
 
 - **Breakpoints (0.4.1414, fixed in 0.4.1444):** the extension declared no
   ABAP language, so an `.abap` file opened as Plain Text and VS Code refused a
@@ -64,9 +75,8 @@ needs no workaround:
   session verifies breakpoints, and gave up. The script checks the debugged
   call after a plain one, in the long session.
 
-Still open on 0.6.1531:
+Fixed in 0.6.1621:
 
-- **Variables:** the Variables view and the debug hover show the runtime's
-  JavaScript objects (`ls_ship = Structure {value: …}`), not the ABAP fields;
-  the hover's first line carries the structure as JSON, which is where the
-  script finds `S001`. Chapter 2 says so.
+- **Variables:** the Variables view and hover expose ABAP structures and
+  scalar values. The harness expands `ls_ship` and checks the first ship’s
+  `ship_id`, displayed as `'S001' (c4)`.

@@ -1,29 +1,32 @@
 // Screenshots of the real VS Code with the open-steamgate extension, for the
-// book (chapters 1, 2 and 15), taken on a workstation and committed to book/img/
+// book (chapters 1, 2, 9, 15, 16 and 17), taken on a workstation and committed to book/img/
 // like the other pictures:
 //
 //   CODE=<VS Code binary> VSIX=<extension .vsix> OSD_HOME=<open-steamgate checkout> \
 //   WS=<a copy of this repository> OUT=book/img \
 //   xvfb-run -a -s "-screen 0 1440x900x24" node test/vscode-shots.mjs
 //
+// Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
 // - VSIX: a released extension (gh release download vscode-v0.6.1621 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
-// - WS: a copy, so no local path shows in a breadcrumb:
-//   git archive main | tar -x -C <dir>.
+// - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
+//   keep TMPDIR short too for debugger sockets.
+// - WS: a disposable copy, so no local path shows in a breadcrumb:
+//   git archive HEAD | tar -x -C <dir>.
 // Headless Chromium renders a blank workbench, so this needs an X server.
 // Without one, `apt download xvfb`, `dpkg -x` it into a scratch folder and put
 // its usr/bin on PATH; xvfb-run also needs xauth.
 //
 // Drives VS Code (Electron) with Playwright's _electron: a fresh user-data and
-// extensions dir under /tmp/osd-shot, the extension installed from VSIX, the
-// system started from OSD_HOME with WS as its pack, then commands through the
-// command palette. A picture is taken only once the window shows what it is
+// extensions dir under SHOTS_TMP (or the unique temporary directory), the extension
+// installed from VSIX, the system started from OSD_HOME with WS as its pack, then
+// commands through the command palette. A picture is taken only once the window shows what it is
 // about; the pictures go to OUT only when every step has passed.
 import {execFileSync} from "node:child_process";
-import {copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
+import {copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
 
@@ -33,8 +36,9 @@ const need = (name) => {
   return resolve(value);
 };
 const code = need("CODE"), vsix = need("VSIX"), home = need("OSD_HOME"), ws = need("WS"), out = need("OUT");
-const tmp = "/tmp/osd-shot";
-rmSync(tmp, {recursive: true, force: true});
+const tmp = process.env.SHOTS_TMP || mkdtempSync(join("/tmp", "osd-shot-"));
+// TMPDIR may be inside this directory; preserve it for debugger sockets.
+for (const name of ["ud", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
 mkdirSync(join(tmp, "ud", "User"), {recursive: true});
 mkdirSync(join(tmp, "shots"), {recursive: true});
 writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
@@ -42,6 +46,7 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "workbench.colorTheme": "Default Light Modern",
   "window.title": "osg-demo",
   "window.zoomLevel": 0,
+  "output.wordWrap": true,
   "telemetry.telemetryLevel": "off",
   "update.mode": "none",
   "extensions.autoUpdate": false,
@@ -54,6 +59,12 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
 // the CLI script beside the Electron binary installs extensions
 execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
   {stdio: "inherit"});
+
+// Use placeholders for the request file's illustrative host in pictures.
+const httpFile = join(ws, "http", "fleet.http");
+writeFileSync(httpFile, readFileSync(httpFile, "utf8")
+  .replace("http://localhost:8099", "{{system}}")
+  .replace("http://127.0.0.1:<port>", "<system address>"));
 
 const {_electron} = createRequire(join(home, "package.json"))("playwright");
 const app = await _electron.launch({
@@ -76,6 +87,7 @@ const palette = async (text) => {
   await win.keyboard.press("Enter");
 };
 const open = async (file) => {
+  await palette("View: Focus Active Editor Group");
   await win.keyboard.press("Control+P");
   await win.waitForTimeout(400);
   await win.keyboard.type(file, {delay: 15});
@@ -84,6 +96,13 @@ const open = async (file) => {
   await win.waitForTimeout(1500);
 };
 const shot = async (name) => {
+  await win.mouse.move(900, 470);
+  await win.waitForTimeout(500);
+  const status = await win.locator(".statusbar").innerText();
+  if (!/osd [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
+    throw new Error("the status bar must show SQLite · warm before capture");
+  }
+  console.log(`vscode-shots: ${name}: ${status.match(/osd [0-9a-f]{7,} · SQLite · warm\b/)[0]}`);
   await win.screenshot({path: join(tmp, "shots", `${name}.png`)});
   console.log(`vscode-shots: ${name}.png`);
 };
@@ -105,11 +124,42 @@ const goto = async (line) => {
   await win.keyboard.press("Enter");
   await win.waitForTimeout(500);
 };
+// Resize through VS Code's actual splitter, not the panel's content border.
+const resizePanel = async (y) => {
+  for (const sash of await win.locator(".monaco-sash.horizontal:not(.disabled)").all()) {
+    const box = await sash.boundingBox();
+    if (!box || box.width < 1000 || box.y < 100 || box.y > 850) continue;
+    await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await win.mouse.down();
+    await win.mouse.move(box.x + box.width / 2, y, {steps: 15});
+    await win.mouse.up();
+    await win.waitForTimeout(500);
+    const panel = await win.locator(".part.panel").boundingBox();
+    if (!panel || Math.abs(panel.y - y) > 12) throw new Error("panel resize did not take effect");
+    return;
+  }
+  throw new Error("no panel splitter on screen");
+};
 // a picture is taken only once the window shows what it is a picture of, so
 // a step that fails leaves the committed picture as it was
 const see = async (what, locator, timeout = 60000) => {
   await locator.first().waitFor({timeout}).catch(() => { throw new Error(`no ${what} on screen`); });
 };
+const outputText = async () => (await win.locator(".panel .view-line:visible").allTextContents())
+  .map(line => line.replaceAll("\u00a0", " ")).join("\n");
+const hasOutput = async (expected) => {
+  const text = await outputText();
+  return typeof expected === "string" ? text.includes(expected) : expected.test(text);
+};
+const seeOutput = async (expected, timeout = 60000) => {
+  const until = Date.now() + timeout;
+  while (Date.now() < until) {
+    if (await hasOutput(expected)) return;
+    await win.waitForTimeout(250);
+  }
+  throw new Error(`no ${expected} in the visible output`);
+};
+
 // a webview (Data Preview) renders in nested frames
 const seeInWebview = async (text, timeout = 60000) => {
   const until = Date.now() + timeout;
@@ -136,6 +186,7 @@ const seeRowInWebview = async (texts, timeout = 30000) => {
 };
 const lineOf = (file, text) => readFileSync(join(ws, file), "utf8").split("\n").findIndex((l) => l.includes(text)) + 1;
 const closePanels = async () => {
+  await palette("View: Join All Editor Groups");
   await palette("View: Close All Editors");
   await win.waitForTimeout(500);
 };
@@ -151,6 +202,7 @@ await step("start", async () => {
       console.error(`vscode-shots: the window as it was: ${join(tmp, "start-failed.png")}`);
       throw new Error("the system did not start");
     });
+  await see("jobs status", win.locator(".statusbar").getByText(/OSD jobs:/));
   await win.waitForTimeout(3000);
 });
 if (failed) {
@@ -160,8 +212,18 @@ if (failed) {
 }
 await step("classrun", async () => {
   await open("zosd_demo_hello.clas.abap");
-  await win.keyboard.press("F9");
-  await see("greeting in the osd console", win.locator(".panel").getByText("Hello from ZOSD_DEMO_HELLO."));
+  // A proxy can briefly close the first connection after startup. Retrying
+  // this greeting is safe; scheduling jobs below is never retried.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await win.keyboard.press("F9");
+    await seeOutput(/Hello from ZOSD_DEMO_HELLO\.|osd classrun ZOSD_DEMO_HELLO: fetch failed/, 120000);
+    if (await hasOutput("Hello from ZOSD_DEMO_HELLO.")) break;
+    if (attempt === 2) throw new Error("the greeting request failed three times");
+    await win.locator(".panel .codicon-clear-all:visible").click();
+    await palette("View: Focus Active Editor Group");
+    await win.waitForTimeout(1000);
+  }
+  await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
 });
@@ -192,6 +254,104 @@ await step("data preview", async () => {
   await win.waitForTimeout(1000);
   await shot("vscode-data-preview");
 });
+// Capture supervised jobs before attaching a debugger: debugger runtime
+// reloads can race the worker's SQLite recovery in the released extension.
+await step("kernel diagnostics", async () => {
+  await closePanels();
+  await palette("View: Show Explorer");
+  // Demonstrate a rejected form with an unsaved edit. The actual class
+  // correctly uses bytes; editing the buffer does not rebuild the system.
+  await open("zcl_wasm_mandel.clas.abap");
+  const originalLine = readFileSync(join(ws, "src", "iti", "zcl_wasm_mandel.clas.abap"), "utf8").split("\n")[141];
+  await goto(142);
+  await win.keyboard.press("Home");
+  await win.keyboard.press("Home");
+  await win.keyboard.press("Shift+End");
+  await win.keyboard.insertText("    DATA lv_a TYPE i. DATA lv_b TYPE i. DATA lv_r TYPE i.");
+  await goto(144);
+  await palette("View: Toggle Problems");
+  await see("OSD kernel diagnostic", win.locator(".panel").getByText(/OSD kernel/));
+  await see("support link", win.locator(".panel a").filter({hasText: /bit|offset|kernel/i}));
+  await shot("vscode-kernel-diagnostic");
+  await palette("View: Focus Active Editor Group");
+  await goto(142);
+  await win.keyboard.press("Home");
+  await win.keyboard.press("Home");
+  await win.keyboard.press("Shift+End");
+  await win.keyboard.insertText(originalLine);
+  await see("original byte operands restored", win.locator(".view-line", {hasText: /DATA.lv_a.TYPE.x.LENGTH.4/}));
+  await closePanels();
+});
+
+// Jobs are run by the extension's supervised worker, not an external CLI.
+const runClass = async (file, text, maximize = false) => {
+  // Each assertion reads this invocation, never a previous state snapshot.
+  await palette("Output: Focus on Output View");
+  await win.locator(".panel select:visible").selectOption({label: "osd console"});
+  await win.locator(".panel .codicon-clear-all:visible").click();
+  await open(file);
+  await win.keyboard.press("F9");
+  if (maximize && await win.locator(".part.editor").isVisible()) {
+    await palette("View: Toggle Maximized Panel");
+  }
+  await seeOutput(text, 120000);
+};
+await step("fleet jobs", async () => {
+  await closePanels();
+  await palette("View: Show Explorer");
+  await runClass("zcl_osd_fleet_job.clas.abap", /Fleet job ZOSD_FLEET_AUDIT/);
+  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await seeOutput(/ZOSD_FLEET_AUDIT/, 120000);
+  await seeOutput(/completed/i);
+  await shot("vscode-fleet-jobs");
+});
+await step("night jobs", async () => {
+  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await win.locator(".panel .codicon-clear-all:visible").click();
+  await runClass("zcl_osd_fleet_night_jobs.clas.abap", /Night set, mode P, run .*SUBMITTED/);
+  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await seeOutput(/L3_NIGHT_/, 120000);
+  await seeOutput(/completed/i);
+  await shot("vscode-night-jobs");
+});
+await step("watch glass", async () => {
+  await runClass("zcl_osd_fleet_watch_jobs.clas.abap", /Watch set, mode P, run .*SUBMITTED/);
+  // Re-run the read-only state class until the worker reaches the glass.
+  for (let i = 0; i < 30; i++) {
+    await runClass("zcl_osd_fleet_watch_state.clas.abap", /Watch set, run/, true);
+    if (await hasOutput(/Budget: GLASS/)) break;
+    await win.waitForTimeout(1000);
+  }
+  await seeOutput(/Budget: GLASS/);
+  await seeOutput(/Doctor: RUNNING/);
+  await shot("vscode-watch-glass");
+});
+await step("watch final", async () => {
+  await runClass("zcl_osd_fleet_watch_glass.clas.abap", /Continue run .* with glass 2: X/);
+  for (let i = 0; i < 30; i++) {
+    await runClass("zcl_osd_fleet_watch_state.clas.abap", /Watch set, run/, true);
+    if (await hasOutput(/Doctor: STOPPED/)) break;
+    await win.waitForTimeout(1000);
+  }
+  await seeOutput(/Doctor: STOPPED/);
+  await seeOutput(/Lock on 20261001: RELEASED/);
+  await seeOutput(/Budget: NARROW, glass 2/);
+  // The CONTINUE audit event names the ABAP user. Exclude that line with
+  // the normal Output filter; the state, budget and both alerts stay visible.
+  await win.locator('.panel input[placeholder^="Filter"]').fill("!by ");
+  await win.waitForTimeout(500);
+  await seeOutput(/Doctor: STOPPED/);
+  await seeOutput(/Budget: NARROW, glass 2/);
+  if (await hasOutput(/ by \S+/)) throw new Error("an audit user is still visible");
+  await shot("vscode-watch-final");
+});
+
+await step("reset console after jobs", async () => {
+  await palette("Output: Focus on Output View");
+  await win.locator('.panel input[placeholder^="Filter"]:visible').fill("");
+  await win.locator(".panel .codicon-clear-all:visible").click();
+});
+
 await step("debugger", async () => {
   await closePanels();
   const file = "src/zcl_osd_fleet_report.clas.abap";
@@ -205,9 +365,9 @@ await step("debugger", async () => {
   await win.waitForTimeout(1500);
   // the method's own variables, with ls_ship and its first ship
   await win.locator(".debug-view-content .monaco-list-row", {hasText: "Local:"}).first().click();
+  await win.keyboard.press("ArrowRight");
   await see("ls_ship", win.locator(".debug-view-content").getByText("ls_ship"));
-  // the first ship: the debug hover over ls_ship in the stopped line carries
-  // the structure as JSON, "S001" in it
+  // The debug hover exposes ABAP components, not runtime JSON.
   const line = win.locator(".view-line", {hasText: "steam_check( ls_ship-steam_pct )"}).first();
   // the inner span is as wide as the text, the line itself as the editor
   const span = line.locator(":scope > span").first();
@@ -215,8 +375,12 @@ await step("debugger", async () => {
   const text = await span.textContent();
   const at = text.indexOf("ls_ship") + 2;
   await win.mouse.move(box.x + box.width * at / text.length, box.y + box.height / 2);
-  // the widget's first line holds the structure as JSON, cut off on screen
-  await see("S001 in ls_ship", win.locator(".debug-hover-widget").filter({hasText: '"S001"'}), 15000);
+  await see("ABAP ship_id in ls_ship", win.locator(".debug-hover-widget").filter({hasText: "S001"}), 15000);
+  await win.mouse.move(200, 460);
+  const shipRow = win.locator(".debug-view-content .monaco-list-row", {hasText: /^ls_ship/}).first();
+  await shipRow.click();
+  await win.keyboard.press("ArrowRight");
+  await see("ABAP scalar ship_id", win.locator(".debug-view-content").getByText(/ship_id.*S001/));
   // away from the editor, where a hover would open over the code
   await win.mouse.move(200, 460);
   await win.waitForTimeout(1500);
@@ -257,8 +421,14 @@ await step("services", async () => {
     await see(`${method} in the System view`, osdView.locator(".monaco-list-row", {hasText: method}));
   }
   await see("the service's details", win.locator(".tab.active", {hasText: "ZOSD_FLEET_SRV · Details"}));
-  await win.mouse.move(900, 470);
+  // Service details print absolute source-link labels in this release.
+  // Open the console below them and size it with the normal panel divider;
+  // the visible details contain the service and model classes, not the links.
+  await palette("View: Toggle Output");
+  await see("visible output panel", win.locator(".part.panel"));
+  await resizePanel(400);
   await shot("vscode-services");
+  await resizePanel(576);
   // an entity set's row opens the method that serves it
   await osdView.locator(".monaco-list-row", {hasText: /ShipSet\s*get_entityset/}).first().click();
   await see("the method of ShipSet", win.locator(".tab.active", {hasText: "zcl_zosd_fleet_dpc_ext.clas.abap"}));
@@ -266,6 +436,7 @@ await step("services", async () => {
   await closePanels();
 });
 await step("http lens", async () => {
+  await palette("View: Hide Panel");
   await open("fleet.http");
   for (const [what, line] of [["ShipSet › GET_ENTITYSET", 112], ["ShipSet › GET_ENTITY ", 224], ["VoyageSet › GET_ENTITYSET", 297]]) {
     await see(`the lens ${what}`, lens(`${what}`.trim() + ` → zcl_zosd_fleet_dpc_ext:${line} (static)`), 60000);
@@ -295,7 +466,7 @@ await step("call", async () => {
   await shot("vscode-call-entityset");
 });
 await step("call with debugger", async () => {
-  // no picture: chapter 15 says the call stops on a breakpoint in the method.
+  // Chapter 15: capture the stopped request with ABAP values.
   // On purpose after the plain call and in this long session: the case that
   // ran through before 0.5.1486
   const dpc = "src/zcl_zosd_fleet_dpc_ext.clas.abap";
@@ -310,6 +481,20 @@ await step("call with debugger", async () => {
   try {
     await lens("Attach debugger and call ShipSet").click();
     await see("the stop in shipset_get_entityset", win.getByText("Paused On Breakpoint"), 60000);
+    await palette("View: Show Run and Debug");
+    await win.locator(".debug-view-content .monaco-list-row", {hasText: "Local:"}).first().click();
+    await win.keyboard.press("ArrowRight");
+    // The request arguments are visible at this first statement. Collapse
+    // the JS call stack, whose generated-source labels contain local paths.
+    await win.getByText("Call Stack", {exact: true}).first().click();
+    await win.getByText("Watch", {exact: true}).first().click();
+    await see("ABAP entity name", win.locator(".debug-view-content .monaco-list-row", {hasText: /iv_entity_name.*Ship/}));
+    await see("ABAP table display", win.locator(".debug-view-content .monaco-list-row", {hasText: /et_entityset.*standard table/}));
+    await goto(at);
+    await shot("vscode-debug-entityset");
+  } catch (error) {
+    await win.screenshot({path: join(tmp, "failed-paused-entityset.png")});
+    throw error;
   } finally {
     // whatever happened, no session and no breakpoint for the later pictures
     await win.keyboard.press("Shift+F5");
@@ -336,6 +521,8 @@ await step("readers", async () => {
   await shot("vscode-readers");
   await win.keyboard.press("Escape");
 });
+
+
 
 await app.close();
 console.log(`vscode-shots: ${failed} step(s) failed`);
