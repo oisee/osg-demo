@@ -21,9 +21,9 @@ are changed to integers to demonstrate the diagnostic.
 ![Problems: OSD kernel rejects BIT-AND on integers; the diagnostic links to its support explanation](img/vscode-kernel-diagnostic.png)
 
 The debugger and worker behavior is described in the tag's
-[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/editors/vscode/README.md);
+[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/README.md);
 `osg.kernelStrict` is declared in its
-[settings](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/editors/vscode/package.json).
+[settings](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/package.json).
 
 ## From a service to its code
 

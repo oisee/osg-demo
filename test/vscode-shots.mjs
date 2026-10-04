@@ -8,10 +8,11 @@
 //
 // Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.6.1621 --repo
+// - VSIX: a released extension (gh release download vscode-v0.6.1650 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
-// - OSD_HOME: an open-steamgate checkout after npm install and npm run
-//   bootstrap (Playwright comes from its node_modules);
+// - OSD_HOME: the tag checkout after npm ci, bootstrap, the CI transpiler
+//   build and four osd-link steps, then bootstrap again for warm support
+//   (Playwright comes from its node_modules);
 // - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
 //   keep TMPDIR short too for debugger sockets.
 // - WS: a disposable copy, so no local path shows in a breadcrumb:
@@ -95,14 +96,17 @@ const open = async (file) => {
   await win.keyboard.press("Enter");
   await win.waitForTimeout(1500);
 };
-const shot = async (name) => {
+const shot = async (name, {allowDirty = false} = {}) => {
   await win.mouse.move(900, 470);
   await win.waitForTimeout(500);
+  if (!allowDirty && await win.locator(".tabs-container .tab.dirty").count()) {
+    throw new Error("an editor tab is dirty before capture");
+  }
   const status = await win.locator(".statusbar").innerText();
-  if (!/osd [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
+  if (!/OSD generation [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
     throw new Error("the status bar must show SQLite · warm before capture");
   }
-  console.log(`vscode-shots: ${name}: ${status.match(/osd [0-9a-f]{7,} · SQLite · warm\b/)[0]}`);
+  console.log(`vscode-shots: ${name}: ${status.match(/OSD generation [0-9a-f]{7,} · SQLite · warm\b/)[0]}`);
   await win.screenshot({path: join(tmp, "shots", `${name}.png`)});
   console.log(`vscode-shots: ${name}.png`);
 };
@@ -192,17 +196,20 @@ const closePanels = async () => {
 };
 
 await step("start", async () => {
+  // Wait for extension activation before asking the palette for its command.
+  await see("system status", win.locator(".statusbar").getByText(/OSD (stopped|running)\b/), 120000);
   // the exact title: a shorter query picks "osd: Choose which system Start runs"
   await palette("osd: Start (build + run this system)");
-  // the system is up when the status bar shows its generation ("osd 726a0c3b");
+  // the system is up when the status bar shows its labelled serving generation;
   // the extension picks the port of the instance it launches
-  await win.locator(".statusbar").getByText(/osd [0-9a-f]{7,} ·/).first().waitFor({timeout: 300000})
+  await win.locator(".statusbar").getByText(/OSD generation [0-9a-f]{7,} ·/).first().waitFor({timeout: 300000})
     .catch(async () => {
       await win.screenshot({path: join(tmp, "start-failed.png")});
       console.error(`vscode-shots: the window as it was: ${join(tmp, "start-failed.png")}`);
       throw new Error("the system did not start");
     });
   await see("jobs status", win.locator(".statusbar").getByText(/OSD jobs:/));
+  await see("warm generation", win.locator(".statusbar").getByText(/OSD generation [0-9a-f]{7,} · SQLite · warm\b/), 300000);
   await win.waitForTimeout(3000);
 });
 if (failed) {
@@ -226,6 +233,14 @@ await step("classrun", async () => {
   await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
+});
+await step("open sample", async () => {
+  await palette("OSD: Open sample");
+  await see("sample picker", win.getByText("OSD: Open sample", {exact: true}));
+  await see("hello sample", win.locator(".quick-input-list").getByText("ZOSD_DEMO_HELLO", {exact: true}));
+  await see("bundled notebook", win.locator(".quick-input-list").getByText("Bundled notebook", {exact: true}));
+  await shot("vscode-open-sample");
+  await win.keyboard.press("Escape");
 });
 await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
@@ -262,32 +277,44 @@ await step("kernel diagnostics", async () => {
   // Demonstrate a rejected form with an unsaved edit. The actual class
   // correctly uses bytes; editing the buffer does not rebuild the system.
   await open("zcl_wasm_mandel.clas.abap");
-  const originalLine = readFileSync(join(ws, "src", "iti", "zcl_wasm_mandel.clas.abap"), "utf8").split("\n")[141];
-  await goto(142);
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Shift+End");
-  await win.keyboard.insertText("    DATA lv_a TYPE i. DATA lv_b TYPE i. DATA lv_r TYPE i.");
-  await goto(144);
-  await palette("View: Toggle Problems");
-  await see("OSD kernel diagnostic", win.locator(".panel").getByText(/OSD kernel/));
-  await see("support link", win.locator(".panel a").filter({hasText: /bit|offset|kernel/i}));
-  await shot("vscode-kernel-diagnostic");
-  await palette("View: Focus Active Editor Group");
-  await goto(142);
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Home");
-  await win.keyboard.press("Shift+End");
-  await win.keyboard.insertText(originalLine);
-  await see("original byte operands restored", win.locator(".view-line", {hasText: /DATA.lv_a.TYPE.x.LENGTH.4/}));
+  try {
+    await goto(142);
+    await win.keyboard.press("Home");
+    await win.keyboard.press("Home");
+    await win.keyboard.press("Shift+End");
+    await win.keyboard.insertText("    DATA lv_a TYPE i. DATA lv_b TYPE i. DATA lv_r TYPE i.");
+    await goto(144);
+    await palette("View: Toggle Problems");
+    await see("OSD kernel diagnostic", win.locator(".panel").getByText(/OSD kernel/));
+    await see("support link", win.locator(".panel a").filter({hasText: /bit|offset|kernel/i}));
+    if (await win.locator(".tabs-container .tab.dirty").count() !== 1) {
+      throw new Error("the diagnostic example must have exactly one dirty editor tab");
+    }
+    await shot("vscode-kernel-diagnostic", {allowDirty: true});
+  } finally {
+    await palette("View: Focus Active Editor Group");
+    // workbench.action.files.revert clears the unsaved buffer, including its
+    // dirty state; typing the original text back still leaves a dirty tab.
+    await palette("File: Revert File");
+    await win.locator(".tabs-container .tab.dirty").waitFor({state: "detached", timeout: 15000});
+    await see("original byte operands restored", win.locator(".view-line", {hasText: /DATA.lv_a.TYPE.x.LENGTH.4/}));
+    await win.keyboard.press("Control+w");
+    await win.locator('.tabs-container .tab').filter({hasText: "zcl_wasm_mandel.clas.abap"})
+      .waitFor({state: "detached", timeout: 15000});
+  }
   await closePanels();
 });
 
 // Jobs are run by the extension's supervised worker, not an external CLI.
+const outputAutoScroll = async (enabled) => {
+  const toggle = win.locator(enabled ? ".panel .codicon-unlock:visible" : ".panel .codicon-lock:visible");
+  if (await toggle.count()) await toggle.click();
+};
 const runClass = async (file, text, maximize = false) => {
   // Each assertion reads this invocation, never a previous state snapshot.
   await palette("Output: Focus on Output View");
   await win.locator(".panel select:visible").selectOption({label: "osd console"});
+  await outputAutoScroll(true);
   await win.locator(".panel .codicon-clear-all:visible").click();
   await open(file);
   await win.keyboard.press("F9");
@@ -296,22 +323,33 @@ const runClass = async (file, text, maximize = false) => {
   }
   await seeOutput(text, 120000);
 };
+const showJobs = async () => {
+  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
+  await win.locator(".quick-input-list .monaco-list-row").filter({hasText: "Job worker"}).click();
+  // Output normally follows the last row; this summary puts newest runs first.
+  await palette("Output: Focus on Output View");
+  await outputAutoScroll(false);
+  await win.keyboard.press("Control+Home");
+  await win.keyboard.press("Escape");
+  await seeOutput(/OSD jobs — latest 200 runs, newest first/);
+};
 await step("fleet jobs", async () => {
   await closePanels();
   await palette("View: Show Explorer");
   await runClass("zcl_osd_fleet_job.clas.abap", /Fleet job ZOSD_FLEET_AUDIT/);
-  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await showJobs();
   await seeOutput(/ZOSD_FLEET_AUDIT/, 120000);
-  await seeOutput(/completed/i);
+  await seeOutput(/ZOSD_FLEET_AUDIT \| DONE \|/);
   await shot("vscode-fleet-jobs");
 });
 await step("night jobs", async () => {
-  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await showJobs();
   await win.locator(".panel .codicon-clear-all:visible").click();
   await runClass("zcl_osd_fleet_night_jobs.clas.abap", /Night set, mode P, run .*SUBMITTED/);
-  await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  await showJobs();
   await seeOutput(/L3_NIGHT_/, 120000);
-  await seeOutput(/completed/i);
+  await seeOutput(/L3_NIGHT_[^\n]* \| DONE \|/);
   await shot("vscode-night-jobs");
 });
 await step("watch glass", async () => {

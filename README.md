@@ -8,7 +8,7 @@ This folder is an abapGit repository and an [open-steamgate](https://github.com/
 
 ## Quick start
 
-1. Install the **open-steamgate** extension, **0.6.1621 or later** (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
+1. Install the **open-steamgate** extension, **0.6.1650 or later** (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
 3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
 4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **osd console**. Chapter 1 goes on from there.
@@ -71,7 +71,7 @@ OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       
 OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         # chapter 14's pictures, after cli.mjs --keep /tmp/fleet-cli
 ```
 
-`test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2 and 15; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
+`test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2, 9 and 15–17; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
 CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the command line program, job, L3 and C-in-ABAP checks on every change, against the open-steamgate tag the book is written for (`book/baseline.yaml`; that result decides); the same run against open-steamgate `main` is a canary: it shows as `fleet (main)`, red when main breaks something, without failing the run ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 

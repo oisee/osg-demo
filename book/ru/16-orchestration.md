@@ -138,7 +138,11 @@ SQLite в файле. В VS Code **osd: Start** по умолчанию испо
 SQLite и следит за обработчиком (`osd.jobs.worker=auto`); задания выполняются
 без терминала.
 
-![OSD jobs: состояние обработчика и завершённые задания стопок ночного набора](../img/vscode-night-jobs.png)
+Щелкните **OSD jobs**, затем **Job worker** в **What is running?**, чтобы
+открыть читаемую сводку заданий. У каждого задания стопки своя строка;
+**Show raw job log** открывает JSON обработчика.
+
+![OSD jobs: читаемая сводка завершённых заданий стопок ночного набора](../img/vscode-night-jobs.png)
 
 Чтобы увидеть очередь, как ниже, запустите OSD из checkout с `STG_DB=file`,
 `STG_DB_PATH` и `OSD_PACKS` и выполняйте обработчик сами.
@@ -233,7 +237,7 @@ ENDIF.
 ![Слева: условный UPDATE дает открыть этап 2 ровно одному из двух заданий. Справа: упавшая стопка оставляет этап 1 PARTIAL, а этап 2 NOT-RUN](../img/l3-gate.ru.png)
 
 Эти случаи в главе не выполняются. Так сгенерированный исполнитель
-описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/dsl-l3.md)
+описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/dsl-l3.md)
 open-steamgate (раздел «The worklist and the gate»), и их проверяют ее
 собственные тесты.
 

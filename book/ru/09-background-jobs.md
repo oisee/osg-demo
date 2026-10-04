@@ -14,11 +14,15 @@
 В расширении **osd: Start** также запускает обработчик на файловой базе
 по умолчанию, `osd.database.system=sqlite`. Настройка `osd.jobs.worker=auto`
 действует по умолчанию; `off` его выключает. Строка состояния **OSD jobs**
-показывает состояние обработчика; щелчок открывает его вывод. Выпущенные
+показывает состояние обработчика. Щелкните по ней и выберите **Job worker**
+в **What is running?**: откроется читаемая сводка, по строке на задание,
+сначала новые, с состоянием, временем начала, длительностью и счетчиками
+шагов/вывода; при сбое указана причина. **Show raw job log** в этом меню
+или палитре команд открывает JSON обработчика. Выпущенные
 задания выполняются без терминала. Шаги ниже используют checkout и ручной
 запуск обработчика, чтобы показать очередь до и после каждого шага.
 
-![OSD jobs: управляемый обработчик завершает ZOSD_FLEET_AUDIT](../img/vscode-fleet-jobs.png)
+![OSD jobs: читаемая сводка завершённого задания ZOSD_FLEET_AUDIT](../img/vscode-fleet-jobs.png)
 
 1. Запустите OSD с файловой базой данных, например
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
@@ -75,7 +79,7 @@ open-steamgate игнорируют вызов события, пришедши�
    `WAITING`: ее событие так и не было вызвано. Оставьте ее для доктора ниже.
    Фасад теперь поддерживает `BP_JOB_DELETE` для ждущего задания; в этом
    упражнении он не вызывается. Для нового упражнения возьмите новый каталог
-   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/job-standard-fms.md).
+   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/job-standard-fms.md).
 3. Нажмите **F9** на `ZCL_OSD_FLEET_BAL_VIEW`. Ожидается: `<A>-VOY` с
    `Voyage step OK: 20 voyages`, `<A>-READY` с
    `Fleet ready: 6 ships after a clean voyage step` и `<B>-VOY` с

@@ -134,7 +134,11 @@ Mode P is the same set in background jobs. As in chapter 9, this needs SQLite
 in a file. In VS Code, **osd: Start** uses file SQLite by default and
 supervises the worker (`osd.jobs.worker=auto`); the jobs run without a terminal.
 
-![OSD jobs: the worker’s status and completed night-set pile jobs](img/vscode-night-jobs.png)
+Click **OSD jobs**, then **Job worker** in **What is running?** for the
+readable jobs summary. Each pile job has its own line; **Show raw job log**
+opens the worker JSON when needed.
+
+![OSD jobs: a readable summary of completed night-set pile jobs](img/vscode-night-jobs.png)
 
 For the queue snapshots below, use the checkout route with `STG_DB=file`,
 `STG_DB_PATH` and `OSD_PACKS`, and drive the worker yourself.
@@ -225,7 +229,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 

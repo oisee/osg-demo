@@ -14,11 +14,15 @@ other backends refuse to schedule jobs.
 With the extension, **osd: Start** also starts the worker on the default
 `osd.database.system=sqlite` file database. `osd.jobs.worker=auto` is the
 default; `off` disables it. The **OSD jobs** status bar shows the worker's
-state; click it for its output. It runs released jobs without a terminal.
+state. Click it, then choose **Job worker** in **What is running?** to see
+a readable summary: one line per job, newest first, with state, start time,
+duration and step/output counts; failed runs include a reason. **Show raw
+job log** in that picker or the command palette opens the worker JSON.
+It runs released jobs without a terminal.
 The steps below use a checkout and a manually driven worker to show the
 queue before and after each step.
 
-![OSD jobs: the supervised worker completes ZOSD_FLEET_AUDIT](img/vscode-fleet-jobs.png)
+![OSD jobs: a readable summary of the completed ZOSD_FLEET_AUDIT job](img/vscode-fleet-jobs.png)
 
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
@@ -75,7 +79,7 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
    `WAITING`: its event was never raised. Leave it there for the doctor below.
    The facade now supports `BP_JOB_DELETE` for a waiting job; this exercise
    does not call it. For a fresh exercise, use a new database directory.
-   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/job-standard-fms.md).
+   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/job-standard-fms.md).
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with
