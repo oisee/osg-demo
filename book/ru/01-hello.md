@@ -1,5 +1,16 @@
 # 1. Hello
 
+Самый быстрый старт — команда **OSD: Open sample** в палитре команд.
+Выберите **ZOSD_DEMO_HELLO** и нажмите **F9**; доступны также встроенные
+блокноты. Если OSD остановлен, команда предлагает **Start system**.
+
+![Open sample: встроенные блокноты и класс приветствия из рабочей папки](../img/vscode-open-sample.png)
+
+Строка состояния отдельно показывает **OSD running/stopped**, **OSD generation
+<id> · SQLite · warm** и **OSD jobs: …**. Щелчок по системе или заданиям
+открывает **What is running?** с действиями для системы, обработчика,
+примеров и обзора.
+
 1. Откройте [ZOSD_DEMO_HELLO](../../src/zosd_demo_hello.clas.abap), поставьте курсор в класс и нажмите **F9**. Ожидается: **osd console** показывает `Hello from ZOSD_DEMO_HELLO.` Если F9 вместо этого ставит точку останова, значит, отладчик остановлен на строке: удалите точки останова ABAP (**Run > Remove All Breakpoints**), остановите сеанс (**Run > Stop Debugging**, Shift+F5) и снова нажмите F9; если F9 по-прежнему переключает точку останова, проверьте, что настройка `osd.keymap` имеет значение `abap`.
 
    ![F9 на ZOSD_DEMO_HELLO: приветствие в osd console и OSD jobs idle](../img/vscode-classrun.png)

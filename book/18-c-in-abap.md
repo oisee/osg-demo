@@ -33,8 +33,9 @@ this chapter did not repeat them.
   same nine pass; abapiti's measurement was about 2 seconds on the kernel
   and about 90 on osgo. The tag's [support evidence](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/osg-support.md)
   also records nine passing tests on osgo. On the JavaScript runtime used by
-  VS Code, its QuickJS run built successfully but timed out after 30 minutes
-  without class results. That is an unmeasured result, not a passing run.
+  VS Code, the tag now records all nine QuickJS tests passing in 506.43 seconds
+  after the buffered xstring write fix. These are published measurements;
+  this book’s small C demo does not rerun that corpus.
 
 The same road, at the size of one function, is something you can walk in
 your own sandbox: the rest of this chapter takes thirteen lines of C into
