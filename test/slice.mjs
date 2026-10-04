@@ -477,7 +477,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
       const listing = spawnSync("unzip", ["-Z1", join(work, "with-sidecars.zip")], {encoding: "utf8"});
       expect(listing.status === 0 && listing.stdout.trim(), `could not list the zip: ${listing.error?.message ?? listing.stderr}`);
       const inZip = listing.stdout;
-      expect(!/\.l2\.yaml$|\.trace\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace\.json$/.test(l)).join(", ")}`);
+      expect(!/\.l2\.yaml$|\.trace(?:\.meta)?\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace(?:\.meta)?\.json$/.test(l)).join(", ")}`);
     } else {
       const only = [...new Set([...(withSidecars.stdout + withSidecars.stderr).matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]))];
       expect(only.length > 0 && only.every((k) => sidecars.includes(k)), `with only the L2 sidecars left in: ${only.join(", ") || (withSidecars.stdout + withSidecars.stderr).slice(0, 300)}`);
@@ -485,7 +485,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
-      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace(?:\.meta)?\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
     // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
@@ -680,7 +680,9 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
   return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
 });
 
-await check("17 L2 fleet rule: built class in step, generated tests pass", async () => {
+await check("17 L2 fleet rule: built class in step, v1 traces, generated tests pass", async () => {
+  const {checkTraces} = await import("./l2.mjs");
+  const provenance = checkTraces();
   const l2 = spawnSync(process.execPath, [join(repo, "test", "l2.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
   // the committed rule output is the book's tag's; against a newer engine its
   // generator may have moved, and SLICE_L2_DRIFT=warn (the CI's main canary)
@@ -714,7 +716,7 @@ await check("17 L2 fleet rule: built class in step, generated tests pass", async
   expect(want.length >= 5 && ran.length === want.length && want.every((m) => ran.includes(m)),
     `ran ${ran.join(", ")}; the test class has ${want.join(", ")}`);
   expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
-  return `class in step with the rule; ${ran.length} generated tests pass`;
+  return `class in step with the rule; ${provenance}; ${ran.length} generated tests pass`;
 });
 
 stop();
