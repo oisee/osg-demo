@@ -12,7 +12,7 @@
 //     WAITING;
 //  3. N3: the engine's worker runs the queue empty: the three jobs of stage
 //     1, then, the gate opened once, two rules times two piles of the
-//     worklist; seven jobs, none failed;
+//     worklist; seven pile jobs, none failed;
 //  4. N4: ZCL_OSD_FLEET_NIGHT_STATE shows that run DONE with the same
 //     worklist and the same two alerts as N1;
 //  5. N5: ZCL_OSD_FLEET_NIGHT_SCHEDULE schedules the driver L3_NIGHT_D, a
@@ -23,7 +23,8 @@
 //     with a glass of one open alert, runs in jobs and stops at its glass
 //     after one of S004's two alerts; ZCL_OSD_FLEET_WATCH_GLASS continues it
 //     with a reason, one job per pile the glass stopped runs, and the run
-//     completes with both alerts and its lock released.
+//     completes with both alerts and its lock released; the default daemon
+//     starts without a schedule, leaves GLASS alone, and stops after completion.
 import {spawn, spawnSync} from "node:child_process";
 import {mkdtempSync, rmSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -222,7 +223,7 @@ await check("N5 schedule: L3_NIGHT_D waits once; switched off, nothing waits", a
   expect(on.includes(`Waiting: '${match[1]}'`), `not waiting: ${on}`);
   // switched off at once: the facade deletes a job still in its outbox
   const off = await classrun("ZCL_OSD_FLEET_NIGHT_SCHEDULE");
-  inOrder(off, [`Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted`, "Waiting: ''"]);
+  inOrder(off, [`Unscheduled L3_NIGHT_D ${match[1]}: 1 deleted, 0 refused`, "Waiting: ''"]);
   // and the worker finds nothing left to run
   const idle = JSON.parse(cli("work").stdout);
   expect(idle.kind === "empty", `the worker ran something: ${JSON.stringify(idle).slice(0, 300)}`);
@@ -244,8 +245,18 @@ await check("G1 governor: the run in jobs stops at its glass", async () => {
     if (result.kind === "empty") break;
     worked.push(result);
   }
-  expect(worked.length === 7 && worked.every((w) => w.kind === "completed"), `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
+  const piles = worked.filter((w) => w.run?.program === "ZOSD_FLEET_WATCH");
+  const passes = worked.filter((w) => w.run?.program === "ZL3_WATCH_DOC");
+  expect(piles.length === 7 && passes.length >= 1 && piles.length + passes.length === worked.length
+    && worked.every((w) => w.kind === "completed"), `jobs: ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
   const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
+  expect(/^Doctor: RUNNING since /m.test(state), `doctor did not start automatically: ${state}`);
+  // At GLASS the timer stays armed but must not submit another pass. Allow
+  // a default ten-second tick, then prove the budget and queue stay put.
+  await new Promise((ok) => setTimeout(ok, 11000));
+  expect(JSON.parse(cli("work").stdout).kind === "empty", "doctor queued work at GLASS");
+  const held = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
+  expect(held.includes("Budget: GLASS, glass 1, reserved 1, consumed 1, refunded 0"), `doctor changed the glass: ${held}`);
   // which of the two checks meets the glass depends on the order of the
   // jobs; a pile of no alert that ran after it stops at the glass too
   glassPiles = state.split("\n").filter((l) => /^ {2}\S+ pile \d: GLASS /.test(l)).length;
@@ -255,7 +266,7 @@ await check("G1 governor: the run in jobs stops at its glass", async () => {
     "Event 1 WARN: glass 1, reserved 1", "Event 2 NARROW: glass 1, reserved 1",
     "Event 3 GLASS: glass 1, reserved 1, amount 1, \"reservation does not fit\"",
     /^Event 4 GLASS-STAGE: glass 1, reserved 1, amount 2$/, /^Alert (low-steam|maintenance)-voyage: S004 Cumulus: /, "1 alerts"]);
-  return `run ${watch}: GLASS after one alert`;
+  return `run ${watch}: GLASS after one alert; daemon RUNNING, ${passes.length} dispatcher passes, no pass at GLASS`;
 });
 
 await check("G2 glass: a person continues with a reason; the run completes", async () => {
@@ -269,7 +280,10 @@ await check("G2 glass: a person continues with a reason; the run completes", asy
     worked.push(result);
   }
   // one job per pile the glass stopped
-  expect(worked.length === glassPiles && worked.every((w) => w.kind === "completed"), `jobs (${glassPiles} at the glass): ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
+  const piles = worked.filter((w) => w.run?.program === "ZOSD_FLEET_WATCH");
+  const passes = worked.filter((w) => w.run?.program === "ZL3_WATCH_DOC");
+  expect(piles.length === glassPiles && piles.length + passes.length === worked.length
+    && worked.every((w) => w.kind === "completed"), `jobs (${glassPiles} at the glass): ${worked.map((w) => `${w.run?.jobName}:${w.kind}`).join(" ")}`);
   const state = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
   inOrder(state, [`Watch set, run ${watch}`, "Lock on 20261001: RELEASED", "Stage 2 checks: DONE",
     "Budget: NARROW, glass 2, reserved 2, consumed 2, refunded 0",
@@ -278,7 +292,14 @@ await check("G2 glass: a person continues with a reason; the run completes", asy
   // the reason says why the pile was sent again, not how it ended
   expect(/^ {2}(low-steam|maintenance)-voyage pile 2: DONE \(STALE-PLAN\)$/m.test(state), `no pile 2 sent again: ${state}`);
   expect(!/GLASS \(|FAILED|PLANNED/.test(state.split("Budget:")[0]), `a pile is not DONE: ${state}`);
-  return `${worked.map((w) => w.run.jobName).join(" ")} again; DONE with both alerts, lock released`;
+  let stopped = state;
+  const until = Date.now() + 20000;
+  while (!/^Doctor: STOPPED since /m.test(stopped) && Date.now() < until) {
+    await new Promise((ok) => setTimeout(ok, 1000));
+    stopped = await classrun("ZCL_OSD_FLEET_WATCH_STATE", {readOnly: true});
+  }
+  expect(/^Doctor: STOPPED since /m.test(stopped), `daemon did not stop after final run: ${stopped}`);
+  return `${piles.map((w) => w.run.jobName).join(" ")} again; DONE with both alerts, lock released, daemon STOPPED`;
 });
 
 stop();
