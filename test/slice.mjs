@@ -232,10 +232,18 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
 
   const view = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_BAL_VIEW`,
     {method: "POST", headers: await csrf(`${base}/sap/bc/adt/discovery`)});
-  const shown = await view.text();
-  expect(view.ok, `BAL viewer: HTTP ${view.status}: ${shown.slice(0, 200)}`);
+  const output = await view.text();
+  expect(view.ok, `BAL viewer: HTTP ${view.status}: ${output.slice(0, 200)}`);
+  // File SQLite keeps earlier batches. Scope whole log blocks to this batch,
+  // retaining every item (including duplicates) so exact counts still fail.
+  const logs = output.split(/(?=^Run )/m).filter((log) => log.startsWith(`Run ${batch}-`));
+  expect(logs.length === 3, `BAL batch ${batch}: expected 3 logs, got ${logs.length}: ${output}`);
+  const shown = logs.join("");
   for (const suffix of ["OK1", "OK2", "ERR"]) {
-    expect(shown.includes(`Run ${batch}-${suffix};`), `BAL viewer lacks ${suffix}: ${shown}`);
+    const log = logs.find((log) => log.startsWith(`Run ${batch}-${suffix};`));
+    expect(log, `BAL viewer lacks ${suffix}: ${shown}`);
+    const items = [...log.matchAll(/^(\d+) [SIE] /gm)].map((m) => Number(m[1]));
+    expect(items.join() === "1,2,3", `BAL ${suffix} item order: ${items.join()}: ${log}`);
   }
   expect((shown.match(/1 S Fleet audit started/g) ?? []).length === 3, `BAL start items: ${shown}`);
   expect((shown.match(/2 I Observed 6 ships and 20 voyages/g) ?? []).length === 3,
@@ -260,7 +268,7 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
   expect(unit.ok, `BAL ABAP Unit: HTTP ${unit.status}`);
   expect(/testMethod adtcore:name="ERROR_FILTER_READS_MESSAGES"/.test(xml), "BAL filter test did not run");
   expect(!/<alert[\s>]/.test(xml), `BAL test has alerts:\n${xml}`);
-  return "3 persisted logs, 9 ordered messages, error filter ABAP Unit green";
+  return `batch ${batch}: 3 persisted logs, 9 ordered messages, error filter ABAP Unit green`;
 });
 
 await check("1c service tree: chapter labels", async () => {
