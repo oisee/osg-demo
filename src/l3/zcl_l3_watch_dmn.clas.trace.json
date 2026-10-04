@@ -1,0 +1,106 @@
+{
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zcl_l3_watch_dmn.clas.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [2, 17],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 18,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 1},
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 17}
+          ]
+        },
+        {
+          "lines": [19, 44],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 18}
+          ]
+        },
+        {
+          "line": 45,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 44}
+          ]
+        },
+        {
+          "lines": [46, 54],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 45}
+          ]
+        },
+        {
+          "lines": [55, 56],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 54}
+          ]
+        },
+        {
+          "lines": [57, 63],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 56}
+          ]
+        },
+        {
+          "line": 64,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 63}
+          ]
+        },
+        {
+          "lines": [65, 72],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/daemon.tpl", "anchor": "<partial>", "offset": 64}
+          ]
+        }
+      ]
+    }
+  ]
+}

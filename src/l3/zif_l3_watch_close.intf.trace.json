@@ -1,57 +1,50 @@
 {
- "generator": "dsl-l3",
- "set": "src/l3/fleet_watch.l3.yaml",
- "template": "recipes/l3-ports/iface-autoclose.tpl",
- "model": "sha256:203629b94aba55fde03aee3470b7642972ff1c6b7466d49549f467f266512bcd",
- "lines": [
-  {
-   "line": 1,
-   "template_line": 1,
-   "path": "/source",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 2,
-   "template_line": 2,
-   "path": "/port",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 3,
-   "template_line": 3,
-   "path": "/iface",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 4,
-   "template_line": 4,
-   "path": "/",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 5,
-   "template_line": 5,
-   "path": "/",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 6,
-   "template_line": 6,
-   "path": "/",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  },
-  {
-   "line": 7,
-   "template_line": 7,
-   "path": "/",
-   "node": "set/watch/port/close",
-   "set_line": 39
-  }
- ]
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zif_l3_watch_close.intf.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/source"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/iface-autoclose.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 2,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/port"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/set"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/iface-autoclose.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 3,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/iface"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/iface-autoclose.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        },
+        {
+          "lines": [4, 7],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/close", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/iface-autoclose.tpl", "anchor": "<partial>", "offset": 3}
+          ]
+        }
+      ]
+    }
+  ]
 }

@@ -1,0 +1,131 @@
+{
+  "format": "osd-trace-meta/1",
+  "generator": "dsl-l3",
+  "generator_version": "0.7",
+  "lines": [
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+          "template": "main",
+          "template_line": 1
+        },
+        {
+          "invocation": 1,
+          "path": "/autodoctor/doctor_report",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/doctor_report"},
+          "template": "main",
+          "template_line": 1
+        }
+      ],
+      "file": "zl3_watch_doc.prog.abap",
+      "line": 1,
+      "node": "set/watch/resilience/doctor",
+      "path": "/autodoctor/doctor_report",
+      "set_line": 47,
+      "template": "main",
+      "template_line": 1
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+          "template": "main",
+          "template_line": 2
+        }
+      ],
+      "file": "zl3_watch_doc.prog.abap",
+      "line": 2,
+      "node": "set/watch",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 2
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+          "template": "main",
+          "template_line": 3
+        }
+      ],
+      "file": "zl3_watch_doc.prog.abap",
+      "line": 3,
+      "node": "set/watch",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 3
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+          "template": "main",
+          "template_line": 4
+        },
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"},
+          "template": "main",
+          "template_line": 4
+        }
+      ],
+      "file": "zl3_watch_doc.prog.abap",
+      "line": 4,
+      "node": "set/watch",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 4
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+          "template": "main",
+          "template_line": 5
+        },
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"},
+          "template": "main",
+          "template_line": 5
+        }
+      ],
+      "file": "zl3_watch_doc.prog.abap",
+      "line": 5,
+      "node": "set/watch",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 5
+    }
+  ],
+  "model": "sha256:0bd7b20ac227fe3506b570d18c52c975f8e5be1a1c9866685a8fb7cf38c66cfb",
+  "model_serialization": "JSON.stringify (existing writer model)",
+  "outputs": [
+    {"file": "zl3_watch_doc.prog.abap", "hash": "sha256:b84e17d04df7a6e085ae1c0cae8d688007ecc7d93cdf83181cbc0438b189f281"}
+  ],
+  "rules": {
+    "busy-ship": {"class": "zcl_osd_fleet_l3_busy", "file": "src/l3/busy_ship.l2.yaml", "model": "sha256:669c875572d3a250f2020e3e44b62750ff83291fa6303e191b690aa45f6c6154"},
+    "low-steam-voyage": {"class": "zcl_osd_fleet_l3_steam", "file": "src/l3/low_steam_voyage.l2.yaml", "model": "sha256:429e1ae70d5ff582572094dc7506171521411b61fc4f2d50ebb17fb4740dc6cf"},
+    "maintenance-voyage": {"class": "zcl_osd_fleet_l3_maint", "file": "src/l3/maintenance_voyage.l2.yaml", "model": "sha256:ffaa917988d887b4a6e6615d9aec57e77cc5e601830d268bd4b2fad5ac7b915b"}
+  },
+  "set": "src/l3/fleet_watch.l3.yaml",
+  "template": "recipes/l3-doctor/report.tpl",
+  "templates": {"recipes/l3-doctor/report.tpl": "sha256:ba2cb6c51b5b16e605c727c18130d0df1f4ffb54a977a6a4afe145b00b3d9acf"}
+}

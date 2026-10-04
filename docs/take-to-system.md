@@ -4,13 +4,13 @@ The local demo is the starting point. A system import is an explicit human actio
 
 ## Build an offline zip
 
-Use an open-steamgate checkout at the tag `vscode-v0.6.1531` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the objects that only work locally (below: four objects and the folders `src/l3` and `src/iti`), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
+Use an open-steamgate checkout at the tag `vscode-v0.6.1621` or later. Its `segw:zip` accepts `--unit` and `--manifest` and rebases the app's manifest for its BSP location. The tool refuses every object the deploy unit does not list, so stage a copy of this folder without the objects that only work locally (below: four objects and the folders `src/l3` and `src/iti`), then zip the copy. Set `DEMO` to your clone and run these commands from the open-steamgate checkout:
 
 ```sh
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm -r "$STAGE"/src/l3 "$STAGE"/src/iti "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/zosd_fleet.tran.xml
+rm -r "$STAGE"/src/l3 "$STAGE"/src/iti "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/l2/*.trace.meta.json "$STAGE"/src/zosd_fleet.tran.xml
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
@@ -60,7 +60,7 @@ Checked with the commands above; the "on a system" column is what the objects ne
 | The launchpad tile | no | The tile is `osd-pack.json`, which only the open-steamgate launchpad reads. On a system, the inbound `AirshipFleet-display` in the manifest is what a launchpad catalog and target mapping would point at; neither is in the zip. |
 | Seed rows (`data/*.tabu.json`) | no | Two things would be needed and neither is here: a `.conf.json` beside each `.tabu.json` (abapGit's instruction: which table, which condition), and a `TABU <table>` entry in the deploy unit (without it the tool refuses the rows as `not-in-manifest`). With both, the rows would be written into the logon client, whatever their `MANDT` says. |
 | `ZCL_OSD_FLEET_LIFT` and `ltcl_fleet_lift` | yes | Plain Open SQL over the fleet tables; the lifted region is ordinary ABAP once generated. Its HARMLESS tests read the seed rows, so they pass only once the rows are there. `test/lift.mjs`, which regenerates the region, needs open-steamgate and does not travel. |
-| `ZCL_OSD_FLEET_L2_MAINT` and its test class | yes | Generated from `src/l2/maintenance_no_voyage.l2.yaml` by open-steamgate's L2 compiler, but plain Open SQL once written. Its test class is `DANGEROUS`: it inserts its examples' rows into the fleet tables and deletes them again. On a system the tests assume no other ship in maintenance has a voyage after 2027-03-01 and that keys `X001`-`X003`/`X00001`-`X00007` are free; an existing row with such a key makes the insert fail and the teardown delete it, so run them only in a sandbox. The rule file and the `*.trace.json` files are files of this repository and do not travel. |
+| `ZCL_OSD_FLEET_L2_MAINT` and its test class | yes | Generated from `src/l2/maintenance_no_voyage.l2.yaml` by open-steamgate's L2 compiler, but plain Open SQL once written. Its test class is `DANGEROUS`: it inserts its examples' rows into the fleet tables and deletes them again. On a system the tests assume no other ship in maintenance has a voyage after 2027-03-01 and that keys `X001`-`X003`/`X00001`-`X00007` are free; an existing row with such a key makes the insert fail and the teardown delete it, so run them only in a sandbox. The rule file and the `*.trace.json` / `*.trace.meta.json` files are files of this repository and do not travel. |
 | `ZCL_OSD_FLEET_DOCTOR` | no | It asks open-steamgate's job doctor `ZCL_OSD_JOB_DOCTOR`; on a system, SM37 and the job log answer the same question. |
 | `ZCL_OSD_FLEET_TPL` | no | It renders through `ZCL_OSD_TPL` and `ZCL_AJSON` of the open-steamgate runtime; a system has neither unless both are imported first. |
 | The night and watch sets, `src/l3` (`ZCL_OSD_FLEET_NIGHT`, `ZCL_OSD_FLEET_WATCH`, their job reports, rules, ports, settings and classruns) | no | They read and write open-steamgate's generic L3 tables (`ZOSD_L3_ALERT`, `ZOSD_L3_PILE`, `ZOSD_L3_STAGE`, `ZOSD_L3_WORK`, `ZOSD_L3_RUN`, and for the watch set the governor's and settings' tables), which this unit does not carry; with those tables imported first, their code is the standard job function modules and Open SQL. |

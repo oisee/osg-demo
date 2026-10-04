@@ -232,10 +232,18 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
 
   const view = await fetch(`${base}/sap/bc/adt/oo/classrun/ZCL_OSD_FLEET_BAL_VIEW`,
     {method: "POST", headers: await csrf(`${base}/sap/bc/adt/discovery`)});
-  const shown = await view.text();
-  expect(view.ok, `BAL viewer: HTTP ${view.status}: ${shown.slice(0, 200)}`);
+  const output = await view.text();
+  expect(view.ok, `BAL viewer: HTTP ${view.status}: ${output.slice(0, 200)}`);
+  // File SQLite keeps earlier batches. Scope whole log blocks to this batch,
+  // retaining every item (including duplicates) so exact counts still fail.
+  const logs = output.split(/(?=^Run )/m).filter((log) => log.startsWith(`Run ${batch}-`));
+  expect(logs.length === 3, `BAL batch ${batch}: expected 3 logs, got ${logs.length}: ${output}`);
+  const shown = logs.join("");
   for (const suffix of ["OK1", "OK2", "ERR"]) {
-    expect(shown.includes(`Run ${batch}-${suffix};`), `BAL viewer lacks ${suffix}: ${shown}`);
+    const log = logs.find((log) => log.startsWith(`Run ${batch}-${suffix};`));
+    expect(log, `BAL viewer lacks ${suffix}: ${shown}`);
+    const items = [...log.matchAll(/^(\d+) [SIE] /gm)].map((m) => Number(m[1]));
+    expect(items.join() === "1,2,3", `BAL ${suffix} item order: ${items.join()}: ${log}`);
   }
   expect((shown.match(/1 S Fleet audit started/g) ?? []).length === 3, `BAL start items: ${shown}`);
   expect((shown.match(/2 I Observed 6 ships and 20 voyages/g) ?? []).length === 3,
@@ -260,7 +268,7 @@ await check("1b1 fleet BAL: two success logs and one error", async () => {
   expect(unit.ok, `BAL ABAP Unit: HTTP ${unit.status}`);
   expect(/testMethod adtcore:name="ERROR_FILTER_READS_MESSAGES"/.test(xml), "BAL filter test did not run");
   expect(!/<alert[\s>]/.test(xml), `BAL test has alerts:\n${xml}`);
-  return "3 persisted logs, 9 ordered messages, error filter ABAP Unit green";
+  return `batch ${batch}: 3 persisted logs, 9 ordered messages, error filter ABAP Unit green`;
 });
 
 await check("1c service tree: chapter labels", async () => {
@@ -477,7 +485,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
       const listing = spawnSync("unzip", ["-Z1", join(work, "with-sidecars.zip")], {encoding: "utf8"});
       expect(listing.status === 0 && listing.stdout.trim(), `could not list the zip: ${listing.error?.message ?? listing.stderr}`);
       const inZip = listing.stdout;
-      expect(!/\.l2\.yaml$|\.trace\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace\.json$/.test(l)).join(", ")}`);
+      expect(!/\.l2\.yaml$|\.trace(?:\.meta)?\.json$/m.test(inZip), `the zip carries L2 sidecars: ${inZip.split("\n").filter((l) => /\.l2\.yaml$|\.trace(?:\.meta)?\.json$/.test(l)).join(", ")}`);
     } else {
       const only = [...new Set([...(withSidecars.stdout + withSidecars.stderr).matchAll(/^  ([A-Z0-9]{2,4} \S+)  \(/gm)].map((m) => m[1]))];
       expect(only.length > 0 && only.every((k) => sidecars.includes(k)), `with only the L2 sidecars left in: ${only.join(", ") || (withSidecars.stdout + withSidecars.stderr).slice(0, 300)}`);
@@ -485,7 +493,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
-      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace\.json$/.test(p)});
+      && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace(?:\.meta)?\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
     // what the tool says it carried, one "<TYPE> <name>" per object: CLAS,
@@ -680,7 +688,9 @@ await check("16 R4 lift: generated region, BEFORE = AFTER, differential test", a
   return `region matches the recipe; ${voyages} voyages agree; ${methods.length} differential tests pass`;
 });
 
-await check("17 L2 fleet rule: built class in step, generated tests pass", async () => {
+await check("17 L2 fleet rule: built class in step, v1 traces, generated tests pass", async () => {
+  const {checkTraces} = await import("./l2.mjs");
+  const provenance = checkTraces();
   const l2 = spawnSync(process.execPath, [join(repo, "test", "l2.mjs")], {env: {...process.env, OSD_HOME: home}, encoding: "utf8"});
   // the committed rule output is the book's tag's; against a newer engine its
   // generator may have moved, and SLICE_L2_DRIFT=warn (the CI's main canary)
@@ -714,7 +724,7 @@ await check("17 L2 fleet rule: built class in step, generated tests pass", async
   expect(want.length >= 5 && ran.length === want.length && want.every((m) => ran.includes(m)),
     `ran ${ran.join(", ")}; the test class has ${want.join(", ")}`);
   expect(!/<alert[\s>]/.test(report), `ABAP Unit alerts: ${report.slice(report.search(/<alert[\s>]/), report.search(/<alert[\s>]/) + 400)}`);
-  return `class in step with the rule; ${ran.length} generated tests pass`;
+  return `class in step with the rule; ${provenance}; ${ran.length} generated tests pass`;
 });
 
 stop();

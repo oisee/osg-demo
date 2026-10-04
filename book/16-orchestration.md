@@ -131,7 +131,11 @@ the 12th, so both checks flag it.
 ## In jobs
 
 Mode P is the same set in background jobs. As in chapter 9, this needs SQLite
-in a file: start OSD with `STG_DB=file`, `STG_DB_PATH` and `OSD_PACKS`.
+in a file. In VS Code, **osd: Start** uses file SQLite by default and
+supervises the worker (`osd.jobs.worker=auto`); the jobs run without a terminal.
+<!-- shot: OSD jobs status and output while the night set runs -->
+For the queue snapshots below, use the checkout route with `STG_DB=file`,
+`STG_DB_PATH` and `OSD_PACKS`, and drive the worker yourself.
 
 1. Press **F9** on
    [ZCL_OSD_FLEET_NIGHT_JOBS](../src/l3/zcl_osd_fleet_night_jobs.clas.abap).
@@ -196,10 +200,10 @@ calls `advance( )` for its stage. `advance( )` counts the stage's piles that
 are not `DONE`; while one is left, it returns. The job that finds none marks
 its stage `DONE` and opens the next one with one statement:
 
-<!-- code: src/l3/zcl_osd_fleet_night.clas.abap lines 471-477 -->
+<!-- code: src/l3/zcl_osd_fleet_night.clas.abap lines 478-484 -->
 ```abap
 UPDATE zosd_l3_stage SET status = 'OPEN' opened = lv_stamp
-  WHERE run_id = iv_run
+  WHERE set_name = c_set AND run_id = iv_run
     AND stage_no = lv_stage
     AND status = 'WAITING'.
 IF sy-dbcnt <> 1.
@@ -219,7 +223,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1531/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1621/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 
@@ -234,12 +238,12 @@ tests check them.
   Once the rest of the stage is final, it marks the stage `PARTIAL` and every
   later stage `NOT-RUN`. That closes the gate, so a late job cannot open it.
   Then the run is final and the lock released.
-- A job of a run that is already over, started again, can still set its pile
-  `RUNNING` and write alerts into a newer run of the date. Only sets with
-  `resilience:` refuse this.
+- A duplicate or late job returns `NOT-PLANNED` for a pile already claimed
+  or finished. A job whose run no longer holds the date lock returns
+  `STALE-RUN`. These guards also apply to the night set without `resilience:`.
 
 A set can also declare `resilience:`: a failed pile goes again after a backoff,
-a doctor job takes over what a dead job left, and fuses can stop a run. The
+the default daemon doctor takes over what a dead job left, and fuses can stop a run. The
 night set does not use it, to stay small; the documentation's "Resilience"
 section describes it.
 
@@ -263,11 +267,12 @@ driver calls `run( )` for that day in mode P, and the jobs above follow.
 Press **F9** again to switch it off:
 
 ```
-Unscheduled L3_NIGHT_D 11001000: 1 deleted
+Unscheduled L3_NIGHT_D 11001000: 1 deleted, 0 refused
 Waiting: ''
 ```
 
-`unschedule( )` deletes the instance that waits, which ends the chain. A
+`unschedule( )` returns separate `deleted` and `refused` counts; here it
+deletes the waiting instance, which ends the chain. A
 `node tools/osd-batch-runs.mjs work` afterwards answers `"kind": "empty"`:
 nothing of the set is left to run (with the queue empty, as after step 2).
 

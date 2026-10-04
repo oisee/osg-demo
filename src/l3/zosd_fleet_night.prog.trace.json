@@ -1,361 +1,276 @@
 {
- "generator": "dsl-l3",
- "set": "src/l3/fleet_night.l3.yaml",
- "template": "recipes/l3-job/template.tpl",
- "model": "sha256:a19091b2b786f32989be4b25ea5cd8f3f924bf7ff94845ae354968dc9d8f473d",
- "rules": {
-  "busy-ship": {
-   "file": "src/l3/busy_ship.l2.yaml",
-   "class": "zcl_osd_fleet_l3_busy",
-   "model": "sha256:669c875572d3a250f2020e3e44b62750ff83291fa6303e191b690aa45f6c6154"
-  },
-  "low-steam-voyage": {
-   "file": "src/l3/low_steam_voyage.l2.yaml",
-   "class": "zcl_osd_fleet_l3_steam",
-   "model": "sha256:429e1ae70d5ff582572094dc7506171521411b61fc4f2d50ebb17fb4740dc6cf"
-  },
-  "maintenance-voyage": {
-   "file": "src/l3/maintenance_voyage.l2.yaml",
-   "class": "zcl_osd_fleet_l3_maint",
-   "model": "sha256:ffaa917988d887b4a6e6615d9aec57e77cc5e601830d268bd4b2fad5ac7b915b"
-  }
- },
- "lines": [
-  {
-   "line": 1,
-   "template_line": 1,
-   "path": "/report",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 2,
-   "template_line": 2,
-   "path": "/source",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 3,
-   "template_line": 3,
-   "path": "/set",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 4,
-   "template_line": 4,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 5,
-   "template_line": 6,
-   "path": "/planned",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 6,
-   "template_line": 7,
-   "path": "/planned",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 7,
-   "template_line": 10,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 8,
-   "template_line": 11,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 9,
-   "template_line": 14,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 10,
-   "template_line": 15,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 11,
-   "template_line": 24,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 12,
-   "template_line": 25,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 13,
-   "template_line": 26,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 14,
-   "template_line": 27,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 15,
-   "template_line": 29,
-   "path": "/planned",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 16,
-   "template_line": 31,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 17,
-   "template_line": 39,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 18,
-   "template_line": 41,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 19,
-   "template_line": 42,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 20,
-   "template_line": 43,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 21,
-   "template_line": 44,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 22,
-   "template_line": 55,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 23,
-   "template_line": 56,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 24,
-   "template_line": 57,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 25,
-   "template_line": 58,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 26,
-   "template_line": 59,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 27,
-   "template_line": 60,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 28,
-   "template_line": 61,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 29,
-   "template_line": 62,
-   "path": "/schedule",
-   "node": "set/night/schedule",
-   "set_line": 24
-  },
-  {
-   "line": 30,
-   "template_line": 78,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 31,
-   "template_line": 79,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 32,
-   "template_line": 80,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 33,
-   "template_line": 81,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 34,
-   "template_line": 82,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 35,
-   "template_line": 87,
-   "path": "/planned",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 36,
-   "template_line": 92,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 37,
-   "template_line": 93,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 38,
-   "template_line": 102,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 39,
-   "template_line": 103,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 40,
-   "template_line": 104,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 41,
-   "template_line": 105,
-   "path": "/class",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 42,
-   "template_line": 106,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 43,
-   "template_line": 107,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 44,
-   "template_line": 111,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 45,
-   "template_line": 112,
-   "path": "/staged",
-   "node": "set/night/stages",
-   "set_line": 12
-  },
-  {
-   "line": 46,
-   "template_line": 114,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 47,
-   "template_line": 115,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  },
-  {
-   "line": 48,
-   "template_line": 116,
-   "path": "/",
-   "node": "set/night",
-   "set_line": 7
-  }
- ]
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zosd_fleet_night.prog.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/report"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 2,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/source"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 3,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/set"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        },
+        {
+          "line": 4,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 3}
+          ]
+        },
+        {
+          "lines": [5, 8],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [9, 10],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [11, 14],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 4}
+          ]
+        },
+        {
+          "line": 15,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 4}
+          ]
+        },
+        {
+          "line": 16,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 8}
+          ]
+        },
+        {
+          "line": 17,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        },
+        {
+          "lines": [18, 19],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 9}
+          ]
+        },
+        {
+          "line": 20,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 11}
+          ]
+        },
+        {
+          "line": 21,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 12}
+          ]
+        },
+        {
+          "lines": [22, 23],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 3},
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 13}
+          ]
+        },
+        {
+          "line": 24,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 5}
+          ]
+        },
+        {
+          "line": 25,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 6},
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 15}
+          ]
+        },
+        {
+          "lines": [26, 31],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 7}
+          ]
+        },
+        {
+          "line": 32,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 13},
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 16}
+          ]
+        },
+        {
+          "lines": [33, 35],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 14}
+          ]
+        },
+        {
+          "line": 36,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 17}
+          ]
+        },
+        {
+          "line": 37,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 18}
+          ]
+        },
+        {
+          "lines": [38, 40],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 19}
+          ]
+        },
+        {
+          "line": 41,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 5}
+          ]
+        },
+        {
+          "lines": [42, 43],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 22}
+          ]
+        },
+        {
+          "lines": [44, 46],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 6}
+          ]
+        },
+        {
+          "line": 47,
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 9},
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 24}
+          ]
+        },
+        {
+          "lines": [48, 51],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 10}
+          ]
+        },
+        {
+          "lines": [52, 54],
+          "sources": [
+            {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 25}
+          ]
+        }
+      ]
+    }
+  ]
 }

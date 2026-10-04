@@ -1,92 +1,110 @@
 {
- "generator": "dsl-l3",
- "set": "src/l3/fleet_watch.l3.yaml",
- "template": "recipes/l3-ports/source-table.tpl",
- "model": "sha256:f55769f340aa9ea244fe6b52e0405dc4fa4384456d1eebe9f95a43a485405672",
- "lines": [
-  {
-   "line": 1,
-   "template_line": 1,
-   "path": "/source",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 2,
-   "template_line": 2,
-   "path": "/port",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 3,
-   "template_line": 3,
-   "path": "/class",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 4,
-   "template_line": 4,
-   "path": "/",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 5,
-   "template_line": 5,
-   "path": "/iface",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 6,
-   "template_line": 6,
-   "path": "/",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 7,
-   "template_line": 7,
-   "path": "/",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 8,
-   "template_line": 8,
-   "path": "/class",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 9,
-   "template_line": 9,
-   "path": "/iface",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 10,
-   "template_line": 10,
-   "path": "/table",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 11,
-   "template_line": 11,
-   "path": "/",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  },
-  {
-   "line": 12,
-   "template_line": 12,
-   "path": "/",
-   "node": "set/watch/port/ships/variant/table",
-   "set_line": 30
-  }
- ]
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zcl_l3_watch_ships_table.clas.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/source"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 2,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/port"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/set"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/variant"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 3,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        },
+        {
+          "line": 4,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 3}
+          ]
+        },
+        {
+          "line": 5,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/iface"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 4}
+          ]
+        },
+        {
+          "lines": [6, 7],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 5}
+          ]
+        },
+        {
+          "line": 8,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 7}
+          ]
+        },
+        {
+          "line": 9,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/iface"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 8}
+          ]
+        },
+        {
+          "line": 10,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/key"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/table"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 9}
+          ]
+        },
+        {
+          "lines": [11, 12],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/ships/variant/table", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-ports/source-table.tpl", "anchor": "<partial>", "offset": 10}
+          ]
+        }
+      ]
+    }
+  ]
 }

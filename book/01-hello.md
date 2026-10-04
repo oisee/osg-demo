@@ -2,10 +2,12 @@
 
 1. Open [ZOSD_DEMO_HELLO](../src/zosd_demo_hello.clas.abap), place the cursor in the class and press **F9**. Expected: the **osd console** shows `Hello from ZOSD_DEMO_HELLO.` If F9 toggles a breakpoint instead, the debugger is stopped at a line: remove the ABAP breakpoints (**Run > Remove All Breakpoints**), stop the session (**Run > Stop Debugging**, Shift+F5) and press F9 again; if it still toggles, check that the setting `osd.keymap` is `abap`.
 
+   <!-- shot: vscode-classrun — refresh for the new extension baseline and status bar -->
    ![F9 on ZOSD_DEMO_HELLO: the osd console prints the greeting](img/vscode-classrun.png)
 
 2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there, or in the class itself. Expected: one green ABAP Unit test.
 
+   <!-- shot: vscode-testing — refresh for the new extension baseline and status bar -->
    ![Ctrl+Shift+F10 in the class: one ABAP Unit test, green](img/vscode-testing.png)
 
 3. Change the text returned by `greeting( )`, press **Ctrl+F2** to check, **Ctrl+F3** to save and activate, then **F9** again. Expected: the console shows your new text. Restore the original text, activate, and rerun the test to leave it green.

@@ -20,6 +20,12 @@ START-OF-SELECTION.
   DATA ls_rule TYPE zcl_osd_fleet_night=>ty_rule.
   DATA lv_bind TYPE string.
   DATA ls_result TYPE zcl_osd_fleet_night=>ty_result.
+  DATA ls_deleted TYPE zcl_osd_fleet_night=>ty_unschedule.
+  IF p_mode = 'U'.
+    ls_deleted = zcl_osd_fleet_night=>unschedule( ).
+    WRITE: / 'deleted', ls_deleted-deleted, 'refused', ls_deleted-refused.
+    RETURN.
+  ENDIF.
   IF p_mode = 'D'.
     " the date of the moment the instance starts, not of when it was planned
     GET TIME.

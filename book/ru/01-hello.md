@@ -2,10 +2,12 @@
 
 1. Откройте [ZOSD_DEMO_HELLO](../../src/zosd_demo_hello.clas.abap), поставьте курсор в класс и нажмите **F9**. Ожидается: **osd console** показывает `Hello from ZOSD_DEMO_HELLO.` Если F9 вместо этого ставит точку останова, значит, отладчик остановлен на строке: удалите точки останова ABAP (**Run > Remove All Breakpoints**), остановите сеанс (**Run > Stop Debugging**, Shift+F5) и снова нажмите F9; если F9 по-прежнему переключает точку останова, проверьте, что настройка `osd.keymap` имеет значение `abap`.
 
+   <!-- shot: vscode-classrun — обновить для новой версии расширения и строки состояния -->
    ![F9 на ZOSD_DEMO_HELLO: osd console печатает приветствие](../img/vscode-classrun.png)
 
 2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** или откройте сам класс и нажмите **Ctrl+Shift+F10** в нем. Ожидается: один зеленый тест ABAP Unit.
 
+   <!-- shot: vscode-testing — обновить для новой версии расширения и строки состояния -->
    ![Ctrl+Shift+F10 в классе: один тест ABAP Unit, зеленый](../img/vscode-testing.png)
 
 3. Измените текст, который возвращает `greeting( )`, нажмите **Ctrl+F2** для проверки, **Ctrl+F3** для сохранения и активации, затем снова **F9**. Ожидается: консоль показывает ваш новый текст. Верните исходный текст, активируйте и перезапустите тест, чтобы он остался зеленым.
