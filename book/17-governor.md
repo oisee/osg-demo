@@ -79,10 +79,12 @@ Start OSD with a file database, as in chapter 16.
    dispatcher jobs; the number of passes depends on the timer and messages.
 3. Press **F9** on
    [ZCL_OSD_FLEET_WATCH_STATE](../src/l3/zcl_osd_fleet_watch_state.clas.abap).
-   It prints the latest run of the set for the date:
+   It prints the latest run of the set for the date. The doctor's timestamps
+   and healed count vary by run, so they are shown as placeholders:
 
    ```
    Watch set, run B2179C23A3CF434380CA033254965E8D
+   Doctor: RUNNING since <started> last <last_pass> healed <n> next <next_tick>
    Lock on 20261001: HELD
    Stage 1 candidates: DONE
      busy-ship pile 1: DONE
@@ -145,6 +147,7 @@ new glass must be higher than the old one, and the reason may not be empty.
    lines above:
 
    ```
+   Doctor: STOPPED since <started> last <last_pass> healed <n> next <next_tick>
    Lock on 20261001: RELEASED
    Stage 2 checks: DONE
      low-steam-voyage pile 2: DONE (STALE-PLAN)

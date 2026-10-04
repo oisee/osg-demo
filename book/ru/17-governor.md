@@ -83,10 +83,12 @@ settings:
    задания-диспетчеры доктора; число проходов зависит от таймера и сообщений.
 3. Нажмите **F9** на
    [ZCL_OSD_FLEET_WATCH_STATE](../../src/l3/zcl_osd_fleet_watch_state.clas.abap).
-   Он печатает последний прогон набора на эту дату:
+   Он печатает последний прогон набора на эту дату. Временные метки доктора
+   и число восстановлений зависят от прогона, поэтому показаны заполнителями:
 
    ```
    Watch set, run B2179C23A3CF434380CA033254965E8D
+   Doctor: RUNNING since <started> last <last_pass> healed <n> next <next_tick>
    Lock on 20261001: HELD
    Stage 1 candidates: DONE
      busy-ship pile 1: DONE
@@ -150,6 +152,7 @@ lv_ok = zcl_osd_fleet_watch=>continue_glass( iv_run = lv_run
    строк выше:
 
    ```
+   Doctor: STOPPED since <started> last <last_pass> healed <n> next <next_tick>
    Lock on 20261001: RELEASED
    Stage 2 checks: DONE
      low-steam-voyage pile 2: DONE (STALE-PLAN)
