@@ -12,8 +12,8 @@
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: an open-steamgate checkout after npm install and npm run
 //   bootstrap (Playwright comes from its node_modules);
-// - SHOTS_TMP: short scratch path (default /tmp/osd-s05); keep TMPDIR short
-//   too, e.g. /tmp/osd-s05/tmp, for debugger sockets.
+// - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
+//   keep TMPDIR short too for debugger sockets.
 // - WS: a disposable copy, so no local path shows in a breadcrumb:
 //   git archive HEAD | tar -x -C <dir>.
 // Headless Chromium renders a blank workbench, so this needs an X server.
@@ -21,12 +21,12 @@
 // its usr/bin on PATH; xvfb-run also needs xauth.
 //
 // Drives VS Code (Electron) with Playwright's _electron: a fresh user-data and
-// extensions dir under SHOTS_TMP (default /tmp/osd-s05), the extension installed from VSIX, the
-// system started from OSD_HOME with WS as its pack, then commands through the
-// command palette. A picture is taken only once the window shows what it is
+// extensions dir under SHOTS_TMP (or the unique temporary directory), the extension
+// installed from VSIX, the system started from OSD_HOME with WS as its pack, then
+// commands through the command palette. A picture is taken only once the window shows what it is
 // about; the pictures go to OUT only when every step has passed.
 import {execFileSync} from "node:child_process";
-import {copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
+import {copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
 
@@ -36,7 +36,7 @@ const need = (name) => {
   return resolve(value);
 };
 const code = need("CODE"), vsix = need("VSIX"), home = need("OSD_HOME"), ws = need("WS"), out = need("OUT");
-const tmp = process.env.SHOTS_TMP || "/tmp/osd-s05";
+const tmp = process.env.SHOTS_TMP || mkdtempSync(join("/tmp", "osd-shot-"));
 // TMPDIR may be inside this directory; preserve it for debugger sockets.
 for (const name of ["ud", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
 mkdirSync(join(tmp, "ud", "User"), {recursive: true});

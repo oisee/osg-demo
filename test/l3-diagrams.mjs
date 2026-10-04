@@ -3,6 +3,7 @@
 //
 //   OSD_HOME=<open-steamgate checkout> node test/l3-diagrams.mjs
 //   SHOTS_ONLY=glass OUT=<staging directory> limits the refresh to chapter 17.
+// Images are copied to OUT only after all selected renders and browser shutdown succeed.
 //
 // Drawn here as SVG from what test/l3.mjs checks (the stages, the piles and
 // their jobs, the worklist, the gate) and from docs/dsl-l3.md of
@@ -10,8 +11,9 @@
 // with open-steamgate's Playwright Chromium. Nothing is read from a run: job
 // names and keys are those of the fleet's seed for 2026-10-01. The glass
 // picture (chapter 17) draws the run test/l3.mjs G1 and G2 check.
-import {mkdirSync} from "node:fs";
+import {copyFileSync, mkdirSync, mkdtempSync, rmSync} from "node:fs";
 import {createRequire} from "node:module";
+import {tmpdir} from "node:os";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
@@ -22,7 +24,6 @@ if (!home) {
   process.exit(2);
 }
 const out = process.env.OUT ? resolve(process.env.OUT) : join(repo, "book", "img");
-mkdirSync(out, {recursive: true});
 
 const C = {
   ink: "#1f2933", soft: "#52606d", line: "#9aa5b1", paper: "#ffffff",
@@ -286,19 +287,30 @@ function glass(t) {
 
 const pictures = {shape, piles, timeline, gate, glass};
 const {chromium} = createRequire(join(home, "package.json"))("playwright");
-const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePath: process.env.SLICE_CHROMIUM} : {});
+const staging = mkdtempSync(join(tmpdir(), "l3-diagrams-"));
+const files = [];
 try {
-  const tab = await browser.newPage({deviceScaleFactor: 2});
-  for (const [name, draw] of Object.entries(pictures)) {
-    if (process.env.SHOTS_ONLY && name !== process.env.SHOTS_ONLY) continue;
-    for (const [lang, suffix] of [["en", ""], ["ru", ".ru"]]) {
-      const t = (en, ru) => (lang === "en" ? en : ru);
-      await tab.setContent(`<!doctype html><html><body style="margin:0">${draw(t)}</body></html>`);
-      const file = join(out, `l3-${name}${suffix}.png`);
-      await tab.locator("svg").screenshot({path: file});
-      console.log(`l3-diagrams: ${file}`);
+  const browser = await chromium.launch(process.env.SLICE_CHROMIUM ? {executablePath: process.env.SLICE_CHROMIUM} : {});
+  try {
+    const tab = await browser.newPage({deviceScaleFactor: 2});
+    for (const [name, draw] of Object.entries(pictures)) {
+      if (process.env.SHOTS_ONLY && name !== process.env.SHOTS_ONLY) continue;
+      for (const [lang, suffix] of [["en", ""], ["ru", ".ru"]]) {
+        const t = (en, ru) => (lang === "en" ? en : ru);
+        await tab.setContent(`<!doctype html><html><body style="margin:0">${draw(t)}</body></html>`);
+        const file = `l3-${name}${suffix}.png`;
+        await tab.locator("svg").screenshot({path: join(staging, file)});
+        files.push(file);
+      }
     }
+  } finally {
+    await browser.close();
+  }
+  mkdirSync(out, {recursive: true});
+  for (const file of files) {
+    copyFileSync(join(staging, file), join(out, file));
+    console.log(`l3-diagrams: ${join(out, file)}`);
   }
 } finally {
-  await browser.close();
+  rmSync(staging, {recursive: true, force: true});
 }
