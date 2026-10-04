@@ -98,6 +98,11 @@ const open = async (file) => {
 const shot = async (name) => {
   await win.mouse.move(900, 470);
   await win.waitForTimeout(500);
+  const status = await win.locator(".statusbar").innerText();
+  if (!/osd [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
+    throw new Error("the status bar must show SQLite · warm before capture");
+  }
+  console.log(`vscode-shots: ${name}: ${status.match(/osd [0-9a-f]{7,} · SQLite · warm\b/)[0]}`);
   await win.screenshot({path: join(tmp, "shots", `${name}.png`)});
   console.log(`vscode-shots: ${name}.png`);
 };
