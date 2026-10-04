@@ -13,7 +13,7 @@ CLASS zcl_osd_fleet_night_schedule IMPLEMENTATION.
   METHOD if_oo_adt_classrun~main.
     DATA lv_count TYPE tbtcjob-jobcount.
     DATA lv_again TYPE tbtcjob-jobcount.
-    DATA lv_deleted TYPE i.
+    DATA ls_deleted TYPE zcl_osd_fleet_night=>ty_unschedule.
     lv_count = zcl_osd_fleet_night=>scheduled( ).
     IF lv_count IS INITIAL.
       lv_count = zcl_osd_fleet_night=>schedule( ).
@@ -25,9 +25,9 @@ CLASS zcl_osd_fleet_night_schedule IMPLEMENTATION.
       lv_again = zcl_osd_fleet_night=>schedule( ).
       out->write( |Scheduled { zcl_osd_fleet_night=>c_driver } { lv_count }; again: { lv_again }| ).
     ELSE.
-      lv_deleted = zcl_osd_fleet_night=>unschedule( ).
+      ls_deleted = zcl_osd_fleet_night=>unschedule( ).
       COMMIT WORK.
-      out->write( |Unscheduled { zcl_osd_fleet_night=>c_driver } { lv_count }: { lv_deleted } deleted| ).
+      out->write( |Unscheduled { zcl_osd_fleet_night=>c_driver } { lv_count }: { ls_deleted-deleted } deleted, { ls_deleted-refused } refused| ).
     ENDIF.
     out->write( |Waiting: '{ zcl_osd_fleet_night=>scheduled( ) }'| ).
   ENDMETHOD.

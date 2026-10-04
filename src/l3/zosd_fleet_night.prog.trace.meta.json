@@ -1,0 +1,1069 @@
+{
+  "format": "osd-trace-meta/1",
+  "generator": "dsl-l3",
+  "generator_version": "0.7",
+  "lines": [
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 1
+        },
+        {
+          "invocation": 1,
+          "path": "/report",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/report"},
+          "template": "main",
+          "template_line": 1
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 1,
+      "node": "set/night",
+      "path": "/report",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 1
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 2
+        },
+        {
+          "invocation": 1,
+          "path": "/source",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/source"},
+          "template": "main",
+          "template_line": 2
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 2,
+      "node": "set/night",
+      "path": "/source",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 2
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 3
+        },
+        {
+          "invocation": 1,
+          "path": "/set",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/set"},
+          "template": "main",
+          "template_line": 3
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 3,
+      "node": "set/night",
+      "path": "/set",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 3
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 4
+        },
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 4
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 4,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 4
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/planned",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 6
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 5,
+      "node": "set/night/stages",
+      "path": "/planned",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 6
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/planned",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 7
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 6,
+      "node": "set/night/stages",
+      "path": "/planned",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 7
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 10
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 7,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 10
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 11
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 8,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 11
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 14
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 9,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 14
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 15
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 10,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 15
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 24
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 11,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 24
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 25
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 12,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 25
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 26
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 13,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 26
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 27
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 14,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 27
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/planned",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 29
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 15,
+      "node": "set/night/stages",
+      "path": "/planned",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 29
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 31
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 16,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 31
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 47
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 17,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 47
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 49
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 18,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 49
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 50
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 19,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 50
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 51
+        },
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 51
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 20,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 51
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 52
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 21,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 52
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 65
+        },
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 65
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 22,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 65
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 66
+        },
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 66
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 23,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 66
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 67
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 24,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 67
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 68
+        },
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 68
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 25,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 68
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 69
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 26,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 69
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 70
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 27,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 70
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 71
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 28,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 71
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 72
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 29,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 72
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 73
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 30,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 73
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 74
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 31,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 74
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 75
+        },
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 75
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 32,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 75
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 76
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 33,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 76
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 77
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 34,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 77
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/schedule",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/schedule", "selector": "/"},
+          "template": "main",
+          "template_line": 78
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 35,
+      "node": "set/night/schedule",
+      "path": "/schedule",
+      "set_line": 24,
+      "template": "main",
+      "template_line": 78
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 105
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 36,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 105
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 106
+        },
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 106
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 37,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 106
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 107
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 38,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 107
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 108
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 39,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 108
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 109
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 40,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 109
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/planned",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 114
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 41,
+      "node": "set/night/stages",
+      "path": "/planned",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 114
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 119
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 42,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 119
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 120
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 43,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 120
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 129
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 44,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 129
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 130
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 45,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 130
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 131
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 46,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 131
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/class",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/class"},
+          "template": "main",
+          "template_line": 132
+        },
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 132
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 47,
+      "node": "set/night",
+      "path": "/class",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 132
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 133
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 48,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 133
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 134
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 49,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 134
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 138
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 50,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 138
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/staged",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night/stages", "selector": "/"},
+          "template": "main",
+          "template_line": 139
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 51,
+      "node": "set/night/stages",
+      "path": "/staged",
+      "set_line": 12,
+      "template": "main",
+      "template_line": 139
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 141
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 52,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 141
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 142
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 53,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 142
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 143
+        }
+      ],
+      "file": "zosd_fleet_night.prog.abap",
+      "line": 54,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 143
+    }
+  ],
+  "model": "sha256:52fff052183a14ad5362ee16832c7b33a89dedc5467d9e9f869ae99306842763",
+  "model_serialization": "JSON.stringify (existing writer model)",
+  "outputs": [
+    {"file": "zosd_fleet_night.prog.abap", "hash": "sha256:5e967d33ef8620fcd07c820398dc631fa67b22320a4659d53a1b904da7da9b3a"}
+  ],
+  "rules": {
+    "busy-ship": {"class": "zcl_osd_fleet_l3_busy", "file": "src/l3/busy_ship.l2.yaml", "model": "sha256:669c875572d3a250f2020e3e44b62750ff83291fa6303e191b690aa45f6c6154"},
+    "low-steam-voyage": {"class": "zcl_osd_fleet_l3_steam", "file": "src/l3/low_steam_voyage.l2.yaml", "model": "sha256:429e1ae70d5ff582572094dc7506171521411b61fc4f2d50ebb17fb4740dc6cf"},
+    "maintenance-voyage": {"class": "zcl_osd_fleet_l3_maint", "file": "src/l3/maintenance_voyage.l2.yaml", "model": "sha256:ffaa917988d887b4a6e6615d9aec57e77cc5e601830d268bd4b2fad5ac7b915b"}
+  },
+  "set": "src/l3/fleet_night.l3.yaml",
+  "template": "recipes/l3-job/template.tpl",
+  "templates": {"recipes/l3-job/template.tpl": "sha256:49b4fa71f60a882358ce5550a4539a0f5b649d26fe5d119216a8e7902d60712a"}
+}

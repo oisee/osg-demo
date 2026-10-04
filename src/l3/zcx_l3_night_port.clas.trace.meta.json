@@ -1,0 +1,516 @@
+{
+  "format": "osd-trace-meta/1",
+  "generator": "dsl-l3",
+  "generator_version": "0.7",
+  "lines": [
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 1
+        },
+        {
+          "invocation": 1,
+          "path": "/source",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/source"},
+          "template": "main",
+          "template_line": 1
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 1,
+      "node": "set/night",
+      "path": "/source",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 1
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 2
+        },
+        {
+          "invocation": 1,
+          "path": "/set",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/set"},
+          "template": "main",
+          "template_line": 2
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 2,
+      "node": "set/night",
+      "path": "/set",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 2
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 3
+        },
+        {
+          "invocation": 1,
+          "path": "/exception",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/exception"},
+          "template": "main",
+          "template_line": 3
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 3,
+      "node": "set/night",
+      "path": "/exception",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 3
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 4
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 4,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 4
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 5
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 5,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 5
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 6
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 6,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 6
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 7
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 7,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 7
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 8
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 8,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 8
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 9
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 9,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 9
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 10
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 10,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 10
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 11
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 11,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 11
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 12
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 12,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 12
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 13
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 13,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 13
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 14
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 14,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 14
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 15
+        },
+        {
+          "invocation": 1,
+          "path": "/exception",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/exception"},
+          "template": "main",
+          "template_line": 15
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 15,
+      "node": "set/night",
+      "path": "/exception",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 15
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 16
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 16,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 16
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 17
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 17,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 17
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 18
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 18,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 18
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 19
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 19,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 19
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 20
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 20,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 20
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 21
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 21,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 21
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 22
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 22,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 22
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 23
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 23,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 23
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 24
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 24,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 24
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 25
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 25,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 25
+    },
+    {
+      "contributors": [
+        {
+          "invocation": 1,
+          "path": "/",
+          "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
+          "template": "main",
+          "template_line": 26
+        }
+      ],
+      "file": "zcx_l3_night_port.clas.abap",
+      "line": 26,
+      "node": "set/night",
+      "path": "/",
+      "set_line": 7,
+      "template": "main",
+      "template_line": 26
+    }
+  ],
+  "model": "sha256:52fff052183a14ad5362ee16832c7b33a89dedc5467d9e9f869ae99306842763",
+  "model_serialization": "JSON.stringify (existing writer model)",
+  "outputs": [
+    {"file": "zcx_l3_night_port.clas.abap", "hash": "sha256:9be4910908f888b8eb4b1ec2d2557bff1bcdc4db1e467ec56427d9094c7e253b"}
+  ],
+  "rules": {
+    "busy-ship": {"class": "zcl_osd_fleet_l3_busy", "file": "src/l3/busy_ship.l2.yaml", "model": "sha256:669c875572d3a250f2020e3e44b62750ff83291fa6303e191b690aa45f6c6154"},
+    "low-steam-voyage": {"class": "zcl_osd_fleet_l3_steam", "file": "src/l3/low_steam_voyage.l2.yaml", "model": "sha256:429e1ae70d5ff582572094dc7506171521411b61fc4f2d50ebb17fb4740dc6cf"},
+    "maintenance-voyage": {"class": "zcl_osd_fleet_l3_maint", "file": "src/l3/maintenance_voyage.l2.yaml", "model": "sha256:ffaa917988d887b4a6e6615d9aec57e77cc5e601830d268bd4b2fad5ac7b915b"}
+  },
+  "set": "src/l3/fleet_night.l3.yaml",
+  "template": "recipes/l3-ports/exception.tpl",
+  "templates": {"recipes/l3-ports/exception.tpl": "sha256:02355dd288d1a64dace6fc9c29e5a74c054caa6e3546b2f4e65293df6d6c17aa"}
+}

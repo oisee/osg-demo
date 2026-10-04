@@ -1,397 +1,258 @@
 {
- "generator": "dsl-l3",
- "set": "src/l3/fleet_watch.l3.yaml",
- "template": "recipes/l3-job/template.tpl",
- "overlay": "recipes/l3-governor/job.patch.json",
- "model": "sha256:821aea177461d5001efd895a9d4cf979fec0093abcb966f68662c1ba69f8e462",
- "rules": {
-  "busy-ship": {
-   "file": "src/l3/busy_ship.l2.yaml",
-   "class": "zcl_osd_fleet_l3_busy",
-   "model": "sha256:669c875572d3a250f2020e3e44b62750ff83291fa6303e191b690aa45f6c6154"
-  },
-  "low-steam-voyage": {
-   "file": "src/l3/low_steam_voyage.l2.yaml",
-   "class": "zcl_osd_fleet_l3_steam",
-   "model": "sha256:429e1ae70d5ff582572094dc7506171521411b61fc4f2d50ebb17fb4740dc6cf"
-  },
-  "maintenance-voyage": {
-   "file": "src/l3/maintenance_voyage.l2.yaml",
-   "class": "zcl_osd_fleet_l3_maint",
-   "model": "sha256:ffaa917988d887b4a6e6615d9aec57e77cc5e601830d268bd4b2fad5ac7b915b"
-  }
- },
- "lines": [
-  {
-   "line": 1,
-   "template_line": 1,
-   "path": "/report",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 2,
-   "template_line": 2,
-   "path": "/source",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 3,
-   "template_line": 3,
-   "path": "/set",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 4,
-   "template_line": 4,
-   "path": "/class",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 5,
-   "template_line": 6,
-   "path": "/planned",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 6,
-   "template_line": 7,
-   "path": "/planned",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 7,
-   "template_line": 10,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 8,
-   "template_line": 11,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 9,
-   "template_line": 21,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 10,
-   "template_line": 22,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 11,
-   "template_line": 24,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 12,
-   "template_line": 25,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 13,
-   "template_line": 26,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 14,
-   "template_line": 27,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 15,
-   "template_line": 29,
-   "path": "/planned",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 16,
-   "template_line": 31,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 17,
-   "template_line": 33,
-   "path": "/settings/entries/1/screen",
-   "node": "set/watch/setting/budget.glass",
-   "set_line": 55
-  },
-  {
-   "line": 18,
-   "template_line": 41,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 19,
-   "template_line": 42,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 20,
-   "template_line": 43,
-   "path": "/class",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 21,
-   "template_line": 44,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 22,
-   "template_line": 46,
-   "path": "/settings/class",
-   "node": "set/watch/settings",
-   "set_line": 54
-  },
-  {
-   "line": 23,
-   "template_line": 48,
-   "path": "/settings/entries/1/field",
-   "node": "set/watch/setting/budget.glass",
-   "set_line": 55
-  },
-  {
-   "line": 24,
-   "template_line": 78,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 25,
-   "template_line": 79,
-   "path": "/class",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 26,
-   "template_line": 80,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 27,
-   "template_line": 81,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 28,
-   "template_line": 82,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 29,
-   "template_line": 84,
-   "path": "/settings",
-   "node": "set/watch/settings",
-   "set_line": 54
-  },
-  {
-   "line": 30,
-   "template_line": 87,
-   "path": "/planned",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 31,
-   "template_line": 92,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 32,
-   "template_line": 93,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 33,
-   "template_line": 95,
-   "path": "/governor",
-   "node": "set/watch/governor",
-   "set_line": 51
-  },
-  {
-   "line": 34,
-   "template_line": 96,
-   "path": "/governor",
-   "node": "set/watch/governor",
-   "set_line": 51
-  },
-  {
-   "line": 35,
-   "template_line": 97,
-   "path": "/governor",
-   "node": "set/watch/governor",
-   "set_line": 51
-  },
-  {
-   "line": 36,
-   "template_line": 98,
-   "path": "/governor",
-   "node": "set/watch/governor",
-   "set_line": 51
-  },
-  {
-   "line": 37,
-   "template_line": 99,
-   "path": "/governor",
-   "node": "set/watch/governor",
-   "set_line": 51
-  },
-  {
-   "line": 38,
-   "template_line": 102,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 39,
-   "template_line": 103,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 40,
-   "template_line": 104,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 41,
-   "template_line": 105,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 42,
-   "template_line": 106,
-   "path": "/resilience",
-   "node": "set/watch/resilience",
-   "set_line": 47
-  },
-  {
-   "line": 43,
-   "template_line": 109,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 44,
-   "template_line": 110,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 45,
-   "template_line": 111,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 46,
-   "template_line": 112,
-   "path": "/class",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 47,
-   "template_line": 113,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 48,
-   "template_line": 114,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 49,
-   "template_line": 118,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 50,
-   "template_line": 119,
-   "path": "/staged",
-   "node": "set/watch/stages",
-   "set_line": 12
-  },
-  {
-   "line": 51,
-   "template_line": 121,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 52,
-   "template_line": 122,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  },
-  {
-   "line": 53,
-   "template_line": 123,
-   "path": "/",
-   "node": "set/watch",
-   "set_line": 7
-  }
- ]
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zosd_fleet_watch.prog.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/report"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 2,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/source"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 3,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/set"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        },
+        {
+          "line": 4,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 3}
+          ]
+        },
+        {
+          "lines": [5, 8],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [9, 10],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [11, 14],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 4}
+          ]
+        },
+        {
+          "line": 15,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 4}
+          ]
+        },
+        {
+          "line": 16,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 8}
+          ]
+        },
+        {
+          "line": 17,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/setting/budget.glass", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/setting/budget.glass", "selector": "/screen"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [18, 19],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 9}
+          ]
+        },
+        {
+          "line": 20,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 11}
+          ]
+        },
+        {
+          "line": 21,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 12}
+          ]
+        },
+        {
+          "line": 22,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 23,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/setting/budget.glass", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/setting/budget.glass", "selector": "/field"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/setting/budget.glass", "selector": "/screen"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 24,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 13}
+          ]
+        },
+        {
+          "line": 25,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 14}
+          ]
+        },
+        {
+          "lines": [26, 28],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 15}
+          ]
+        },
+        {
+          "line": 29,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "line": 30,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 5}
+          ]
+        },
+        {
+          "lines": [31, 32],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 18}
+          ]
+        },
+        {
+          "line": 33,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/job-tail.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "line": 34,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 6}
+          ]
+        },
+        {
+          "line": 35,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/job-tail.tpl", "anchor": "<partial>", "offset": 0},
+            {"recipe": "recipes/l3-doctor/job-tail.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "lines": [36, 37],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/stages", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-job/template.tpl", "anchor": "<partial>", "offset": 7}
+          ]
+        },
+        {
+          "line": 38,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/job-tail.tpl", "anchor": "<partial>", "offset": 0},
+            {"recipe": "recipes/l3-doctor/job-tail.tpl", "anchor": "<partial>", "offset": 2}
+          ]
+        }
+      ]
+    }
+  ]
 }

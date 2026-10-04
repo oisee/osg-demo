@@ -44,6 +44,7 @@ CLASS zcl_osd_fleet_watch_state IMPLEMENTATION.
       RETURN.
     ENDIF.
     out->write( |Watch set, run { lv_run }| ).
+    out->write( |Doctor: { zcl_osd_fleet_watch=>daemon_status( ) }| ).
     SELECT SINGLE * FROM zosd_l3_run INTO ls_lock
       WHERE set_name = zcl_osd_fleet_watch=>c_set
         AND check_date = zcl_osd_fleet_night_run=>c_date.

@@ -1,0 +1,39 @@
+{
+  "format": "osd-trace/1",
+  "outputs": [
+    {
+      "file": "zl3_watch_doc.prog.abap",
+      "lines": [
+        {
+          "line": 1,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/doctor_report"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/report.tpl", "anchor": "<partial>", "offset": 0}
+          ]
+        },
+        {
+          "lines": [2, 3],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/report.tpl", "anchor": "<partial>", "offset": 1}
+          ]
+        },
+        {
+          "lines": [4, 5],
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/class"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-doctor/report.tpl", "anchor": "<partial>", "offset": 3}
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -30,24 +30,9 @@ START-OF-SELECTION.
     iv_pile = p_pile
     iv_bind = lv_bind ).
   WRITE: / ls_rule-rule, ls_rule-status, ls_rule-alerts.
-  IF ls_rule-status = 'GLASS' OR ls_rule-status = 'HELD'.
-    " a human hold is a completed job, never an aborted retry
-    COMMIT WORK.
-    RETURN.
-  ENDIF.
-  IF ls_rule-status = 'KILLED' OR ls_rule-status = 'FUSED'.
-    " the pile row says so; it is committed and the job ends without abort
-    COMMIT WORK.
-    RETURN.
-  ENDIF.
+  COMMIT WORK.
   IF ls_rule-status = 'DONE'.
-    " the pile's DONE is committed first, so the gate sees it
-    COMMIT WORK.
-    zcl_osd_fleet_watch=>advance( iv_run = p_run
-      iv_date = p_date
-      iv_stage = ls_rule-stage_no
+    zcl_osd_fleet_watch=>advance( iv_run = p_run iv_date = p_date iv_stage = ls_rule-stage_no
       iv_bind = lv_bind ).
   ENDIF.
-  IF ls_rule-status <> 'DONE'.
-    MESSAGE 'The rule did not run to the end; see the list' TYPE 'E'.
-  ENDIF.
+  zcl_osd_fleet_watch=>pile_done( iv_run = p_run iv_pile = p_pile ).

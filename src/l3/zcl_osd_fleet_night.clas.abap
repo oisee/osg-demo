@@ -104,9 +104,13 @@ CLASS zcl_osd_fleet_night DEFINITION PUBLIC FINAL CREATE PUBLIC.
     " this user, or initial when the set is not scheduled
     CLASS-METHODS scheduled
       RETURNING VALUE(rv_jobcount) TYPE tbtcjob-jobcount.
-    " deletes the waiting instance of the driver, which ends the chain
+    TYPES: BEGIN OF ty_unschedule,
+             deleted TYPE i,
+             refused TYPE i,
+           END OF ty_unschedule.
+    " deletes waiting instances; a refusal is distinct from no matching job
     CLASS-METHODS unschedule
-      RETURNING VALUE(rv_deleted) TYPE i.
+      RETURNING VALUE(rs_deleted) TYPE ty_unschedule.
   PRIVATE SECTION.
     CLASS-METHODS write
       IMPORTING iv_date TYPE d
@@ -152,6 +156,9 @@ CLASS zcl_osd_fleet_night DEFINITION PUBLIC FINAL CREATE PUBLIC.
     " puts the rows of zosd_fleet_ship back after a replay: the rows kept before it
     CLASS-METHODS restore_1
       IMPORTING it_keep TYPE zif_l3_night_ships=>tt_rows.
+    " persists the pile's mutable execution fields under this set and key
+    CLASS-METHODS save_pile
+      IMPORTING is_pile TYPE zosd_l3_pile.
     CLASS-METHODS submit
       IMPORTING iv_date TYPE d
                 iv_run TYPE csequence
@@ -251,7 +258,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
           ENDIF.
           GET TIME STAMP FIELD lv_stamp.
           UPDATE zosd_l3_stage SET status = 'OPEN' opened = lv_stamp
-            WHERE run_id = rs_result-run_id
+            WHERE set_name = c_set AND run_id = rs_result-run_id
               AND stage_no = ls_stage-stage_no
               AND status = 'WAITING'.
           lt_piles = plan( iv_run = rs_result-run_id
@@ -318,7 +325,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
             ENDIF.
             GET TIME STAMP FIELD lv_stamp.
             UPDATE zosd_l3_stage SET status = ls_stage-status ended = lv_stamp
-              WHERE run_id = rs_result-run_id
+              WHERE set_name = c_set AND run_id = rs_result-run_id
                 AND stage_no = ls_stage-stage_no.
           ENDIF.
           APPEND ls_stage TO rs_result-stages.
@@ -462,14 +469,14 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     ENDIF.
     GET TIME STAMP FIELD lv_stamp.
     UPDATE zosd_l3_stage SET status = 'DONE' ended = lv_stamp
-      WHERE run_id = iv_run
+      WHERE set_name = c_set AND run_id = iv_run
         AND stage_no = iv_stage
         AND status = 'OPEN'.
     lt_rules = rules( ).
     lv_stage = iv_stage + 1.
     WHILE lv_stage <= c_stages.
       UPDATE zosd_l3_stage SET status = 'OPEN' opened = lv_stamp
-        WHERE run_id = iv_run
+        WHERE set_name = c_set AND run_id = iv_run
           AND stage_no = lv_stage
           AND status = 'WAITING'.
       IF sy-dbcnt <> 1.
@@ -493,7 +500,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         RETURN.
       ENDIF.
       UPDATE zosd_l3_stage SET status = 'DONE' ended = lv_stamp
-        WHERE run_id = iv_run
+        WHERE set_name = c_set AND run_id = iv_run
           AND stage_no = lv_stage.
       lv_stage = lv_stage + 1.
     ENDWHILE.
@@ -581,6 +588,14 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     INSERT zosd_fleet_ship FROM TABLE it_keep.
   ENDMETHOD.
 
+  METHOD save_pile.
+    UPDATE zosd_l3_pile SET status = is_pile-status alerts = is_pile-alerts
+      started = is_pile-started ended = is_pile-ended
+      job_name = is_pile-job_name job_count = is_pile-job_count
+      WHERE set_name = c_set AND run_id = is_pile-run_id
+        AND rule_name = is_pile-rule_name AND pile_no = is_pile-pile_no.
+  ENDMETHOD.
+
   METHOD rules.
     DATA ls_rule TYPE ty_rule.
     ls_rule-rule = c_rule_1.
@@ -604,6 +619,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD run_rule.
+    DATA lv_run_status TYPE zosd_l3_run-status.
     " a pile of one rule: its plan row RUNNING now, DONE or FAILED at the end;
     " a filter rule's keys go to its worklist, a check rule's alerts to the log
     DATA lt_alerts TYPE string_table.
@@ -614,7 +630,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     DATA lt_keys_1 TYPE zcl_osd_fleet_l3_busy=>tt_range.
     DATA ls_key_1 LIKE LINE OF lt_keys_1.
     rs_rule-rule = iv_rule.
-    SELECT SINGLE * FROM zosd_l3_pile INTO ls_pile
+    SELECT SINGLE FOR UPDATE * FROM zosd_l3_pile INTO ls_pile
       WHERE set_name = c_set
         AND run_id = iv_run
         AND rule_name = iv_rule
@@ -624,9 +640,22 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
       RETURN.
     ENDIF.
     rs_rule-piles = 1.
+    " a duplicate or late job never works a pile already claimed or finished
+    IF ls_pile-status <> 'PLANNED'.
+      rs_rule-status = 'NOT-PLANNED'.
+      RETURN.
+    ENDIF.
+    " the lock row names the latest run of this set and date
+    SELECT SINGLE status FROM zosd_l3_run INTO lv_run_status
+      WHERE set_name = c_set AND check_date = iv_date
+        AND run_id = iv_run AND status = 'HELD'.
+    IF sy-subrc <> 0.
+      rs_rule-status = 'STALE-RUN'.
+      RETURN.
+    ENDIF.
     ls_pile-status = 'RUNNING'.
     GET TIME STAMP FIELD ls_pile-started.
-    UPDATE zosd_l3_pile FROM ls_pile.
+    save_pile( ls_pile ).
     CASE iv_rule.
       WHEN c_rule_1.
         rs_rule-model_hash = c_hash_1.
@@ -685,7 +714,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
     ELSE.
       ls_pile-status = 'FAILED'.
     ENDIF.
-    UPDATE zosd_l3_pile FROM ls_pile.
+    save_pile( ls_pile ).
   ENDMETHOD.
 
   METHOD write.
@@ -805,12 +834,12 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         OTHERS = 1.
     IF sy-subrc <> 0.
       cs_pile-status = 'FAILED'.
-      UPDATE zosd_l3_pile FROM cs_pile.
+      save_pile( cs_pile ).
       RETURN.
     ENDIF.
     cs_pile-job_name = lv_jobname.
     cs_pile-job_count = lv_jobcount.
-    UPDATE zosd_l3_pile FROM cs_pile.
+    save_pile( cs_pile ).
     SUBMIT zosd_fleet_night
       WITH p_rule = cs_pile-rule_name
       WITH p_date = iv_date
@@ -830,7 +859,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         OTHERS = 1.
     IF sy-subrc <> 0 OR lv_released <> 'X'.
       cs_pile-status = 'FAILED'.
-      UPDATE zosd_l3_pile FROM cs_pile.
+      save_pile( cs_pile ).
     ENDIF.
   ENDMETHOD.
 
@@ -936,8 +965,13 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
       TABLES
         jobselect_joblist = lt_jobs
       EXCEPTIONS
-        OTHERS = 1.
+        no_jobs_found = 1
+        OTHERS = 2.
+    IF sy-subrc = 1.
+      RETURN.
+    ENDIF.
     IF sy-subrc <> 0.
+      rs_deleted-refused = rs_deleted-refused + 1.
       RETURN.
     ENDIF.
     LOOP AT lt_jobs INTO ls_job WHERE status = 'S'.
@@ -948,7 +982,9 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         EXCEPTIONS
           OTHERS = 1.
       IF sy-subrc = 0.
-        rv_deleted = rv_deleted + 1.
+        rs_deleted-deleted = rs_deleted-deleted + 1.
+      ELSE.
+        rs_deleted-refused = rs_deleted-refused + 1.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -1032,7 +1068,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
           " one UPDATE on the row as read, and on the job that was checked
           GET TIME STAMP FIELD ls_pile-ended.
           UPDATE zosd_l3_pile SET status = 'FAILED' ended = ls_pile-ended
-            WHERE run_id = ls_pile-run_id
+            WHERE set_name = c_set AND run_id = ls_pile-run_id
               AND rule_name = ls_pile-rule_name
               AND pile_no = ls_pile-pile_no
               AND status = ls_pile-status
@@ -1078,7 +1114,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
       IF ls_gate-status = 'WAITING' AND lv_closed = abap_true.
         " after a PARTIAL stage: never opened, and now never opens
         UPDATE zosd_l3_stage SET status = 'NOT-RUN' ended = lv_stamp
-          WHERE run_id = is_result-run_id
+          WHERE set_name = c_set AND run_id = is_result-run_id
             AND stage_no = ls_gate-stage_no
             AND status = 'WAITING'.
         ls_stage-status = 'NOT-RUN'.
@@ -1093,7 +1129,7 @@ CLASS zcl_osd_fleet_night IMPLEMENTATION.
         lv_final = abap_false.
       ELSEIF lv_lost = abap_true.
         UPDATE zosd_l3_stage SET status = 'PARTIAL' ended = lv_stamp
-          WHERE run_id = is_result-run_id
+          WHERE set_name = c_set AND run_id = is_result-run_id
             AND stage_no = ls_gate-stage_no.
         ls_stage-status = 'PARTIAL'.
         lv_closed = abap_true.
