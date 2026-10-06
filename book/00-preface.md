@@ -22,22 +22,22 @@ statuses.
 
 ## This edition
 
-The book is written for the open-steamgate VS Code extension **0.6.1650 or
-later**; its workbench pictures were captured with the released **0.6.1650**
-extension.
+The book is written for the open-steamgate VS Code extension **0.7.1688 or
+later** (book v0.6). Its workbench pictures still show the previous 0.6
+release; updated pictures are pending verification of the stable release VSIX.
 
 Where a chapter works in an
 open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the
-checks of appendix A), use the tag **`vscode-v0.6.1650` or later**. Where the
+checks of appendix A), use the tag **`vscode-stable-v0.7.1688` or later**. Where the
 extension does not yet do what a step needs, the step says so.
 
 ## Before you start
 
 1. Install the **open-steamgate** extension (`oisee.open-steamgate`,
-   pre-release): search for it in the Extensions view, or take the `.vsix`
+   stable channel): search for it in the Extensions view, or take the `.vsix`
    from the latest
-   [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
-   (0.6.1650 or later) and
+   [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases)
+   (0.7.1688 or later) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
