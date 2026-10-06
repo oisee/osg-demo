@@ -43,7 +43,7 @@ METHODS invoke
 
 ([zif_pia_00_tool](https://github.com/oisee/pia/blob/v0.1.0/src/00/zif_pia_00_tool.intf.abap);
 the permission is `READ`, `WRITE` or `EXECUTE`.) The arguments arrive as the
-JSON the model wrote; the result goes back as text with an `ok` flag. The
+JSON the model wrote; the tool's output goes back to the model as text. The
 model in v0.1.0 is z.ai's `glm-5.3`, reached over HTTPS from ABAP.
 
 ## Green, red, green
@@ -61,12 +61,13 @@ First, the tests: one tool call, green.
 
 Then a deliberate break: "change add to a - b and activate it". The model
 reads the class, writes it back with the change, activates it, and adds on
-its own that the existing test will now fail.
+its own that the existing test will likely fail now.
 
 ![PIA changes add to a - b: read_object, write_source, activate](img/pia-2-break.png)
 
-It does. `expected 5, actual -1`; the SAP test result prints the negative
-number as `1-`, the ABAP way, and the model explains it.
+It does: expected 5, actual −1. (SAP's test result writes the negative
+number as `1-`, the ABAP way; PIA's porting notes record it, and the
+Russian run's picture shows the model explaining it.)
 
 ![The tests are red: LTCL_ADD→ADD_2_3 expected 5, got -1](img/pia-3-red.png)
 
@@ -108,13 +109,13 @@ and the model, see one format.
 
 The terminal is an ABAP Push Channel: a WebSocket served by ABAP. The
 natural design runs the agent's turn right in the push channel's handler.
-On SAP that cannot work: inside an APC handler, SAP refuses ABAP Unit and
-source writes, two of PIA's four tools. So on SAP each turn runs as a
+On A4H that did not work: PIA's porting found that inside an APC handler SAP
+refuses ABAP Unit and source writes, two of PIA's four tools. So on SAP each turn runs as a
 background job, `PIA_<session>`, and the job streams its tool events back
 to the terminal over ABAP Messaging Channels (AMC). PIA's notes measure about
 ten seconds for a simple turn, with the first tool event after 4.5 to 5.5
 seconds ([porting notes](https://github.com/oisee/pia/blob/v0.1.0/osg-probe/a4h/README.md)).
-open-steamgate has no such limit; there the turn can run in place
+On open-steamgate PIA runs the turn inside the push channel itself
 (`PIA_TURN_MODE=inline`).
 
 ## Stories from PIA
@@ -137,11 +138,11 @@ These are PIA's own findings, from its reports and porting notes.
   relied on the opposite and produced fifteen stray `{`. Explicit
   assignments and `CLEAR` fixed it. This is ABAP's rule, and a JavaScript
   reader trips on it easily.
-- **`>`.** The model sends source code as JSON, and JSON may escape `>`
-  as `>`. Until the decoder learned `\u`, `=>` arrived in the class as
-  `=u003e`, and the broken class still activated. The open-steamgate side
-  of that ("a broken source activates silently") went to its authors as a
-  finding.
+- **`\u003e`.** The model sends source code as JSON, and JSON may escape `>`
+  as `\u003e`. Until the decoder learned `\u`, `=>` arrived in the class as
+  `=u003e`, and the broken class still activated. PIA's report lists the
+  open-steamgate side of it ("a broken source activates silently") among
+  its findings for open-steamgate.
 - **What open-steamgate let through.** Porting to SAP found code that
   open-steamgate had accepted and SAP did not:
   - `DATA x TYPE i VALUE <variable>`;
@@ -150,9 +151,10 @@ These are PIA's own findings, from its reports and porting notes.
 
   On SAP none of them compiles.
 - **PIA edits PIA.** Given the task "add a method VERSION to
-  ZCL_PIA_00_JSON_UTIL", PIA read one of its own classes, added the method,
-  wrote and activated it. After a restart the method answered
-  `v0.2-selfhosted`
+  ZCL_PIA_00_JSON_UTIL", PIA read one of its own classes, added the method
+  and wrote it back. Its own `activate` reported a failure that was not
+  one, so the class was activated from outside; after a restart the method
+  answered `v0.2-selfhosted`
   ([report](https://github.com/oisee/pia/blob/v0.1.0/reports/2026-10-06-SELF-HOSTING.md)).
   An ABAP agent, written in ABAP, changed its own ABAP.
 
@@ -161,10 +163,9 @@ These are PIA's own findings, from its reports and porting notes.
 Not yet with the open-steamgate this book is written for. PIA's
 open-steamgate backend needs open-steamgate's development API for agents
 (tracked activation, tests on a published generation). PIA's README calls
-it a preview until that API is in an open-steamgate release; PIA 0.1.1 is to
-follow it. To replay this chapter without a model key, PIA 0.1.1 is to bring
-a recorded transcript of the model's answers. The tools would still run for
-real against the same demo class.
+open-steamgate support a preview until that API is merged, with PIA 0.1.1 to
+follow. When both are released, this section will take you through the same
+four tasks in your own sandbox.
 
 <!-- hands-on: after the OSG release with the agent dev API and PIA 0.1.1 -->
 
