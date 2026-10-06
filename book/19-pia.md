@@ -7,11 +7,12 @@ written in ABAP. It runs inside the system it works on. You type a task into
 a terminal in your browser; PIA reads the class, writes the change, activates
 it and runs its ABAP Unit tests, on that same system and as you.
 
-Everything here is PIA's own, from its first release,
-[v0.1.0](https://github.com/oisee/pia/releases/tag/v0.1.0). The pictures were
-taken on SAP's ABAP Platform Trial (A4H, NetWeaver 7.58), not on
-open-steamgate; this chapter did not repeat the run. The last section says
-what it takes to run the same thing in your own sandbox.
+Everything here is PIA's own, from its releases
+[v0.1.0](https://github.com/oisee/pia/releases/tag/v0.1.0) and
+[v0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1). The pictures are
+PIA 0.1.1: five on SAP's ABAP Platform Trial (A4H, NetWeaver 7.58), two on
+open-steamgate; this chapter did not repeat the runs. The last section says what it takes to run the same thing in your
+own sandbox.
 
 ## A turn
 
@@ -49,36 +50,41 @@ model in v0.1.0 is z.ai's `glm-5.3`, reached over HTTPS from ABAP.
 ## Green, red, green
 
 PIA's release test drives the terminal with Playwright
-([tui-e2e.mjs](https://github.com/oisee/pia/blob/v0.1.0/osg-probe/ui/tui-e2e.mjs))
-through four tasks on a small class, `ZCL_PIA_DEMO4`, whose method `add`
+([tui-e2e.mjs](https://github.com/oisee/pia/blob/v0.1.1/osg-probe/ui/tui-e2e.mjs))
+through five tasks on a small class, `ZCL_PIA_DEMO4`, whose method `add`
 returns `a + b` and whose one test expects `add( 2, 3 )` to be 5. Each line
 that starts with `>` is a task; the indented `>` and `<` lines under it are the
-tool calls and their results, as they happen.
+tool calls and their results, as they happen. The pictures are PIA 0.1.1 on
+A4H ([screenshots/a4h-tui-011](https://github.com/oisee/pia/tree/68431f8/screenshots/a4h-tui-011)).
 
 First, the tests: one tool call, green.
 
-![PIA runs the tests of ZCL_PIA_DEMO4: one call of run_tests, all green](img/pia-1-green.png)
+![PIA runs the tests of ZCL_PIA_DEMO4: one call of run_tests, green](img/pia-1-green.png)
 
 Then a deliberate break: "change add to a - b and activate it". The model
 reads the class, writes it back with the change, activates it, and adds on
-its own that the existing test will likely fail now.
+its own that the test will now fail. (It also gets the test's numbers wrong
+in passing: the test expects 5, not 4. The tests in the next turn are what
+count.)
 
 ![PIA changes add to a - b: read_object, write_source, activate](img/pia-2-break.png)
 
-It does: expected 5, actual −1. (SAP's test result writes the negative
-number as `1-`, the ABAP way; PIA's porting notes record it, and the
-Russian run's picture shows the model explaining it.)
+The tests are red: expected 5, actual −1. SAP's test result writes the
+negative number as `1-`, with the sign at the end, the ABAP way, and the
+model reads it back as −1.
 
-![The tests are red: LTCL_ADD→ADD_2_3 expected 5, got -1](img/pia-3-red.png)
+![The tests are red: LTCL_ADD->ADD_2_3 expected 5, got 1-, that is −1](img/pia-3-red.png)
 
-Last, the fix in one task: "change add back to a + b, activate and run the
-tests". Three tool calls, and the tests are green again.
+The fix: "change add back to a + b and activate it". Two tool calls.
 
-![PIA writes a + b back, activates and runs the tests: green](img/pia-4-fix.png)
+![PIA writes a + b back and activates it](img/pia-4-fix.png)
+
+And the fifth task runs the tests again: green.
+
+![The tests are green again](img/pia-5-green.png)
 
 The same run passes in English, Danish and Russian: the model answers in the
-language of the task. (The empty box after RED and GREEN is an emoji the
-terminal's font does not have.)
+language of the task. PIA's release reports all fifteen steps passing on A4H.
 
 ## One agent, two systems
 
@@ -158,18 +164,43 @@ These are PIA's own findings, from its reports and porting notes.
   ([report](https://github.com/oisee/pia/blob/v0.1.0/reports/2026-10-06-SELF-HOSTING.md)).
   An ABAP agent, written in ABAP, changed its own ABAP.
 
+## The same run on open-steamgate
+
+[PIA 0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1) runs the same
+five turns on open-steamgate. These pictures were taken there, replaying the
+recorded model answers described below
+([screenshots/osg-tui](https://github.com/oisee/pia/tree/68431f8/screenshots/osg-tui)).
+One difference shows in the agent's answers: on open-steamgate an activation
+is published at the end of the turn, so the model says "publish pending, live
+in the next step", and the tests run in the next turn.
+
+![On open-steamgate: red after the break, then add goes back to a + b and is activated](img/pia-osg-4-fix.png)
+
+![The fifth turn: the tests are green again](img/pia-osg-5-green.png)
+
 ## Running it on your own open-steamgate
 
-Not yet with the open-steamgate this book is written for. PIA's
-open-steamgate backend needs open-steamgate's development API for agents
-(tracked activation, tests on a published generation). PIA's README calls
-open-steamgate support a preview until that API is merged, with PIA 0.1.1 to
-follow. When both are released, this section will take you through the same
-four tasks in your own sandbox.
+PIA 0.1.1 can replay the chapter without a model key. `PIA_LLM=record:<file>`
+in `pia-settings.env` (settings without secrets, next to `pia.env`) writes
+every model answer to a file; `PIA_LLM=replay:<file>` answers from it, in
+order, with no key and no network. The tools still run for real. The release
+carries `pia-chapter.rec`: the five-turn scenario in English, Danish and
+Russian, recorded on open-steamgate. Delete `pia-chapter.rec.pos` to start
+over ([release notes](https://github.com/oisee/pia/releases/tag/v0.1.1)).
 
-<!-- hands-on: after the OSG release with the agent dev API and PIA 0.1.1 -->
+It does not run yet on the open-steamgate release this book is written for.
+PIA's release notes name what the terminal still needs on open-steamgate and
+what is not in a release yet:
+- AMC channel extensions;
+- publishing at the end of an APC step;
+- a runtime recycle that must not drop the connection in the middle of a
+  turn.
 
-On SAP, PIA 0.1.0 installs today: an abapGit zip, two certificates for the
-model's host, a key file, and the terminal at `/sap/bc/zpia_tui/`. The
-[README](https://github.com/oisee/pia/blob/v0.1.0/README.md) has the four
-steps.
+When they are in an open-steamgate release, this section will take you
+through the five turns in your own sandbox.
+
+<!-- hands-on: after the OSG release with AMC channel extensions, publish at the end of an APC step and the quiet-recycle fix -->
+
+On SAP, PIA installs today: an abapGit zip, two certificates for the model's
+host, a key file, and the terminal at `/sap/bc/zpia_tui/`. The
+[README](https://github.com/oisee/pia/blob/v0.1.1/README.md) has the steps.
