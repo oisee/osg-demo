@@ -111,7 +111,7 @@
 
 `http/fleet.http` - обычный файл `.http`. В REST Client или httpYac задайте
 `@baseUrl` - адрес, на котором работает система: его называет вывод
-**osd system** в строке `serving generation … on http://127.0.0.1:<port>`.
+**OSD: System log** в строке `serving generation … on http://127.0.0.1:<port>`.
 Строки `# @osd.id` эти клиенты пропускают. Они дают каждому запросу имя
 кейса для регрессионных инструментов open-steamgate, которые читают тот же
 файл; превращать в такие файлы кейсы, сохраненные в SAP Gateway Client, -

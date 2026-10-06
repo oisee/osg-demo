@@ -140,7 +140,7 @@ SQLite и следит за обработчиком (`osd.jobs.worker=auto`); �
 
 Щелкните **OSD jobs**, затем **Job worker** в **What is running?**, чтобы
 открыть читаемую сводку заданий. У каждого задания стопки своя строка;
-**Show raw job log** открывает JSON обработчика.
+**Show raw job log** переключает вывод **OSD: Jobs** на JSON обработчика.
 
 ![OSD jobs: читаемая сводка завершённых заданий стопок ночного набора](../img/vscode-night-jobs.png)
 

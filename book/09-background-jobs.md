@@ -16,8 +16,10 @@ With the extension, **osd: Start** also starts the worker on the default
 default; `off` disables it. The **OSD jobs** status bar shows the worker's
 state. Click it, then choose **Job worker** in **What is running?** to see
 a readable summary: one line per job, newest first, with state, start time,
-duration and step/output counts; failed runs include a reason. **Show raw
-job log** in that picker or the command palette opens the worker JSON.
+duration and step/output counts; failed runs include a reason. The summary is in the
+**OSD: Jobs** output; **Show raw job log** in that picker or the command
+palette switches the same channel to the worker JSON, and **OSD: Show jobs**
+switches it back.
 It runs released jobs without a terminal.
 The steps below use a checkout and a manually driven worker to show the
 queue before and after each step.

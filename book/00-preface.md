@@ -60,7 +60,10 @@ The extension uses ADT's keys: **F9** runs a class (its classrun), **F8** runs
 a report or previews a table or CDS view, **Ctrl+F2** checks, **Ctrl+F3**
 activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you
 are in, **Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys
-only while execution is paused at a line.
+only while execution is paused at a line. F8, F9 and the editor's ▷ never run
+ABAP Unit; tests run with Ctrl+Shift+F10, the beaker button in the editor's
+title bar, or Testing. The title bar also has a check mark for Check and a
+match for Activate.
 
 ## How the book is organised
 
