@@ -7,8 +7,9 @@ If OSD is stopped, the command offers **Start system**.
 ![Open sample: bundled notebooks and the workspace hello class](img/vscode-open-sample.png)
 
 The status bar separates **OSD running/stopped**, **OSD generation <id> ·
-SQLite · warm**, and **OSD jobs: …**. Click the system or jobs item to open
-**What is running?**, with system, worker, sample and overview actions.
+SQLite · warm**, and **OSD jobs: …**. Click the system item to open
+**What is running?**, with system, worker, sample and overview actions; the
+jobs item opens the **OSD Jobs** view.
 
 1. Open [ZOSD_DEMO_HELLO](../src/zosd_demo_hello.clas.abap), place the cursor in the class and press **F9**. Expected: the **OSD: Console** output shows `Hello from ZOSD_DEMO_HELLO.` If F9 toggles a breakpoint instead, the debugger is stopped at a line: remove the ABAP breakpoints (**Run > Remove All Breakpoints**), stop the session (**Run > Stop Debugging**, Shift+F5) and press F9 again; if it still toggles, check that the setting `osd.keymap` is `abap`.
 
