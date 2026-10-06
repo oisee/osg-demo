@@ -23,8 +23,8 @@ statuses.
 ## This edition
 
 The book is written for the open-steamgate VS Code extension **0.7.1688 or
-later** (book v0.6). Its workbench pictures still show the previous 0.6
-release; updated pictures are pending verification of the stable release VSIX.
+later** (book v0.6). Its workbench pictures were retaken with the verified
+VSIX from `vscode-stable-v0.7.1688`.
 
 Where a chapter works in an
 open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the

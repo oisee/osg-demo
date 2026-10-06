@@ -83,7 +83,7 @@ await win.waitForTimeout(3000);
 const palette = async (text) => {
   await win.keyboard.press("F1");
   await win.waitForTimeout(400);
-  await win.keyboard.type(text, {delay: 15});
+  await win.locator('.quick-input-box input').fill(`>${text}`);
   await win.waitForTimeout(800);
   await win.keyboard.press("Enter");
 };
@@ -97,10 +97,22 @@ const open = async (file) => {
   await win.waitForTimeout(1500);
 };
 const shot = async (name, {allowDirty = false} = {}) => {
+  // Tree refreshes can reopen Layers or finished jobs between commands.
+  // Their children label source paths and the ABAP user: collapse them via
+  // the actual twistie immediately before each capture.
+  for (const text of ["Layers", "finished"]) {
+    const row = win.locator('.sidebar .monaco-list-row').filter({hasText: new RegExp(`^${text}$`)});
+    if (await row.count() && await row.getAttribute("aria-expanded") === "true") {
+      await row.locator('.monaco-tl-twistie').click();
+    }
+  }
   await win.mouse.move(900, 470);
   await win.waitForTimeout(500);
   if (!allowDirty && await win.locator(".tabs-container .tab.dirty").count()) {
     throw new Error("an editor tab is dirty before capture");
+  }
+  if (await win.locator(".notifications-toasts .notification-toast:visible").count()) {
+    throw new Error("a notification toast is visible before capture");
   }
   const status = await win.locator(".statusbar").innerText();
   if (!/OSD generation [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
@@ -232,9 +244,10 @@ await step("classrun", async () => {
     await palette("View: Focus Active Editor Group");
     await win.waitForTimeout(1000);
   }
-  await see("Check title button", win.locator('.editor-actions [aria-label="osd: Check (Ctrl+F2)"]'));
-  await see("Activate title button", win.locator('.editor-actions [aria-label="osd: Activate (Ctrl+F3)"]'));
+  await see("Check title button", win.locator('.part.editor [aria-label^="osd: Check"]'));
+  await see("Activate title button", win.locator('.part.editor [aria-label^="osd: Activate"]'));
   await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
+  await win.locator('.panel input[placeholder^="Filter"]').fill("!not activated yet");
   await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
@@ -246,6 +259,7 @@ await step("open sample", async () => {
   await see("bundled notebook", win.locator(".quick-input-list").getByText("Bundled notebook", {exact: true}));
   await shot("vscode-open-sample");
   await win.keyboard.press("Escape");
+  await win.locator('.panel input[placeholder^="Filter"]').fill("");
 });
 await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
@@ -331,9 +345,9 @@ const runClass = async (file, text, maximize = false) => {
 const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
   // Since 0.7 the status item focuses the Jobs view, not What is running?.
-  await see("Jobs view", win.locator('[id="osdJobs"]'));
+  await see("Jobs view", win.getByText("OSD Jobs", {exact: true}));
   // Keep the book's summary captures in the named Output channel.
-  await palette("OSD: What is running?");
+  await win.locator(".statusbar").getByText("OSD running", {exact: true}).click();
   await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
   await win.locator(".quick-input-list .monaco-list-row").filter({hasText: "Job worker"}).click();
   // Output normally follows the last row; this summary puts newest runs first.
@@ -343,6 +357,14 @@ const showJobs = async () => {
   await win.keyboard.press("Control+Home");
   await win.keyboard.press("Escape");
   await seeOutput(/OSD jobs — latest 200 runs, newest first/);
+  // The System status action refreshes the tree. Hide source paths only
+  // after that refresh, and keep job rows (which include an ABAP user)
+  // collapsed while retaining the visible OSD Jobs header and state group.
+  const layers = win.locator('.sidebar .monaco-list-row').filter({hasText: /^Layers$/});
+  if (await layers.getAttribute("aria-expanded") === "true") await layers.locator('.monaco-tl-twistie').click();
+  const finished = win.locator('.sidebar .monaco-list-row').filter({hasText: /^finished$/});
+  if (await finished.count() && await finished.getAttribute("aria-expanded") === "true") await finished.locator('.monaco-tl-twistie').click();
+  await palette("Output: Focus on Output View");
 };
 await step("fleet jobs", async () => {
   await closePanels();
@@ -463,6 +485,8 @@ await step("services", async () => {
   await palette("View: Show OSD");
   await win.keyboard.press("Escape");
   await win.waitForTimeout(1500);
+  const jobsHeader = win.locator('.sidebar .pane-header').filter({hasText: /^OSD Jobs$/});
+  if (await jobsHeader.getAttribute("aria-expanded") === "true") await jobsHeader.click();
   // Layers names local folders: closed, so no path shows
   const layers = osdView.locator(".monaco-list-row", {hasText: "Layers"}).first();
   await layers.click();
@@ -470,6 +494,12 @@ await step("services", async () => {
   await expandRow("Services");
   await expandRow("OData (");
   await expandRow("ZOSD_FLEET_SRV");
+  // The separate Jobs pane shortens the virtualized System tree. Scroll
+  // the selected service's children into view before checking its methods.
+  const tree = osdView.locator('.monaco-list[aria-label="System"]');
+  await tree.hover();
+  await win.mouse.wheel(0, 650);
+  await win.waitForTimeout(1000);
   for (const method of [/ShipSet\s*get_entityset/, /VoyageSet\s*get_entityset/, /ShipSet\s*get_entity$/]) {
     await see(`${method} in the System view`, osdView.locator(".monaco-list-row", {hasText: method}));
   }
@@ -479,8 +509,13 @@ await step("services", async () => {
   // the visible details contain the service and model classes, not the links.
   await palette("View: Toggle Output");
   await see("visible output panel", win.locator(".part.panel"));
+  await win.locator(".panel select:visible").selectOption({label: "OSD: System log"});
+  await win.locator('.panel input[placeholder^="Filter"]').fill("warm: primed");
+  await seeOutput(/warm: primed 2084 files/);
   await resizePanel(400);
   await shot("vscode-services");
+  await win.locator('.panel input[placeholder^="Filter"]').fill("");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await resizePanel(576);
   // an entity set's row opens the method that serves it
   await osdView.locator(".monaco-list-row", {hasText: /ShipSet\s*get_entityset/}).first().click();
