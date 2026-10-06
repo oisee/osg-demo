@@ -14,11 +14,12 @@ other backends refuse to schedule jobs.
 With the extension, **osd: Start** also starts the worker on the default
 `osd.database.system=sqlite` file database. `osd.jobs.worker=auto` is the
 default; `off` disables it. The **OSD jobs** status bar shows the worker's
-state. Click it, then choose **Job worker** in **What is running?** to see
+state. Click it to open the **OSD Jobs** view. For the output summary, run
+**OSD: What is running?** and choose **Job worker** to see
 a readable summary: one line per job, newest first, with state, start time,
 duration and step/output counts; failed runs include a reason. The summary is in the
 **OSD: Jobs** output; **Show raw job log** in that picker or the command
-palette switches the same channel to the worker JSON, and **OSD: Show jobs**
+palette switches the same channel to the worker JSON, and **Job worker** in **What is running?**
 switches it back.
 It runs released jobs without a terminal.
 The steps below use a checkout and a manually driven worker to show the

@@ -8,10 +8,10 @@
 //
 // Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.6.1650 --repo
+// - VSIX: a released extension (gh release download vscode-stable-v0.7.1688 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
-// - OSD_HOME: the tag checkout after npm ci, bootstrap, the CI transpiler
-//   build and four osd-link steps, then bootstrap again for warm support
+// - OSD_HOME: the tag checkout after npm ci, npm run transpiler:pin,
+//   and npm run bootstrap for warm support
 //   (Playwright comes from its node_modules);
 // - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
 //   keep TMPDIR short too for debugger sockets.
@@ -210,6 +210,8 @@ await step("start", async () => {
     });
   await see("jobs status", win.locator(".statusbar").getByText(/OSD jobs:/));
   await see("warm generation", win.locator(".statusbar").getByText(/OSD generation [0-9a-f]{7,} · SQLite · warm\b/), 300000);
+  await palette("Output: Focus on Output View");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: System log"});
   await win.waitForTimeout(3000);
 });
 if (failed) {
@@ -230,6 +232,9 @@ await step("classrun", async () => {
     await palette("View: Focus Active Editor Group");
     await win.waitForTimeout(1000);
   }
+  await see("Check title button", win.locator('.editor-actions [aria-label="osd: Check (Ctrl+F2)"]'));
+  await see("Activate title button", win.locator('.editor-actions [aria-label="osd: Activate (Ctrl+F3)"]'));
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
@@ -313,7 +318,7 @@ const outputAutoScroll = async (enabled) => {
 const runClass = async (file, text, maximize = false) => {
   // Each assertion reads this invocation, never a previous state snapshot.
   await palette("Output: Focus on Output View");
-  await win.locator(".panel select:visible").selectOption({label: "osd console"});
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await outputAutoScroll(true);
   await win.locator(".panel .codicon-clear-all:visible").click();
   await open(file);
@@ -325,10 +330,15 @@ const runClass = async (file, text, maximize = false) => {
 };
 const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  // Since 0.7 the status item focuses the Jobs view, not What is running?.
+  await see("Jobs view", win.locator('[id="osdJobs"]'));
+  // Keep the book's summary captures in the named Output channel.
+  await palette("OSD: What is running?");
   await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
   await win.locator(".quick-input-list .monaco-list-row").filter({hasText: "Job worker"}).click();
   // Output normally follows the last row; this summary puts newest runs first.
   await palette("Output: Focus on Output View");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Jobs"});
   await outputAutoScroll(false);
   await win.keyboard.press("Control+Home");
   await win.keyboard.press("Escape");
@@ -396,6 +406,11 @@ await step("debugger", async () => {
   await open("zcl_osd_fleet_report.clas.abap");
   await goto(lineOf(file, "steam_check( ls_ship-steam_pct )."));
   await win.keyboard.press("Control+Shift+B");
+  // Assert and dismiss the one-time first-breakpoint explanation deliberately.
+  const note = win.locator(".notifications-toasts").filter({hasText: "osd debugs without a launch configuration"});
+  await see("first-breakpoint note", note);
+  await note.getByRole("button", {name: "Got it", exact: true}).click();
+  await note.waitFor({state: "hidden"});
   await win.waitForTimeout(1500);
   await palette("osd: Run as ABAP Application with debugger");
   await see("stop on the breakpoint", win.getByText("Paused On Breakpoint"), 120000);

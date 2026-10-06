@@ -134,8 +134,8 @@ Mode P is the same set in background jobs. As in chapter 9, this needs SQLite
 in a file. In VS Code, **osd: Start** uses file SQLite by default and
 supervises the worker (`osd.jobs.worker=auto`); the jobs run without a terminal.
 
-Click **OSD jobs**, then **Job worker** in **What is running?** for the
-readable jobs summary. Each pile job has its own line; **Show raw job log**
+Click **OSD jobs** to open the **OSD Jobs** view. For the readable output
+summary, run **OSD: What is running?** and choose **Job worker**. Each pile job has its own line; **Show raw job log**
 switches the **OSD: Jobs** output to the worker JSON when needed.
 
 ![OSD jobs: a readable summary of completed night-set pile jobs](img/vscode-night-jobs.png)
