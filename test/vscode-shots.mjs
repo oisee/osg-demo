@@ -87,11 +87,20 @@ await win.waitForSelector(".monaco-workbench", {timeout: 120000});
 await win.waitForTimeout(3000);
 
 const palette = async (text) => {
-  await win.keyboard.press("F1");
-  await win.waitForTimeout(400);
-  await win.locator('.quick-input-box input').fill(`>${text}`);
-  await win.waitForTimeout(800);
-  await win.keyboard.press("Enter");
+  const input = win.locator('.quick-input-box input:visible');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await win.keyboard.press("Escape");
+    await win.keyboard.press("Control+Shift+P");
+    try {
+      await input.waitFor({state: "visible", timeout: 3000});
+      await input.fill(`>${text}`);
+      await win.waitForTimeout(800);
+      await win.keyboard.press("Enter");
+      return;
+    } catch (error) {
+      if (attempt === 2) throw new Error(`command palette for ${text}: ${error.message.split("\n")[0]}`);
+    }
+  }
 };
 const open = async (file) => {
   await palette("View: Focus Active Editor Group");
@@ -357,6 +366,9 @@ const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
   // Since 0.7 the status item focuses the Jobs view, not What is running?.
   await see("Jobs view", win.getByText("OSD Jobs", {exact: true}));
+  // Refresh the saved-run tree explicitly; its empty-state polling backs off.
+  await palette("OSD: Refresh jobs");
+  await see("finished saved jobs", win.locator('.sidebar .monaco-list-row').filter({hasText: /^finished$/}));
   // Keep the book's summary captures in the named Output channel.
   await win.locator(".statusbar").getByText("OSD running", {exact: true}).click();
   await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
@@ -387,14 +399,27 @@ await step("fleet jobs", async () => {
   await shot("vscode-fleet-jobs");
 });
 await step("night jobs", async () => {
-  await showJobs();
-  await win.locator(".panel .codicon-clear-all:visible").click();
   await runClass("zcl_osd_fleet_night_jobs.clas.abap", /Night set, mode P, run .*SUBMITTED/);
+  // The caption shows completed pile jobs, so wait for all seven, not just
+  // the first DONE row while other piles are still running.
+  await see("idle night worker", win.locator(".statusbar").getByText("OSD jobs: idle", {exact: true}), 120000);
   await showJobs();
   await seeOutput(/L3_NIGHT_/, 120000);
   await seeOutput(/L3_NIGHT_[^\n]* \| DONE \|/);
   await shot("vscode-night-jobs");
 });
+// Jobs-only retakes stop here even on failure, without publishing partial work.
+if (requestedShots && requestedShots.every(name => ["vscode-fleet-jobs", "vscode-night-jobs"].includes(name))) {
+  await app.close();
+  const missing = requestedShots.filter(name => !readdirSync(join(tmp, "shots")).includes(`${name}.png`));
+  console.log(`vscode-shots: ${failed} step(s) failed`);
+  if (failed || missing.length) process.exit(1);
+  mkdirSync(out, {recursive: true});
+  for (const name of requestedShots) copyFileSync(join(tmp, "shots", `${name}.png`), join(out, `${name}.png`));
+  console.log(`vscode-shots: requested pictures are in ${out}`);
+  process.exit(0);
+}
+
 await step("watch glass", async () => {
   await runClass("zcl_osd_fleet_watch_jobs.clas.abap", /Watch set, mode P, run .*SUBMITTED/);
   // Re-run the read-only state class until the worker reaches the glass.
