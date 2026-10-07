@@ -165,6 +165,107 @@ These are PIA's own findings, from its reports and porting notes.
   ([report](https://github.com/oisee/pia/blob/v0.1.0/reports/2026-10-06-SELF-HOSTING.md)).
   An ABAP agent, written in ABAP, changed its own ABAP.
 
+## The agent fixes itself
+
+PIA's authors then gave it a harder job: find and fix a bug in its own code,
+from nothing but the symptom. The record of every attempt is published:
+the task, each WebSocket frame, the model's answers, and what PIA wrote
+([osg-probe/f1](https://github.com/oisee/pia/tree/d68a778/osg-probe/f1)). This is that record, told in order.
+It ran on open-steamgate's development line, newer than this book's tag.
+
+**The task.** "When the model answers with two tool calls and the source in
+the first call contains a string literal with a single opening brace, for
+example `lv_open = '{'.`, PIA runs only the first call. Its arguments
+arrive with extra text after the JSON and the second call is lost. Find the
+cause in your own code, write an ABAP Unit test that reproduces it and is
+red, then fix the code and show the tests green." No class, no method. After
+each turn the terminal sends only "Continue with the task."
+([task.txt](https://github.com/oisee/pia/blob/d68a778/osg-probe/f1/task.txt)).
+
+**It cannot see itself.** In the first attempt PIA read its own JSON helper
+and got it cut off at 8,000 characters, the limit for a tool's result. It
+refused to rewrite a class it could not read whole: guessing would break it.
+A person raised the limit to 60,000, the first human step.
+
+**A diagnosis in one turn.** In the second attempt PIA read its LLM client,
+its JSON helpers and its executor, and named the cause in its first turn:
+`split_entries` and `extract_balanced` count brackets without telling a
+bracket that structures the JSON from a bracket inside a string
+([turn1-diagnosis.txt](https://github.com/oisee/pia/blob/d68a778/osg-probe/f1/attempt2-osg/turn1-diagnosis.txt)).
+
+**The bug bites the one fixing it.** The turns in which PIA was about to
+write its fix ended empty: no answer, no tool calls. In one of the model's
+answers, the `output` array began with the model's reasoning, then the two
+`write_source` calls that carried the fix. PIA's parser closed the array at
+character 6,344 of 85,587, on a `]` inside this sentence of the reasoning:
+"It finds the first `]` that brings depth to 0. Since the source string
+contains no `]`…". The model was explaining the bug, and its explanation
+triggered it
+([response-12-excerpt.txt](https://github.com/oisee/pia/blob/d68a778/osg-probe/f1/attempt3-osg/response-12-excerpt.txt)).
+
+**The system lies to the agent.** In the third attempt PIA wrote three
+honestly red tests and a fix in two classes. Every `activate` answered
+"ok"; the tests stayed red on the same lines. In its last turn PIA worked it
+out from the line numbers: "So 7a68c5ff main = OLD" — the published
+generation still held its old code. It was right. Its test used
+`cl_abap_unit_assert=>quit`, a constant that does not exist. open-steamgate's
+build failed, while the development API's activation reported success and
+`RUN_TESTS` kept running the previous generation (the build header says it:
+`X-OSD-Build: failed; check_syntax, Attribute or constant "quit" not found`)
+([adt-activation-headers.txt](https://github.com/oisee/pia/blob/d68a778/osg-probe/f1/attempt3-osg/adt-activation-headers.txt)).
+
+![End of the third attempt: PIA concludes the published generation holds its old code](img/pia-f1-old.png)
+
+**The agent cuts off its own hands.** With open-steamgate fixed to return
+syntax errors from the activation itself, PIA corrected its tests and
+reached an honest red. Its fix of `extract_balanced` was right, but the LLM
+client uses the same helper to take out a tool call's `arguments`, which
+are a JSON string. After publishing, every tool call reached PIA with empty
+arguments
+([attempt 4](https://github.com/oisee/pia/tree/d68a778/osg-probe/f1/attempt4-osg)).
+
+**A different bug.** The bracket bug guards itself: it sits on the path the
+agent uses to fix it. So people replaced PIA's hand-written parsing with a
+real JSON reader (sXML) and gave PIA a safety net: if a change to its own
+code breaks it, it rolls the change back. The exercise moved to another real
+bug. `pia.env`, written exactly as PIA's README shows it, with a comment
+after the value (`PIA_MODEL=glm-5.3   # optional`), sent the model name
+`glm-5.3   # optional` to the model's host
+([task-b.txt](https://github.com/oisee/pia/blob/d68a778/osg-probe/f1/task-b.txt)).
+
+The first try reached a red test, but its fix turned every setting without a
+comment into an empty string, the API key included, and the safety net did
+not catch it. People closed that gap and checked it on the same break. The
+second try is the ending. In three turns, with no person in between, PIA
+moved the value parsing into a method `VALUE_OF_LINE`, wrote a test class
+`LTCL_CONFIG`, saw it red (`Expected [glm-5.3] / Actual [glm-5.3 # optional]`),
+fixed the method, tripped over a line its own `write_method` tool had left
+behind, read the activation error, rewrote the class, and ended green, three
+tests out of three
+([b2-osg](https://github.com/oisee/pia/tree/d68a778/osg-probe/f1/b2-osg)). The terminal reconnected on its own
+twice on the way.
+
+![The ending: PIA's own summary — cause, red test, fix, three tests green](img/pia-f1-green.png)
+
+The fix is in PIA's history as a commit by PIA itself, author
+"PIA (Pi-ABAP Agent, glm-5.3)"
+([12836e7](https://github.com/oisee/pia/commit/12836e7)).
+
+On the way, the exercise found eight real bugs:
+- in PIA:
+  - the 8,000-character limit;
+  - the bracket counting;
+  - the fix that emptied the arguments;
+  - the empty settings;
+  - the gap in the safety net;
+- in open-steamgate:
+  - an activation that said "ok" when the build had failed;
+  - tests that ran on the previous generation;
+  - a runtime recycle that dropped a terminal's connection in the middle of
+    a turn.
+
+And one repair, by the agent, of itself.
+
 ## Run it yourself on open-steamgate
 
 This book's open-steamgate tag has everything PIA's terminal needs:
