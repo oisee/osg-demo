@@ -170,7 +170,9 @@ These are PIA's own findings, from its reports and porting notes.
 PIA's authors then gave it a harder job: find and fix a bug in its own code,
 given only the symptom. The record of every attempt is published:
 the task, each WebSocket frame, the model's answers, and what PIA wrote
-([osg-probe/f1](https://github.com/oisee/pia/tree/d68a778/osg-probe/f1)). This is that record, told in order.
+([osg-probe/f1](https://github.com/oisee/pia/tree/d68a778/osg-probe/f1)). This is that record, told in order; PIA's
+[report](https://github.com/oisee/pia/blob/1a9bdcd/reports/2026-10-07-F1.md) lists every run, every step a person took and
+the open-steamgate fixes that came out of it.
 It ran on open-steamgate's development line (the ending on commit
 `55f0b95f`), newer than this book's tag.
 
