@@ -272,6 +272,17 @@ On the way, the exercise found eight real failures:
 
 And one repair, by the agent, of itself.
 
+Then PIA was shown this chapter. In a fresh session it read the whole
+chapter, and was asked one question: "You're featured in a book! There's a
+chapter about you — how you fixed yourself. How do you feel?" The answer
+below is a live turn on the live model, one take, unedited; the picture is
+cropped to the last answers
+([the record](https://github.com/oisee/pia/tree/29840f6/osg-probe/featured): what PIA read, every frame, the model's raw
+answers). An earlier take, in which PIA read only this section, is kept in
+the same record and not shown.
+
+![PIA, after reading this chapter: "the book remembers so I don't have to"](img/pia-featured.png)
+
 ## Run it yourself on open-steamgate
 
 This book's open-steamgate tag has everything PIA's terminal needs:
