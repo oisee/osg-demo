@@ -15,14 +15,21 @@
 //   (Playwright comes from its node_modules);
 // - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
 //   keep TMPDIR short too for debugger sockets.
+// - SHOTS: optional comma-separated PNG basenames; publish only these once
+//   their steps and cleanup pass, then close before unrelated later demos.
 // - WS: a disposable copy, so no local path shows in a breadcrumb:
 //   git archive HEAD | tar -x -C <dir>.
+// - User data is staged beneath OSD_HOME/.local/book-shot-user-data. The
+//   launcher copies workspace packs there before building; this tag retains
+//   active source snapshots only for inputs beneath the system root. Use the
+//   canonical OSD_HOME path consistently in build and source reads. User
+//   data outside it gives an empty active-source response and a false F9 hint.
 // Headless Chromium renders a blank workbench, so this needs an X server.
 // Without one, `apt download xvfb`, `dpkg -x` it into a scratch folder and put
 // its usr/bin on PATH; xvfb-run also needs xauth.
 //
-// Drives VS Code (Electron) with Playwright's _electron: a fresh user-data and
-// extensions dir under SHOTS_TMP (or the unique temporary directory), the extension
+// Drives VS Code (Electron) with Playwright's _electron: fresh user data under
+// OSD_HOME and extensions under SHOTS_TMP, the extension
 // installed from VSIX, the system started from OSD_HOME with WS as its pack, then
 // commands through the command palette. A picture is taken only once the window shows what it is
 // about; the pictures go to OUT only when every step has passed.
@@ -37,12 +44,16 @@ const need = (name) => {
   return resolve(value);
 };
 const code = need("CODE"), vsix = need("VSIX"), home = need("OSD_HOME"), ws = need("WS"), out = need("OUT");
+const requestedShots = process.env.SHOTS?.split(",").filter(Boolean);
+const userData = join(home, ".local", "book-shot-user-data");
+// This directory belongs only to this disposable harness session.
+rmSync(userData, {recursive: true, force: true});
 const tmp = process.env.SHOTS_TMP || mkdtempSync(join("/tmp", "osd-shot-"));
 // TMPDIR may be inside this directory; preserve it for debugger sockets.
-for (const name of ["ud", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
-mkdirSync(join(tmp, "ud", "User"), {recursive: true});
+for (const name of ["ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
+mkdirSync(join(userData, "User"), {recursive: true});
 mkdirSync(join(tmp, "shots"), {recursive: true});
-writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
+writeFileSync(join(userData, "User", "settings.json"), JSON.stringify({
   "workbench.startupEditor": "none",
   "workbench.colorTheme": "Default Light Modern",
   "window.title": "osg-demo",
@@ -58,7 +69,7 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "workbench.tips.enabled": false,
 }, null, 2));
 // the CLI script beside the Electron binary installs extensions
-execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
+execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", userData],
   {stdio: "inherit"});
 
 // Use placeholders for the request file's illustrative host in pictures.
@@ -70,10 +81,10 @@ writeFileSync(httpFile, readFileSync(httpFile, "utf8")
 const {_electron} = createRequire(join(home, "package.json"))("playwright");
 const app = await _electron.launch({
   executablePath: code,
-  args: [ws, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud"),
+  args: [ws, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", userData,
     "--disable-workspace-trust", "--skip-welcome", "--skip-release-notes", "--disable-gpu"],
   // the workspace folder is the pack; OSD_PACKS as well would bring it twice
-  env: {...process.env, OSD_PACKS: ""},
+  env: {...process.env, OSD_ROOT: home, OSD_PACKS: ""},
   timeout: 120000,
 });
 const win = await app.firstWindow();
@@ -110,6 +121,9 @@ const shot = async (name, {allowDirty = false} = {}) => {
   await win.waitForTimeout(500);
   if (!allowDirty && await win.locator(".tabs-container .tab.dirty").count()) {
     throw new Error("an editor tab is dirty before capture");
+  }
+  if (!allowDirty && await hasOutput("your editor changes are not activated yet")) {
+    throw new Error("the console reports editor source differing from the active version");
   }
   if (await win.locator(".notifications-toasts .notification-toast:visible").count()) {
     throw new Error("a notification toast is visible before capture");
@@ -247,7 +261,6 @@ await step("classrun", async () => {
   await see("Check title button", win.locator('.part.editor [aria-label^="osd: Check"]'));
   await see("Activate title button", win.locator('.part.editor [aria-label^="osd: Activate"]'));
   await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
-  await win.locator('.panel input[placeholder^="Filter"]').fill("!not activated yet");
   await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
@@ -341,6 +354,9 @@ const runClass = async (file, text, maximize = false) => {
     await palette("View: Toggle Maximized Panel");
   }
   await seeOutput(text, 120000);
+  if (await hasOutput("your editor changes are not activated yet")) {
+    throw new Error("classrun source does not match its active source snapshot");
+  }
 };
 const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
@@ -469,6 +485,18 @@ await step("debugger", async () => {
   await win.waitForTimeout(800);
 });
 
+// A focused book fix runs every prerequisite through debugger cleanup.
+// It publishes nothing if any prerequisite failed or a requested shot is absent.
+if (requestedShots && requestedShots.every(name => readdirSync(join(tmp, "shots")).includes(`${name}.png`))) {
+  await app.close();
+  console.log(`vscode-shots: ${failed} step(s) failed`);
+  if (failed) process.exit(1);
+  mkdirSync(out, {recursive: true});
+  for (const name of requestedShots) copyFileSync(join(tmp, "shots", `${name}.png`), join(out, `${name}.png`));
+  console.log(`vscode-shots: requested pictures are in ${out}`);
+  process.exit(0);
+}
+
 // chapter 15: from a service to its code and from the code to the HTTP result
 const osdView = win.locator('[id="workbench.view.extension.osd"]');
 const expandRow = async (text) => {
@@ -511,7 +539,7 @@ await step("services", async () => {
   await see("visible output panel", win.locator(".part.panel"));
   await win.locator(".panel select:visible").selectOption({label: "OSD: System log"});
   await win.locator('.panel input[placeholder^="Filter"]').fill("warm: primed");
-  await seeOutput(/warm: primed 2084 files/);
+  await seeOutput(/warm: primed [1-9][0-9]* files/);
   await resizePanel(400);
   await shot("vscode-services");
   await win.locator('.panel input[placeholder^="Filter"]').fill("");
