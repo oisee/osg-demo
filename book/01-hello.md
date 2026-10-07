@@ -19,7 +19,7 @@ jobs item opens the **OSD Jobs** view.
 
    ![Ctrl+Shift+F10: one green ABAP Unit test and the supervised jobs worker idle](img/vscode-testing.png)
 
-3. Change the text returned by `greeting( )`, press **Ctrl+F2** to check, **Ctrl+F3** to save and activate (or use the check mark and the match in the editor's title bar; both report in **OSD: Console**), then **F9** again. Expected: the console shows your new text. If you press F9 after saving but before activating, the console warns that your changes are not activated yet and runs the active version. Restore the original text, activate, and rerun the test to leave it green.
+3. Change the text returned by `greeting( )`, press **Ctrl+F2** to check, **Ctrl+F3** to save and activate (or use the check mark and the match in the editor's title bar; both report in **OSD: Console**), then **F9** again. Expected: the console shows your new text. F9 runs the active version. It warns about unactivated changes when the editor is dirty or a nonempty active source differs from the editor. An empty active-source response (as for workspace-pack objects) is treated as unknown, so saving without activation does not guarantee a warning. Restore the original text, activate, and rerun the test to leave it green.
 
 ## Under the hood
 

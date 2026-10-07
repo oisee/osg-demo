@@ -188,15 +188,16 @@ carries `pia-chapter.rec`: the five-turn scenario in English, Danish and
 Russian, recorded on open-steamgate. Delete `pia-chapter.rec.pos` to start
 over ([release notes](https://github.com/oisee/pia/releases/tag/v0.1.1)).
 
-It does not run yet on the open-steamgate release this book is written for.
-PIA's release notes name what the terminal still needs on open-steamgate and
-what is not in a release yet:
-- AMC channel extensions;
-- publishing at the end of an APC step;
-- a runtime recycle that must not drop the connection in the middle of a
-  turn.
-
-<!-- hands-on: after the OSG release with AMC channel extensions, publish at the end of an APC step and the quiet-recycle fix -->
+The book's open-steamgate tag includes the three runtime fixes named in
+PIA's release notes: AMC channel-extension matching (#630), publication
+completed before the next event on the same APC socket (#636), and deferral
+of quiet and swap-count warm recycles while an APC socket is open (#631).
+The heap safety limit and correctness-driven recycles can still cut sockets;
+this is not a guarantee against every runtime restart. See the tag's
+[release notes](https://github.com/oisee/open-steamgate/releases/tag/vscode-stable-v0.7.1696)
+and [warm lifecycle](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/warm-compile.md).
+The pictures above remain the recorded PIA 0.1.1 run; they are not a fresh
+PIA acceptance run on this tag.
 
 On SAP, PIA installs today: an abapGit zip, two certificates for the model's
 host, a key file, and the terminal at `/sap/bc/zpia_tui/`. The
