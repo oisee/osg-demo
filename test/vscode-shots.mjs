@@ -8,7 +8,7 @@
 //
 // Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-stable-v0.7.1688 --repo
+// - VSIX: a released extension (gh release download vscode-stable-v0.7.1696 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: the tag checkout after npm ci, npm run transpiler:pin,
 //   and npm run bootstrap for warm support
@@ -19,17 +19,14 @@
 //   their steps and cleanup pass, then close before unrelated later demos.
 // - WS: a disposable copy, so no local path shows in a breadcrumb:
 //   git archive HEAD | tar -x -C <dir>.
-// - User data is staged beneath OSD_HOME/.local/book-shot-user-data. The
-//   launcher copies workspace packs there before building; this tag retains
-//   active source snapshots only for inputs beneath the system root. Use the
-//   canonical OSD_HOME path consistently in build and source reads. User
-//   data outside it gives an empty active-source response and a false F9 hint.
+// - User data and extensions are staged under SHOTS_TMP, outside OSD_HOME,
+//   as in a reader's ordinary workspace-pack setup.
 // Headless Chromium renders a blank workbench, so this needs an X server.
 // Without one, `apt download xvfb`, `dpkg -x` it into a scratch folder and put
 // its usr/bin on PATH; xvfb-run also needs xauth.
 //
 // Drives VS Code (Electron) with Playwright's _electron: fresh user data under
-// OSD_HOME and extensions under SHOTS_TMP, the extension
+// SHOTS_TMP alongside extensions, the extension
 // installed from VSIX, the system started from OSD_HOME with WS as its pack, then
 // commands through the command palette. A picture is taken only once the window shows what it is
 // about; the pictures go to OUT only when every step has passed.
@@ -45,12 +42,10 @@ const need = (name) => {
 };
 const code = need("CODE"), vsix = need("VSIX"), home = need("OSD_HOME"), ws = need("WS"), out = need("OUT");
 const requestedShots = process.env.SHOTS?.split(",").filter(Boolean);
-const userData = join(home, ".local", "book-shot-user-data");
-// This directory belongs only to this disposable harness session.
-rmSync(userData, {recursive: true, force: true});
 const tmp = process.env.SHOTS_TMP || mkdtempSync(join("/tmp", "osd-shot-"));
 // TMPDIR may be inside this directory; preserve it for debugger sockets.
-for (const name of ["ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
+const userData = join(tmp, "user");
+for (const name of ["user", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
 mkdirSync(join(userData, "User"), {recursive: true});
 mkdirSync(join(tmp, "shots"), {recursive: true});
 writeFileSync(join(userData, "User", "settings.json"), JSON.stringify({
