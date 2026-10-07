@@ -13,7 +13,7 @@
 ошибки показаны, выполнение разрешено. `warning` снижает уровень;
 `refuse` также блокирует запуск объектов и тестов; `off` выключает эту
 диагностику. Ссылки на описание поддержки объясняют замечание. Сканер
-проверяет известные конструкции; чистое представление не доказывает, что
+проверяет известные конструкции; отсутствие диагностических сообщений не доказывает, что
 весь объект активируется на системе.
 
 На снимке показана временная правка примера Мандельброта: байтовые операнды
@@ -22,9 +22,9 @@
 ![Problems: OSD kernel отклоняет BIT-AND для целых чисел; ссылка ведёт к объяснению поддержки](../img/vscode-kernel-diagnostic.png)
 
 Поведение отладчика и обработчика описано в
-[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/README.md);
+[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/README.md);
 `osg.kernelStrict` задан в его
-[настройках](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/package.json).
+[настройках](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/package.json).
 
 ## От службы к коду
 
@@ -111,7 +111,7 @@
 
 `http/fleet.http` - обычный файл `.http`. В REST Client или httpYac задайте
 `@baseUrl` - адрес, на котором работает система: его называет вывод
-**osd system** в строке `serving generation … on http://127.0.0.1:<port>`.
+**OSD: System log** в строке `serving generation … on http://127.0.0.1:<port>`.
 Строки `# @osd.id` эти клиенты пропускают. Они дают каждому запросу имя
 кейса для регрессионных инструментов open-steamgate, которые читают тот же
 файл; превращать в такие файлы кейсы, сохраненные в SAP Gateway Client, -

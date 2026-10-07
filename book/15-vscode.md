@@ -21,9 +21,9 @@ are changed to integers to demonstrate the diagnostic.
 ![Problems: OSD kernel rejects BIT-AND on integers; the diagnostic links to its support explanation](img/vscode-kernel-diagnostic.png)
 
 The debugger and worker behavior is described in the tag's
-[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/README.md);
+[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/README.md);
 `osg.kernelStrict` is declared in its
-[settings](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/package.json).
+[settings](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/package.json).
 
 ## From a service to its code
 
@@ -108,7 +108,7 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 ## Send the requests yourself
 
 `http/fleet.http` is an ordinary `.http` file. With REST Client or httpYac,
-set `@baseUrl` to the address the system serves on: the **osd system** output
+set `@baseUrl` to the address the system serves on: the **OSD: System log** output
 says it in its line `serving generation … on http://127.0.0.1:<port>`. The
 `# @osd.id` lines are ignored by those clients. They name each request as a
 case for open-steamgate's regression tools, which read the same file; turning

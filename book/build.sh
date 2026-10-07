@@ -41,12 +41,12 @@ fi
 ext=$(sed -n 's/^extension: "\(.*\)"$/\1/p' baseline.yaml)
 tag=$(sed -n 's/^tag: "\(.*\)"$/\1/p' baseline.yaml)
 if [ -z "$ext" ] || [ -z "$tag" ]; then echo "book/build.sh: book/baseline.yaml needs extension and tag" >&2; exit 1; fi
-# every version and every vscode-v tag the preface (EN/RU) and README name must
-# be this one, and each must name it at least once: no stale mention survives
+# every version and every vscode-v or vscode-stable-v tag the preface (EN/RU) and README name must
+# be this one, and each must name the version; prefaces must name its tag too: no stale mention survives
 for f in 00-preface.md ru/00-preface.md ../README.md; do
   versions=$(grep -oE '(^|[^0-9.])[0-9]+\.[0-9]+\.[0-9]+' "$f" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -u || true)
-  tags=$(grep -oE 'vscode-v[0-9][0-9.]*[0-9]' "$f" | sort -u || true)
-  if [ "$versions" != "$ext" ] || { [ "$f" != ../README.md ] && [ "$tags" != "$tag" ]; }; then
+  tags=$(grep -oE 'vscode-(stable-)?v[0-9][0-9.]*[0-9]' "$f" | sort -u || true)
+  if [ "$versions" != "$ext" ] || { [ "$f" != ../README.md ] && [ "$tags" != "$tag" ]; } || { [ -n "$tags" ] && [ "$tags" != "$tag" ]; }; then
     echo "book/build.sh: $f names $(echo $versions $tags), book/baseline.yaml says $ext and $tag" >&2; exit 1
   fi
 done

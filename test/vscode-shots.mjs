@@ -8,21 +8,25 @@
 //
 // Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-v0.6.1650 --repo
+// - VSIX: a released extension (gh release download vscode-stable-v0.7.1696 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
-// - OSD_HOME: the tag checkout after npm ci, bootstrap, the CI transpiler
-//   build and four osd-link steps, then bootstrap again for warm support
+// - OSD_HOME: the tag checkout after npm ci, npm run transpiler:pin,
+//   and npm run bootstrap for warm support
 //   (Playwright comes from its node_modules);
 // - SHOTS_TMP: short scratch path (default: a unique /tmp/osd-shot-* directory);
 //   keep TMPDIR short too for debugger sockets.
+// - SHOTS: optional comma-separated PNG basenames; publish only these once
+//   their steps and cleanup pass, then close before unrelated later demos.
 // - WS: a disposable copy, so no local path shows in a breadcrumb:
 //   git archive HEAD | tar -x -C <dir>.
+// - User data and extensions are staged under SHOTS_TMP, outside OSD_HOME,
+//   as in a reader's ordinary workspace-pack setup.
 // Headless Chromium renders a blank workbench, so this needs an X server.
 // Without one, `apt download xvfb`, `dpkg -x` it into a scratch folder and put
 // its usr/bin on PATH; xvfb-run also needs xauth.
 //
-// Drives VS Code (Electron) with Playwright's _electron: a fresh user-data and
-// extensions dir under SHOTS_TMP (or the unique temporary directory), the extension
+// Drives VS Code (Electron) with Playwright's _electron: fresh user data under
+// SHOTS_TMP alongside extensions, the extension
 // installed from VSIX, the system started from OSD_HOME with WS as its pack, then
 // commands through the command palette. A picture is taken only once the window shows what it is
 // about; the pictures go to OUT only when every step has passed.
@@ -37,12 +41,14 @@ const need = (name) => {
   return resolve(value);
 };
 const code = need("CODE"), vsix = need("VSIX"), home = need("OSD_HOME"), ws = need("WS"), out = need("OUT");
+const requestedShots = process.env.SHOTS?.split(",").filter(Boolean);
 const tmp = process.env.SHOTS_TMP || mkdtempSync(join("/tmp", "osd-shot-"));
 // TMPDIR may be inside this directory; preserve it for debugger sockets.
-for (const name of ["ud", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
-mkdirSync(join(tmp, "ud", "User"), {recursive: true});
+const userData = join(tmp, "user");
+for (const name of ["user", "ext", "shots"]) rmSync(join(tmp, name), {recursive: true, force: true});
+mkdirSync(join(userData, "User"), {recursive: true});
 mkdirSync(join(tmp, "shots"), {recursive: true});
-writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
+writeFileSync(join(userData, "User", "settings.json"), JSON.stringify({
   "workbench.startupEditor": "none",
   "workbench.colorTheme": "Default Light Modern",
   "window.title": "osg-demo",
@@ -58,7 +64,7 @@ writeFileSync(join(tmp, "ud", "User", "settings.json"), JSON.stringify({
   "workbench.tips.enabled": false,
 }, null, 2));
 // the CLI script beside the Electron binary installs extensions
-execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud")],
+execFileSync(join(dirname(code), "bin", "code"), ["--install-extension", vsix, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", userData],
   {stdio: "inherit"});
 
 // Use placeholders for the request file's illustrative host in pictures.
@@ -70,10 +76,10 @@ writeFileSync(httpFile, readFileSync(httpFile, "utf8")
 const {_electron} = createRequire(join(home, "package.json"))("playwright");
 const app = await _electron.launch({
   executablePath: code,
-  args: [ws, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", join(tmp, "ud"),
+  args: [ws, "--extensions-dir", join(tmp, "ext"), "--user-data-dir", userData,
     "--disable-workspace-trust", "--skip-welcome", "--skip-release-notes", "--disable-gpu"],
   // the workspace folder is the pack; OSD_PACKS as well would bring it twice
-  env: {...process.env, OSD_PACKS: ""},
+  env: {...process.env, OSD_ROOT: home, OSD_PACKS: ""},
   timeout: 120000,
 });
 const win = await app.firstWindow();
@@ -81,11 +87,20 @@ await win.waitForSelector(".monaco-workbench", {timeout: 120000});
 await win.waitForTimeout(3000);
 
 const palette = async (text) => {
-  await win.keyboard.press("F1");
-  await win.waitForTimeout(400);
-  await win.keyboard.type(text, {delay: 15});
-  await win.waitForTimeout(800);
-  await win.keyboard.press("Enter");
+  const input = win.locator('.quick-input-box input:visible');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await win.keyboard.press("Escape");
+    await win.keyboard.press("Control+Shift+P");
+    try {
+      await input.waitFor({state: "visible", timeout: 3000});
+      await input.fill(`>${text}`);
+      await win.waitForTimeout(800);
+      await win.keyboard.press("Enter");
+      return;
+    } catch (error) {
+      if (attempt === 2) throw new Error(`command palette for ${text}: ${error.message.split("\n")[0]}`);
+    }
+  }
 };
 const open = async (file) => {
   await palette("View: Focus Active Editor Group");
@@ -97,10 +112,25 @@ const open = async (file) => {
   await win.waitForTimeout(1500);
 };
 const shot = async (name, {allowDirty = false} = {}) => {
+  // Tree refreshes can reopen Layers or finished jobs between commands.
+  // Their children label source paths and the ABAP user: collapse them via
+  // the actual twistie immediately before each capture.
+  for (const text of ["Layers", "finished"]) {
+    const row = win.locator('.sidebar .monaco-list-row').filter({hasText: new RegExp(`^${text}$`)});
+    if (await row.count() && await row.getAttribute("aria-expanded") === "true") {
+      await row.locator('.monaco-tl-twistie').click();
+    }
+  }
   await win.mouse.move(900, 470);
   await win.waitForTimeout(500);
   if (!allowDirty && await win.locator(".tabs-container .tab.dirty").count()) {
     throw new Error("an editor tab is dirty before capture");
+  }
+  if (!allowDirty && await hasOutput("your editor changes are not activated yet")) {
+    throw new Error("the console reports editor source differing from the active version");
+  }
+  if (await win.locator(".notifications-toasts .notification-toast:visible").count()) {
+    throw new Error("a notification toast is visible before capture");
   }
   const status = await win.locator(".statusbar").innerText();
   if (!/OSD generation [0-9a-f]{7,} · SQLite · warm\b/.test(status) || status.includes("cold:")) {
@@ -210,6 +240,8 @@ await step("start", async () => {
     });
   await see("jobs status", win.locator(".statusbar").getByText(/OSD jobs:/));
   await see("warm generation", win.locator(".statusbar").getByText(/OSD generation [0-9a-f]{7,} · SQLite · warm\b/), 300000);
+  await palette("Output: Focus on Output View");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: System log"});
   await win.waitForTimeout(3000);
 });
 if (failed) {
@@ -230,6 +262,9 @@ await step("classrun", async () => {
     await palette("View: Focus Active Editor Group");
     await win.waitForTimeout(1000);
   }
+  await see("Check title button", win.locator('.part.editor [aria-label^="osd: Check"]'));
+  await see("Activate title button", win.locator('.part.editor [aria-label^="osd: Activate"]'));
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await palette("Notifications: Clear All Notifications");
   await win.waitForTimeout(1000);
   await shot("vscode-classrun");
@@ -241,6 +276,7 @@ await step("open sample", async () => {
   await see("bundled notebook", win.locator(".quick-input-list").getByText("Bundled notebook", {exact: true}));
   await shot("vscode-open-sample");
   await win.keyboard.press("Escape");
+  await win.locator('.panel input[placeholder^="Filter"]').fill("");
 });
 await step("tests", async () => {
   // the demo's own tests: Ctrl+Shift+F10 in the class, whose main file the
@@ -313,7 +349,7 @@ const outputAutoScroll = async (enabled) => {
 const runClass = async (file, text, maximize = false) => {
   // Each assertion reads this invocation, never a previous state snapshot.
   await palette("Output: Focus on Output View");
-  await win.locator(".panel select:visible").selectOption({label: "osd console"});
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await outputAutoScroll(true);
   await win.locator(".panel .codicon-clear-all:visible").click();
   await open(file);
@@ -322,17 +358,36 @@ const runClass = async (file, text, maximize = false) => {
     await palette("View: Toggle Maximized Panel");
   }
   await seeOutput(text, 120000);
+  if (await hasOutput("your editor changes are not activated yet")) {
+    throw new Error("classrun source does not match its active source snapshot");
+  }
 };
 const showJobs = async () => {
   await win.locator(".statusbar").getByText(/OSD jobs:/).click();
+  // Since 0.7 the status item focuses the Jobs view, not What is running?.
+  await see("Jobs view", win.getByText("OSD Jobs", {exact: true}));
+  // Refresh the saved-run tree explicitly; its empty-state polling backs off.
+  await palette("OSD: Refresh jobs");
+  await see("finished saved jobs", win.locator('.sidebar .monaco-list-row').filter({hasText: /^finished$/}));
+  // Keep the book's summary captures in the named Output channel.
+  await win.locator(".statusbar").getByText("OSD running", {exact: true}).click();
   await see("What is running picker", win.getByText("OSD: What is running?", {exact: true}));
   await win.locator(".quick-input-list .monaco-list-row").filter({hasText: "Job worker"}).click();
   // Output normally follows the last row; this summary puts newest runs first.
   await palette("Output: Focus on Output View");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Jobs"});
   await outputAutoScroll(false);
   await win.keyboard.press("Control+Home");
   await win.keyboard.press("Escape");
   await seeOutput(/OSD jobs — latest 200 runs, newest first/);
+  // The System status action refreshes the tree. Hide source paths only
+  // after that refresh, and keep job rows (which include an ABAP user)
+  // collapsed while retaining the visible OSD Jobs header and state group.
+  const layers = win.locator('.sidebar .monaco-list-row').filter({hasText: /^Layers$/});
+  if (await layers.getAttribute("aria-expanded") === "true") await layers.locator('.monaco-tl-twistie').click();
+  const finished = win.locator('.sidebar .monaco-list-row').filter({hasText: /^finished$/});
+  if (await finished.count() && await finished.getAttribute("aria-expanded") === "true") await finished.locator('.monaco-tl-twistie').click();
+  await palette("Output: Focus on Output View");
 };
 await step("fleet jobs", async () => {
   await closePanels();
@@ -344,14 +399,27 @@ await step("fleet jobs", async () => {
   await shot("vscode-fleet-jobs");
 });
 await step("night jobs", async () => {
-  await showJobs();
-  await win.locator(".panel .codicon-clear-all:visible").click();
   await runClass("zcl_osd_fleet_night_jobs.clas.abap", /Night set, mode P, run .*SUBMITTED/);
+  // The caption shows completed pile jobs, so wait for all seven, not just
+  // the first DONE row while other piles are still running.
+  await see("idle night worker", win.locator(".statusbar").getByText("OSD jobs: idle", {exact: true}), 120000);
   await showJobs();
   await seeOutput(/L3_NIGHT_/, 120000);
   await seeOutput(/L3_NIGHT_[^\n]* \| DONE \|/);
   await shot("vscode-night-jobs");
 });
+// Jobs-only retakes stop here even on failure, without publishing partial work.
+if (requestedShots && requestedShots.every(name => ["vscode-fleet-jobs", "vscode-night-jobs"].includes(name))) {
+  await app.close();
+  const missing = requestedShots.filter(name => !readdirSync(join(tmp, "shots")).includes(`${name}.png`));
+  console.log(`vscode-shots: ${failed} step(s) failed`);
+  if (failed || missing.length) process.exit(1);
+  mkdirSync(out, {recursive: true});
+  for (const name of requestedShots) copyFileSync(join(tmp, "shots", `${name}.png`), join(out, `${name}.png`));
+  console.log(`vscode-shots: requested pictures are in ${out}`);
+  process.exit(0);
+}
+
 await step("watch glass", async () => {
   await runClass("zcl_osd_fleet_watch_jobs.clas.abap", /Watch set, mode P, run .*SUBMITTED/);
   // Re-run the read-only state class until the worker reaches the glass.
@@ -396,6 +464,11 @@ await step("debugger", async () => {
   await open("zcl_osd_fleet_report.clas.abap");
   await goto(lineOf(file, "steam_check( ls_ship-steam_pct )."));
   await win.keyboard.press("Control+Shift+B");
+  // Assert and dismiss the one-time first-breakpoint explanation deliberately.
+  const note = win.locator(".notifications-toasts").filter({hasText: "osd debugs without a launch configuration"});
+  await see("first-breakpoint note", note);
+  await note.getByRole("button", {name: "Got it", exact: true}).click();
+  await note.waitFor({state: "hidden"});
   await win.waitForTimeout(1500);
   await palette("osd: Run as ABAP Application with debugger");
   await see("stop on the breakpoint", win.getByText("Paused On Breakpoint"), 120000);
@@ -432,6 +505,18 @@ await step("debugger", async () => {
   await win.waitForTimeout(800);
 });
 
+// A focused book fix runs every prerequisite through debugger cleanup.
+// It publishes nothing if any prerequisite failed or a requested shot is absent.
+if (requestedShots && requestedShots.every(name => readdirSync(join(tmp, "shots")).includes(`${name}.png`))) {
+  await app.close();
+  console.log(`vscode-shots: ${failed} step(s) failed`);
+  if (failed) process.exit(1);
+  mkdirSync(out, {recursive: true});
+  for (const name of requestedShots) copyFileSync(join(tmp, "shots", `${name}.png`), join(out, `${name}.png`));
+  console.log(`vscode-shots: requested pictures are in ${out}`);
+  process.exit(0);
+}
+
 // chapter 15: from a service to its code and from the code to the HTTP result
 const osdView = win.locator('[id="workbench.view.extension.osd"]');
 const expandRow = async (text) => {
@@ -448,6 +533,8 @@ await step("services", async () => {
   await palette("View: Show OSD");
   await win.keyboard.press("Escape");
   await win.waitForTimeout(1500);
+  const jobsHeader = win.locator('.sidebar .pane-header').filter({hasText: /^OSD Jobs$/});
+  if (await jobsHeader.getAttribute("aria-expanded") === "true") await jobsHeader.click();
   // Layers names local folders: closed, so no path shows
   const layers = osdView.locator(".monaco-list-row", {hasText: "Layers"}).first();
   await layers.click();
@@ -455,6 +542,12 @@ await step("services", async () => {
   await expandRow("Services");
   await expandRow("OData (");
   await expandRow("ZOSD_FLEET_SRV");
+  // The separate Jobs pane shortens the virtualized System tree. Scroll
+  // the selected service's children into view before checking its methods.
+  const tree = osdView.locator('.monaco-list[aria-label="System"]');
+  await tree.hover();
+  await win.mouse.wheel(0, 650);
+  await win.waitForTimeout(1000);
   for (const method of [/ShipSet\s*get_entityset/, /VoyageSet\s*get_entityset/, /ShipSet\s*get_entity$/]) {
     await see(`${method} in the System view`, osdView.locator(".monaco-list-row", {hasText: method}));
   }
@@ -464,8 +557,13 @@ await step("services", async () => {
   // the visible details contain the service and model classes, not the links.
   await palette("View: Toggle Output");
   await see("visible output panel", win.locator(".part.panel"));
+  await win.locator(".panel select:visible").selectOption({label: "OSD: System log"});
+  await win.locator('.panel input[placeholder^="Filter"]').fill("warm: primed");
+  await seeOutput(/warm: primed [1-9][0-9]* files/);
   await resizePanel(400);
   await shot("vscode-services");
+  await win.locator('.panel input[placeholder^="Filter"]').fill("");
+  await win.locator(".panel select:visible").selectOption({label: "OSD: Console"});
   await resizePanel(576);
   // an entity set's row opens the method that serves it
   await osdView.locator(".monaco-list-row", {hasText: /ShipSet\s*get_entityset/}).first().click();

@@ -13,8 +13,9 @@ CLASS zcl_osd_fleet_job DEFINITION PUBLIC FINAL CREATE PUBLIC.
 * ship count and releases it for an immediate start. The caller commits; a
 * worker runs the step afterwards. When a step fails, JOBCOUNT is initial and
 * FAILED names the step; the caller rolls back. A job that JOB_OPEN opened
-* stays behind with status P on a system (BP_JOB_DELETE is not in OSD's job
-* facade), without steps it never runs.
+* stays behind with status P on a system: JOB_OPEN commits there, and this
+* helper does not call BP_JOB_DELETE (supported by OSD). Without steps the
+* opened job never runs.
     CLASS-METHODS schedule
       IMPORTING iv_run_id TYPE ty_run_id
                 iv_expected_ships TYPE i DEFAULT 6

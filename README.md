@@ -8,10 +8,10 @@ This folder is an abapGit repository and an [open-steamgate](https://github.com/
 
 ## Quick start
 
-1. Install the **open-steamgate** extension, **0.6.1650 or later** (`oisee.open-steamgate`, pre-release): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
+1. Install the **open-steamgate** extension, **0.7.1696 or later** (`oisee.open-steamgate`, stable channel): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
 3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
-4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **osd console**. Chapter 1 goes on from there.
+4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **OSD: Console** output. Chapter 1 goes on from there.
 
 From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`.
 
@@ -38,7 +38,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 16 | [Orchestration: the night set](book/16-orchestration.md) | [Оркестрация](book/ru/16-orchestration.md) | a set of rules in stages: a filter fills a worklist, piles run as jobs, a gate opens the next stage once, a nightly schedule | `ZCL_OSD_FLEET_NIGHT` (`src/l3/`) |
 | 17 | [The governor](book/17-governor.md) | [Регулятор](book/ru/17-governor.md) | a budget of open alerts per run: the run stops at its glass, a person continues it with a reason | `ZCL_OSD_FLEET_WATCH` (`src/l3/`) |
 | 18 | [Because we can: JavaScript and C in ABAP](book/18-c-in-abap.md) | [JavaScript и C в ABAP](book/ru/18-c-in-abap.md) | QuickJS as ABAP on a real kernel (abapiti's result); a C function via WebAssembly and abapiti into an ABAP class, drawing the Mandelbrot set like native C | `ZCL_WASM_MANDEL` (`src/iti/`, `iti/`) |
-| 19 | [An agent that writes ABAP from inside the system](book/19-pia.md) | [Агент, который пишет ABAP изнутри системы](book/ru/19-pia.md) | PIA, an ABAP coding agent written in ABAP: green, break, red, fix, green on SAP A4H; the open-steamgate run follows the next PIA release | — (PIA's own repository) |
+| 19 | [An agent that writes ABAP from inside the system](book/19-pia.md) | [Агент, который пишет ABAP изнутри системы](book/ru/19-pia.md) | PIA, an ABAP coding agent written in ABAP: green, break, red, fix, green on SAP A4H and on open-steamgate; a recorded run replays without a model key | — (PIA's own repository) |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |

@@ -69,6 +69,7 @@ jobs:
         working-directory: osd
         run: |
           npm ci
+          npm run transpiler:pin
           npm run bootstrap
       - name: Fleet smoke on SQLite
         working-directory: demo

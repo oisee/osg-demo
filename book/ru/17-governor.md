@@ -186,7 +186,7 @@ lv_ok = zcl_osd_fleet_watch=>continue_glass( iv_run = lv_run
 | `resilience.fuses.max_alerts` | каждую строку сообщений правила в прогоне | правило `FUSED` и перестает писать |
 
 Набор watch пользуется только стеклом. Два других предела описаны в
-[документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/dsl-l3.md)
+[документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
 open-steamgate (разделы «Governor: the manual-handling budget» и «Fuses») и
 здесь не выполняются.
 

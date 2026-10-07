@@ -22,22 +22,22 @@ statuses.
 
 ## This edition
 
-The book is written for the open-steamgate VS Code extension **0.6.1650 or
-later**; its workbench pictures were captured with the released **0.6.1650**
-extension.
+The book is written for the open-steamgate VS Code extension **0.7.1696 or
+later** (book v0.6). Its workbench pictures were retaken with the verified
+VSIX from `vscode-stable-v0.7.1696`.
 
 Where a chapter works in an
 open-steamgate checkout (chapters 7 and 14, the command lines elsewhere, the
-checks of appendix A), use the tag **`vscode-v0.6.1650` or later**. Where the
+checks of appendix A), use the tag **`vscode-stable-v0.7.1696` or later**. Where the
 extension does not yet do what a step needs, the step says so.
 
 ## Before you start
 
 1. Install the **open-steamgate** extension (`oisee.open-steamgate`,
-   pre-release): search for it in the Extensions view, or take the `.vsix`
+   stable channel): search for it in the Extensions view, or take the `.vsix`
    from the latest
-   [`vscode-v*` release](https://github.com/oisee/open-steamgate/releases)
-   (0.6.1650 or later) and
+   [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases)
+   (0.7.1696 or later) and
    run **Extensions: Install from VSIX...**.
 2. Clone [oisee/osg-demo](https://github.com/oisee/osg-demo) and open the
    clone as a VS Code folder.
@@ -60,7 +60,10 @@ The extension uses ADT's keys: **F9** runs a class (its classrun), **F8** runs
 a report or previews a table or CDS view, **Ctrl+F2** checks, **Ctrl+F3**
 activates, **Ctrl+Shift+F10** runs the ABAP Unit tests of the class or test include you
 are in, **Ctrl+Shift+B** toggles a breakpoint. F9 and F8 act as debugger keys
-only while execution is paused at a line.
+only while execution is paused at a line. F8, F9 and the editor's ▷ never run
+ABAP Unit; tests run with Ctrl+Shift+F10, the beaker button in the editor's
+title bar, or Testing. The title bar also has a check mark for Check and a
+match for Activate.
 
 ## How the book is organised
 
@@ -75,5 +78,5 @@ only while execution is paused at a line.
 | The workbench | 15 From a service to its code | the System view, `.http` requests resolved to their DPC method, a call from the code to its HTTP answer, the readers of a class |
 | Orchestration | 16 The night set, 17 The governor | a set of rules in YAML (DSL L3): a filter stage, a worklist, piles run as jobs, a gate that opens the next stage once, a nightly schedule; a budget of open alerts per run that stops it until a person continues it with a reason |
 | Because we can | 18 JavaScript and C in ABAP | QuickJS running as ABAP on a real kernel (abapiti's result); in your sandbox, a C function compiled to WebAssembly and by abapiti to an ABAP class, drawing the Mandelbrot set in the classrun console, byte for byte as native C |
-| An agent at the keyboard | 19 An agent that writes ABAP from inside the system | PIA, a coding agent written in ABAP, reads, changes, activates and tests a class on the system it runs in: green, a deliberate break, red, fixed, green (shown on SAP A4H) |
+| An agent at the keyboard | 19 An agent that writes ABAP from inside the system | PIA, a coding agent written in ABAP, reads, changes, activates and tests a class on the system it runs in: green, a deliberate break, red, fixed, green (shown on SAP A4H and on open-steamgate) |
 | Appendices | A Run the checks, B Take it to a system (what travels), C Limits and glossary | the automated checks, the transport list, the fine print |
