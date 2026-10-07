@@ -181,7 +181,7 @@ A governed set has three limits, and they answer different questions:
 
 The watch set uses only the glass. The other two are described in
 open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
 ("Governor: the manual-handling budget", "Fuses"), and are not run here.
 
 ## What this chapter does not show

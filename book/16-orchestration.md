@@ -229,7 +229,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 
