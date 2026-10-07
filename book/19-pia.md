@@ -63,9 +63,9 @@ First, the tests: one tool call, green.
 
 Then a deliberate break: "change add to a - b and activate it". The model
 reads the class, writes it back with the change, activates it, and adds on
-its own that the test will now fail. (It also gets the test's numbers wrong
-in passing: the test expects 5, not 4. The tests in the next turn are what
-count.)
+its own that the test will now fail. (In the English run it also gets the
+test's numbers wrong in passing: the test expects 5, not 4. The tests in the
+next turn are what count.)
 
 ![PIA changes add to a - b: read_object, write_source, activate](img/pia-2-break.png)
 
@@ -195,9 +195,6 @@ what is not in a release yet:
 - publishing at the end of an APC step;
 - a runtime recycle that must not drop the connection in the middle of a
   turn.
-
-When they are in an open-steamgate release, this section will take you
-through the five turns in your own sandbox.
 
 <!-- hands-on: after the OSG release with AMC channel extensions, publish at the end of an APC step and the quiet-recycle fix -->
 

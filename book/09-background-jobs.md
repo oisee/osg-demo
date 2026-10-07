@@ -21,7 +21,7 @@ duration and step/output counts; failed runs include a reason. The summary is in
 **OSD: Jobs** output; **Show raw job log** in that picker or the command
 palette switches the same channel to the worker JSON, and **Job worker** in **What is running?**
 switches it back.
-It runs released jobs without a terminal.
+The worker runs released jobs without a terminal.
 The steps below use a checkout and a manually driven worker to show the
 queue before and after each step.
 

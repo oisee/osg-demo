@@ -11,7 +11,7 @@ This folder is an abapGit repository and an [open-steamgate](https://github.com/
 1. Install the **open-steamgate** extension, **0.7.1688 or later** (`oisee.open-steamgate`, stable channel): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
 3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
-4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **osd console**. Chapter 1 goes on from there.
+4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **OSD: Console** output. Chapter 1 goes on from there.
 
 From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/path/to/osg-demo STG_PORT=8099 npm start`.
 
