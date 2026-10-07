@@ -139,13 +139,13 @@ SQLite и следит за обработчиком (`osd.jobs.worker=auto`); �
 без терминала.
 
 Щелкните **OSD jobs**, чтобы открыть представление **OSD Jobs**. Для читаемой
-сводки в канале вывода щелкните **OSD running**, чтобы открыть **OSD: What is running?**, и выберите **Job worker**. У каждого задания стопки своя строка;
+сводки в канале вывода щелкните **OSD running**, чтобы открыть **OSD: What is running?**, и выберите **Job worker**. Каждое задание стопки — отдельная строка;
 **Show raw job log** переключает вывод **OSD: Jobs** на JSON обработчика.
 
 ![OSD jobs: читаемая сводка завершённых заданий стопок ночного набора](../img/vscode-night-jobs.png)
 
 Чтобы увидеть очередь, как ниже, запустите OSD из checkout с `STG_DB=file`,
-`STG_DB_PATH` и `OSD_PACKS` и выполняйте обработчик сами.
+`STG_DB_PATH` и `OSD_PACKS` и запускайте обработчик вручную.
 
 1. Нажмите **F9** на
    [ZCL_OSD_FLEET_NIGHT_JOBS](../../src/l3/zcl_osd_fleet_night_jobs.clas.abap).

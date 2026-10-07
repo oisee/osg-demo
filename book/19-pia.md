@@ -11,8 +11,8 @@ Everything here is PIA's own, from its releases
 [v0.1.0](https://github.com/oisee/pia/releases/tag/v0.1.0) and
 [v0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1). Five pictures
 are PIA's own, taken with 0.1.1 on SAP's ABAP Platform Trial (A4H, NetWeaver
-7.58); the two open-steamgate pictures were taken for this book, following
-the last section's steps. The last section says what it takes to run the same thing in your
+7.58); the two open-steamgate pictures are replays of the last section's
+steps. The last section says what it takes to run the same thing in your
 own sandbox.
 
 ## A turn
@@ -171,7 +171,8 @@ This book's open-steamgate tag has everything PIA's terminal needs:
 - the agent development API;
 - AMC channel extensions;
 - publishing at the end of an APC step;
-- warm recycles that wait while a push channel is open.
+- housekeeping recycles of the warm runtime that wait while a push channel
+  is open (a recycle forced by the heap limit can still close it).
 
 PIA's README names the same commit, `292a4c60`
 ([README at e815e79](https://github.com/oisee/pia/blob/e815e79/README.md)).
@@ -180,12 +181,14 @@ network once things are installed. PIA's own tools still run for real:
 they read, write, activate and test the class in your system.
 
 You need git, Node 22 or newer, and room for a second open-steamgate tree
-just for PIA: about 0.8 GB, plus about 0.5 GB for the pinned transpiler.
+just for PIA. In this book's run it took about 0.8 GB, and the pinned
+transpiler's cache about 0.5 GB more.
 
 1. Clone PIA and set up its own open-steamgate:
 
    ```
    git clone https://github.com/oisee/pia && cd pia
+   git checkout e815e79
    osg-probe/osg-setup.sh ~/dev/osg-pia
    ```
 
@@ -224,6 +227,10 @@ just for PIA: about 0.8 GB, plus about 0.5 GB for the pinned transpiler.
    −1), the fix, and green again. The answers are the recorded ones; the
    tool calls, the source in your system and the test results are yours.
 
+   There are Danish and Russian recordings too, for tasks in those
+   languages; the tasks are in
+   [PIA's test](https://github.com/oisee/pia/blob/e815e79/osg-probe/ui/tui-e2e.mjs).
+
 ![The red turn on open-steamgate, replayed: ADD_2_3 expected 5, got −1](img/pia-osg-3-red.png)
 
 ![The fifth turn: the tests are green again](img/pia-osg-5-green.png)
@@ -231,8 +238,7 @@ just for PIA: about 0.8 GB, plus about 0.5 GB for the pinned transpiler.
 The replay does not read your task: it hands out the recorded answers in
 order. Type the five tasks in this order, or the model will answer a
 question you did not ask. There is a recording per language
-(`pia-chapter.en.rec`, `.da.rec`, `.ru.rec`); the Danish and Russian tasks
-are in PIA's [test](https://github.com/oisee/pia/blob/e815e79/osg-probe/ui/tui-e2e.mjs).
+(`pia-chapter.en.rec`, `.da.rec`, `.ru.rec`).
 
 On open-steamgate an activation goes live when the turn ends. That is why
 the model says the publication is pending, and why the tests run in the next
@@ -240,9 +246,11 @@ turn rather than in the same one. With your own key in `~/.config/pia/pia.env`
 (`ZAI_API_KEY=…`) and no `PIA_LLM` line, the same terminal talks to the live
 model instead.
 
-The same test PIA's authors run drives the terminal for you, if you prefer:
+The same test PIA's authors run drives the terminal for you, if you prefer.
+After a run by hand the recording is used up, so reset it first:
 
 ```
+rm -f ~/.config/pia/pia-chapter.en.rec.pos
 cd ~/dev/osg-pia && npx playwright install chromium     # once
 cd - && PIA_E2E_USER=alice PIA_E2E_PASS=alice OSG=~/dev/osg-pia \
   node osg-probe/ui/tui-e2e.mjs http://127.0.0.1:<port>/sap/bc/zpia_tui/ en
