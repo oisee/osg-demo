@@ -9,9 +9,10 @@ it and runs its ABAP Unit tests, on that same system and as you.
 
 Everything here is PIA's own, from its releases
 [v0.1.0](https://github.com/oisee/pia/releases/tag/v0.1.0) and
-[v0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1). The pictures are
-PIA 0.1.1: five on SAP's ABAP Platform Trial (A4H, NetWeaver 7.58), two on
-open-steamgate; this chapter did not repeat the runs. The last section says what it takes to run the same thing in your
+[v0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1). Five pictures
+are PIA's own, taken with 0.1.1 on SAP's ABAP Platform Trial (A4H, NetWeaver
+7.58); the two open-steamgate pictures were taken for this book, following
+the last section's steps. The last section says what it takes to run the same thing in your
 own sandbox.
 
 ## A turn
@@ -164,41 +165,89 @@ These are PIA's own findings, from its reports and porting notes.
   ([report](https://github.com/oisee/pia/blob/v0.1.0/reports/2026-10-06-SELF-HOSTING.md)).
   An ABAP agent, written in ABAP, changed its own ABAP.
 
-## The same run on open-steamgate
+## Run it yourself on open-steamgate
 
-[PIA 0.1.1](https://github.com/oisee/pia/releases/tag/v0.1.1) runs the same
-five turns on open-steamgate. These pictures were taken there, replaying the
-recorded model answers described below
-([screenshots/osg-tui](https://github.com/oisee/pia/tree/68431f8/screenshots/osg-tui)).
-One difference shows in the agent's answers: on open-steamgate an activation
-is published at the end of the turn, so the model says "publish pending, live
-in the next step", and the tests run in the next turn.
+This book's open-steamgate tag has everything PIA's terminal needs:
+- the agent development API;
+- AMC channel extensions;
+- publishing at the end of an APC step;
+- warm recycles that wait while a push channel is open.
 
-![On open-steamgate: red after the break, then add goes back to a + b and is activated](img/pia-osg-4-fix.png)
+PIA's README names the same commit, `292a4c60`
+([README at e815e79](https://github.com/oisee/pia/blob/e815e79/README.md)).
+The steps below replay the model's answers, so you need no key and no
+network once things are installed. PIA's own tools still run for real:
+they read, write, activate and test the class in your system.
+
+You need git, Node 22 or newer, and room for a second open-steamgate tree
+just for PIA: about 0.8 GB, plus about 0.5 GB for the pinned transpiler.
+
+1. Clone PIA and set up its own open-steamgate:
+
+   ```
+   git clone https://github.com/oisee/pia && cd pia
+   osg-probe/osg-setup.sh ~/dev/osg-pia
+   ```
+
+   The script clones open-steamgate at `vscode-stable-v0.7.1696` into
+   `~/dev/osg-pia`. Then it:
+   - installs it and pins the transpiler;
+   - deploys PIA and starts the system;
+   - waits until the system serves and activates `ZCL_PIA_DEMO` once;
+   - prints the terminal's address:
+     `PIA terminal: http://127.0.0.1:<port>/sap/bc/zpia_tui/ (user alice, password alice)`.
+
+   The first build takes a few minutes. It notes that `pia.env` is missing;
+   that file holds a model key, and replay needs none.
+
+2. Tell PIA to answer from the English recording:
+
+   ```
+   cp replay/pia-chapter.en.rec ~/.config/pia/
+   echo "PIA_LLM=replay:pia-chapter.en.rec" > ~/.config/pia/pia-settings.env
+   rm -f ~/.config/pia/pia-chapter.en.rec.pos
+   ```
+
+   `~/.config/pia` is where the setup points the system's data directories
+   (`OSD_DATASET_*`). The `.pos` file remembers how far the replay got;
+   deleting it starts over.
+
+3. Open the address in a browser, log on as `alice` / `alice`, and type the
+   five tasks, one at a time:
+   1. `Run the tests of ZCL_PIA_DEMO.`
+   2. `In ZCL_PIA_DEMO, change add to a - b and activate it.`
+   3. `Run the tests of ZCL_PIA_DEMO again.`
+   4. `Change add back to a + b and activate it.`
+   5. `Run the tests of ZCL_PIA_DEMO once more.`
+
+   Expected: green, the change and its activation, red (expected 5, actual
+   −1), the fix, and green again. The answers are the recorded ones; the
+   tool calls, the source in your system and the test results are yours.
+
+![The red turn on open-steamgate, replayed: ADD_2_3 expected 5, got −1](img/pia-osg-3-red.png)
 
 ![The fifth turn: the tests are green again](img/pia-osg-5-green.png)
 
-## Running it on your own open-steamgate
+The replay does not read your task: it hands out the recorded answers in
+order. Type the five tasks in this order, or the model will answer a
+question you did not ask. There is a recording per language
+(`pia-chapter.en.rec`, `.da.rec`, `.ru.rec`); the Danish and Russian tasks
+are in PIA's [test](https://github.com/oisee/pia/blob/e815e79/osg-probe/ui/tui-e2e.mjs).
 
-PIA 0.1.1 can replay the chapter without a model key. `PIA_LLM=record:<file>`
-in `pia-settings.env` (settings without secrets, next to `pia.env`) writes
-every model answer to a file; `PIA_LLM=replay:<file>` answers from it, in
-order, with no key and no network. The tools still run for real. The release
-carries `pia-chapter.rec`: the five-turn scenario in English, Danish and
-Russian, recorded on open-steamgate. Delete `pia-chapter.rec.pos` to start
-over ([release notes](https://github.com/oisee/pia/releases/tag/v0.1.1)).
+On open-steamgate an activation goes live when the turn ends. That is why
+the model says the publication is pending, and why the tests run in the next
+turn rather than in the same one. With your own key in `~/.config/pia/pia.env`
+(`ZAI_API_KEY=…`) and no `PIA_LLM` line, the same terminal talks to the live
+model instead.
 
-The book's open-steamgate tag includes the three runtime fixes named in
-PIA's release notes: AMC channel-extension matching (#630), publication
-completed before the next event on the same APC socket (#636), and deferral
-of quiet and swap-count warm recycles while an APC socket is open (#631).
-The heap safety limit and correctness-driven recycles can still cut sockets;
-this is not a guarantee against every runtime restart. See the tag's
-[release notes](https://github.com/oisee/open-steamgate/releases/tag/vscode-stable-v0.7.1696)
-and [warm lifecycle](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/warm-compile.md).
-The pictures above remain the recorded PIA 0.1.1 run; they are not a fresh
-PIA acceptance run on this tag.
+The same test PIA's authors run drives the terminal for you, if you prefer:
 
-On SAP, PIA installs today: an abapGit zip, two certificates for the model's
-host, a key file, and the terminal at `/sap/bc/zpia_tui/`. The
-[README](https://github.com/oisee/pia/blob/v0.1.1/README.md) has the steps.
+```
+cd ~/dev/osg-pia && npx playwright install chromium     # once
+cd - && PIA_E2E_USER=alice PIA_E2E_PASS=alice OSG=~/dev/osg-pia \
+  node osg-probe/ui/tui-e2e.mjs http://127.0.0.1:<port>/sap/bc/zpia_tui/ en
+```
+
+On SAP, PIA installs from an abapGit zip with two certificates for the
+model's host, a key file, and the terminal at `/sap/bc/zpia_tui/`; the
+[README](https://github.com/oisee/pia/blob/e815e79/README.md) has the steps.
