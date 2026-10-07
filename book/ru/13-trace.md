@@ -99,4 +99,4 @@ AND voy~dep_date > iv_date
 `node -e "for (const o of require('./src/l2/zcl_osd_fleet_l2_maint.clas.trace.json').outputs) for (const e of o.lines) console.log(o.file, e.line ?? e.lines, e.sources)"`.
 
 Контракт — в документации open-steamgate
-[по формату трассировки v1](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/trace-format.md).
+[по формату трассировки v1](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/trace-format.md).

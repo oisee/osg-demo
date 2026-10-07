@@ -82,7 +82,7 @@ open-steamgate игнорируют вызов события, пришедши�
    `WAITING`: ее событие так и не было вызвано. Оставьте ее для доктора ниже.
    Фасад теперь поддерживает `BP_JOB_DELETE` для ждущего задания; в этом
    упражнении он не вызывается. Для нового упражнения возьмите новый каталог
-   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/job-standard-fms.md).
+   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/job-standard-fms.md).
 3. Нажмите **F9** на `ZCL_OSD_FLEET_BAL_VIEW`. Ожидается: `<A>-VOY` с
    `Voyage step OK: 20 voyages`, `<A>-READY` с
    `Fleet ready: 6 ships after a clean voyage step` и `<B>-VOY` с

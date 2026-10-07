@@ -31,9 +31,9 @@ this chapter did not repeat them.
   `abapiti says 42`. Every answer equals the same wasm run in wazero.
 - On open-steamgate's Go runtime (osgo, available in the book's tag) the
   same nine pass; abapiti's measurement was about 2 seconds on the kernel
-  and about 90 on osgo. The tag's [support evidence](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/osg-support.md)
+  and about 90 on osgo. The tag's [support evidence](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/osg-support.md)
   also records nine passing tests on osgo. On the JavaScript runtime used by
-  VS Code, the tag now records all nine QuickJS tests passing in 506.43 seconds
+  VS Code, the tag now records all nine QuickJS tests passing in 469.93 seconds
   after the buffered xstring write fix. These are published measurements;
   this book’s small C demo does not rerun that corpus.
 

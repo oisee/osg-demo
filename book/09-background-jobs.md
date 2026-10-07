@@ -82,7 +82,7 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
    `WAITING`: its event was never raised. Leave it there for the doctor below.
    The facade now supports `BP_JOB_DELETE` for a waiting job; this exercise
    does not call it. For a fresh exercise, use a new database directory.
-   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/job-standard-fms.md).
+   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/job-standard-fms.md).
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with

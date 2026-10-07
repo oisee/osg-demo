@@ -237,7 +237,7 @@ ENDIF.
 ![Слева: условный UPDATE дает открыть этап 2 ровно одному из двух заданий. Справа: упавшая стопка оставляет этап 1 PARTIAL, а этап 2 NOT-RUN](../img/l3-gate.ru.png)
 
 Эти случаи в главе не выполняются. Так сгенерированный исполнитель
-описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/docs/dsl-l3.md)
+описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/docs/dsl-l3.md)
 open-steamgate (раздел «The worklist and the gate»), и их проверяют ее
 собственные тесты.
 

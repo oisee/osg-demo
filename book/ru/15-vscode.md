@@ -22,9 +22,9 @@
 ![Problems: OSD kernel отклоняет BIT-AND для целых чисел; ссылка ведёт к объяснению поддержки](../img/vscode-kernel-diagnostic.png)
 
 Поведение отладчика и обработчика описано в
-[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/README.md);
+[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/editors/vscode/README.md);
 `osg.kernelStrict` задан в его
-[настройках](https://github.com/oisee/open-steamgate/blob/vscode-v0.6.1650/editors/vscode/package.json).
+[настройках](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1688/editors/vscode/package.json).
 
 ## От службы к коду
 
