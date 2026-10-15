@@ -1,6 +1,6 @@
 # I only wanted to run a little ABAP
 
-*…and now there is a local ABAP runtime inside a VS Code extension. =)*
+*…and now there is a pocket ABAP runtime inside a VS Code extension. =)*
 
 Ask an ABAP developer what they need to start developing in ABAP, and you'll get a small history of our tools. Somebody will say SE38, somebody will remember practically living in SE80, then we get to Eclipse and ADT, VS Code and abap-fs, and eventually somebody mentions MCP and vibing-steampunk.
 
@@ -8,7 +8,7 @@ And of course we need an agent now. Claude, Codex, Pi, GitHub Copilot… perhaps
 
 All of these give us different ways to work, but somewhere underneath them — underneath the editor, underneath the agent, underneath the whole modern conversation about how modern everything has become — we arrive at the same requirement: you need a system.
 
-And I do like having a system. I'm grateful to SAP for the Developer Trials, and A4H in particular; having a real system to check how things actually behave is invaluable.
+And I do like having a system. I'm grateful to SAP for the Developer Trials; a real system to validate against before anything goes further is invaluable.
 
 But sometimes I want to try something much smaller. Change a method, see what comes back from an OData service, adjust a CDS view and check what the Fiori application makes of it — preferably while I still remember what I was trying to find out, rather than after I've wandered off during the build. Or try two implementations at once. Or let a second agent work on the same problem, before the first one develops opinions about shared state.
 
@@ -76,7 +76,7 @@ And then Eclipse arrived. Yes, Eclipse. Stock ADT, through the RFC-to-ADT bridge
 
 This is the bit I keep wanting to show people. There is something quietly wonderful about an IDE opening a repository tree while the "system" at the other end is a collection of files and a local process you can go and look at. The furniture is familiar. The building has become portable.
 
-There is a local WebGUI-style interface too, with converted classic reports, and separate DIAG work that gets a native SAP GUI client to accept a limited screen. I'm going to resist turning this paragraph into another article, but yes, "could we also give it a GUI?" did come up, and the answer was partly yes.
+There is a local WebGUI-style interface too, with converted classic reports. I'm going to resist turning this paragraph into another article, but yes, "could we also give it a GUI?" did come up, and the answer was partly yes (via [open-abap-gui](https://github.com/open-abap/open-abap-gui)).
 
 ![A classic ALV report in the local WebGUI](img/05-webgui-alv.png)
 
@@ -108,7 +108,9 @@ But I'd start with the extension and osg-demo, because then you have something t
 
 ## And… there is a book. Of course there is a book.
 
-I know. We were talking about running a little ABAP and now I'm asking you to consider a book about an airship fleet. The connection is that the fleet is the example application: six airships and twenty voyages, with classes, tests, debugging, services, a Fiori application, CDS, AMDP, logs and background jobs. The illustrated chapters follow the application as it grows and say what to try, what to expect, and where the local behaviour differs from SAP; English and Russian ([latest release](https://github.com/oisee/osg-demo/releases/latest)). One of the airships is called Old Boiler. I felt that an application server escaping its usual surroundings should have suitable transport.
+Do you like longreads? =) I love books!
+
+Yeah, I know. We were talking about running a little ABAP and now I'm asking you to consider a book about an airship fleet. The connection is that the fleet is the example application: six airships and twenty voyages, with classes, tests, debugging, services, a Fiori application, CDS, AMDP, logs and background jobs. The illustrated chapters follow the application as it grows and say what to try, what to expect, and where the local behaviour differs from SAP; English and Russian ([latest release](https://github.com/oisee/osg-demo/releases/latest)). One of the airships is called Old Boiler. I felt that an application server escaping its usual surroundings should have suitable transport.
 
 You don't need to read it before doing anything, though. Clone the [demo](https://github.com/oisee/osg-demo), open its folder in VS Code, start OSD, open `ZOSD_DEMO_HELLO` and press **F9**. You should get "Hello from ZOSD_DEMO_HELLO." in the console.
 
@@ -118,9 +120,9 @@ You don't need to read it before doing anything, though. Clone the [demo](https:
 
 And there we are: a little ABAP, running.
 
-There was one thing I did not expect from all this. Rebuilding the environment I needed taught me a great deal about how SAP's own application server is put together. Again and again the conversation went the same way. How do I make this work? Well, like this, probably. Ooh. And how does a real ABAP application server do it? We would go and measure it on A4H, and — oh. Almost exactly the same. *That's* why. =)
+There was one thing I did not expect from all this. Rebuilding the environment I needed taught me a great deal about how SAP's own application server is put together — mostly by sending me back to the documentation. Again and again the conversation went the same way. How do I make this work? Well, like this, probably. Ooh. And how does a real ABAP application server do it? We would go and read — the ABAP Keyword Documentation, the Basis administration book by Föse, Hagemann and Will, *SAP Gateway and OData* for the Gateway side, *Core Data Services for ABAP* for CDS and AMDP — and: oh. Almost exactly the same. *That's* why. =)
 
-Why does every message on a push channel run as a dialog step of its own, with its own commit? Why does a restarted daemon come back with nothing in its attributes? You find out by needing the answer yourself first, and then discovering that somebody at SAP needed it, too, a long time ago.
+Why does every message on a push channel run as a dialog step of its own, with its own commit? Why does a restarted daemon come back with nothing in its attributes? It's all in the keyword documentation, under database LUW and the ABAP Daemon Framework. You just don't go looking until you need the answer yourself — and then discover that somebody at SAP needed it, too, a long time ago.
 
 If you want to see where that left us, the [architecture](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696#architecture) is one picture in the README: a pool of work processes behind a proxy, ICF and APC in front of the Gateway, a seam to the database. The names will look familiar. That was not entirely the plan.
 
