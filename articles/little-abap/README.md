@@ -118,6 +118,12 @@ You don't need to read it before doing anything, though. Clone the [demo](https:
 
 And there we are: a little ABAP, running.
 
+There was one thing I did not expect from all this. Rebuilding the environment I needed taught me a great deal about how SAP's own application server is put together. Again and again the conversation went the same way. How do I make this work? Well, like this, probably. Ooh. And how does a real ABAP application server do it? We would go and measure it on A4H, and — oh. Almost exactly the same. *That's* why. =)
+
+Why does every message on a push channel run as a dialog step of its own, with its own commit? Why does a restarted daemon come back with nothing in its attributes? You find out by needing the answer yourself first, and then discovering that somebody at SAP needed it, too, a long time ago.
+
+If you want to see where that left us, the [architecture](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696#architecture) is one picture in the README: a pool of work processes behind a proxy, ICF and APC in front of the Gateway, a seam to the database. The names will look familiar. That was not entirely the plan.
+
 It took rather more than a little ABAP to get here, but you get to start with the button. I have more to tell you about where the next question led — it led, unexpectedly, to compiling the tools themselves — but first I wanted to finally show you this one.
 
 Meet Open SteamGate. =)
