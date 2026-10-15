@@ -122,4 +122,4 @@ It took rather more than a little ABAP to get here, but you get to start with th
 
 Meet Open SteamGate. =)
 
-[open-steamgate](https://github.com/oisee/open-steamgate) · [osg-demo](https://github.com/oisee/osg-demo)
+[open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) · [osg-demo](https://github.com/oisee/osg-demo)
