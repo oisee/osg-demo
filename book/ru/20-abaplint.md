@@ -151,8 +151,12 @@ node tools/abaplint-tests-all.mjs /path/to/abaplint out.json
   ```
 
   Та же система опубликована одним
-  индексом OCI (`ghcr.io/oisee/abapiti/zlnt-system:v0.5.2`); установка его
-  через `osd-fetch --system` тоже требует линии разработки open-steamgate.
+  индексом OCI (`ghcr.io/oisee/abapiti/zlnt-system:v0.5.2`), который
+  open-steamgate ставит через `osd-fetch --system`, без клона abapiti. На
+  open-steamgate `f83dc5c3` в этом образе ещё 28 тестов падали в трап: двух
+  возможностей рантайма в open-steamgate тогда не было; на линии разработки
+  на `5bced9f8` тот же образ прошёл все 11 060, без падений и трапов
+  ([более поздний раздел записи](https://github.com/oisee/abapiti/blob/0408d2f/docs/history/2026-10-15-abaplint-tests-on-three-runtimes.md)).
 - **Настоящая система SAP.** Импортируйте архивы abapGit из релиза в порядке,
   который даёт
   [руководство abapiti](https://github.com/oisee/abapiti/blob/v0.5.2/docs/a4h-test-suite.md),
