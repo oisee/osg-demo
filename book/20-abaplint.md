@@ -150,8 +150,12 @@ The ABAP build runs on the two other hosts too:
 
   The same
   system is published as one OCI index
-  (`ghcr.io/oisee/abapiti/zlnt-system:v0.5.2`); installing it with
-  `osd-fetch --system` also needs open-steamgate's development line.
+  (`ghcr.io/oisee/abapiti/zlnt-system:v0.5.2`), which open-steamgate installs
+  with `osd-fetch --system`, no abapiti checkout needed. On open-steamgate
+  `f83dc5c3` the image still trapped 28 tests, for two runtime features
+  open-steamgate did not have yet; on its development line at `5bced9f8` the
+  same image passed all 11,060, with none failed or trapped
+  ([the record's later section](https://github.com/oisee/abapiti/blob/0408d2f/docs/history/2026-10-15-abaplint-tests-on-three-runtimes.md)).
 - **A real SAP system.** Import the release's abapGit archives in the order
   [abapiti's guide](https://github.com/oisee/abapiti/blob/v0.5.2/docs/a4h-test-suite.md)
   gives, run report `ZLNT_TESTS_RUN` per shard as a background job, and
