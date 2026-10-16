@@ -1,6 +1,6 @@
 # 20. The tools come home: abaplint in ABAP
 
-open-steamgate activates your ABAP through abaplint, Lars Hvam's ABAP
+open-steamgate activates your ABAP through abaplint, [Lars Hvam's](https://github.com/abaplint/abaplint/blob/30c6443c6a16b7998621a630355a2b81daeea977/LICENSE) ABAP
 parser and linter written in TypeScript, and its transpiler. Chapter 18 took
 other languages into ABAP for the fun of it. This chapter takes in abaplint
 itself, translated into ABAP, running inside an ABAP application server.
