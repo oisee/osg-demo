@@ -1,11 +1,9 @@
 # 20. The tools come home: abaplint in ABAP
 
-Everything in this book runs through abaplint. Lars Hvam's ABAP parser and
-linter, written in TypeScript, and its transpiler are how open-steamgate
-reads your ABAP, checks it and activates it. Chapter 18 took
-other languages into ABAP for the fun of it. This chapter takes in the tool
-that made the rest possible: abaplint itself, translated into ABAP, running
-inside an ABAP application server.
+open-steamgate activates your ABAP through abaplint, Lars Hvam's ABAP
+parser and linter written in TypeScript, and its transpiler. Chapter 18 took
+other languages into ABAP for the fun of it. This chapter takes in abaplint
+itself, translated into ABAP, running inside an ABAP application server.
 
 The translator is [abapiti](https://github.com/oisee/abapiti/tree/v0.5.2), the same
 project as in chapter 18. What follows is abapiti's
@@ -16,9 +14,8 @@ this chapter did not repeat the SAP runs.
 
 ## The road
 
-abapiti reads abaplint's TypeScript with the checker of tsgo, the
-TypeScript compiler written in Go, so it starts from the types the compiler worked out, not from the
-text. It lowers the program into a typed object representation of its own,
+abapiti reads abaplint's TypeScript with the tsgo checker, so it starts
+from the types the checker worked out, not from the text. It lowers the program into a typed object representation of its own,
 the HIR, and writes it out in one of two ways:
 
 - as ABAP classes and interfaces, readable and importable with abapGit;
@@ -82,10 +79,10 @@ of the original abaplint on Node, byte for byte.
 
 These are abapiti v0.3 (`f9d5f8c`) with open-steamgate `7720f6e2` (the
 JavaScript runtime: `6e10128e`). The Go runtime, the native build, Go and
-Node ran on one Linux machine with 16 hardware threads and other jobs
-running; A4H is a separate machine. The JavaScript
-runtime that runs this book's fleet in seconds took 85 minutes over this
-program; the Go runtime took a quarter of a minute.
+Node ran on one Linux machine, 16-core in abapiti's words, with other jobs
+running; A4H is a separate machine. On this program
+the JavaScript runtime took 85 minutes; the Go runtime took a quarter of a
+minute.
 
 ## What comes next
 
@@ -123,7 +120,7 @@ node tools/abaplint-tests-all.mjs /path/to/abaplint out.json
 
 It compiles all seventeen shards to Go, runs them against the Node run of
 the same tests, and prints a table per shard. This book ran it from the tag
-on an Intel Core i7-10700K (8 cores, 16 threads, about 126 GB of memory), Node 24.21.0 and Go
+on an Intel Core i7-10700K (8 cores, 16 threads, about 126 GiB of memory), Node 24.21.0 and Go
 1.26.0, with other jobs on the machine; it took 49 minutes 27 seconds and
 ended:
 
