@@ -2,7 +2,7 @@
 
 *…and now there is a pocket ABAP runtime inside a VS Code extension. =)*
 
-TL;DR: start here: [launchpad/Sysinfo](https://oisee.github.io/open-steamgate/main/app/flp.html) · github: [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) | [osg-demo](https://github.com/oisee/osg-demo)
+TL;DR: start here: [launchpad/Sysinfo](https://oisee.github.io/open-steamgate/main/app/flp.html#Shell-home) · github: [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) | [osg-demo](https://github.com/oisee/osg-demo)
 
 Ask an ABAP developer what they need to start developing in ABAP, and you'll get a small history of our tools. Somebody will say SE38, somebody will remember practically living in SE80, then we get to Eclipse and ADT, VS Code and abap-fs, and eventually somebody mentions MCP and vibing-steampunk.
 
