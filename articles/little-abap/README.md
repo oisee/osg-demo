@@ -104,7 +104,7 @@ And of course, once you have a push channel and a runtime you can see into, some
 
 ![The sharp mountains of Vivid Vibes in four panels: the Node runtime, the Go build, the Go build with the C library's sine, and a magenta difference along the ridges](img/07-vivi-mountains.gif)
 
-![The tesseract in four panels: the Node runtime shades its lines from 39 to 68 %, both Go builds give 20 or 80 %, and the difference panel is magenta](img/08-vivi-tesseract.gif)
+![The tesseract in four panels: the Node runtime, the Go build, the Go build with the C library's sine, and a magenta difference](img/08-vivi-tesseract.gif)
 
 There are limits, of course, and I'll say them once. OSG is an independent implementation of a subset of ABAP application-server behaviour, not a replacement for SAP and not a complete implementation of its stack. The supported workflows and the compatibility gaps are documented, including the harness scenario that currently fails, and code intended for a real SAP system still needs validating on that system. The point is to do more of the developing and experimenting locally, with a deliberate step back to SAP when the application is ready.
 
