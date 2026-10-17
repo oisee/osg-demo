@@ -2,6 +2,8 @@
 
 *…and now there is a pocket ABAP runtime inside a VS Code extension. =)*
 
+TL;DR: start here: [launchpad/Sysinfo](https://oisee.github.io/open-steamgate/main/app/flp.html) · github: [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) | [osg-demo](https://github.com/oisee/osg-demo)
+
 Ask an ABAP developer what they need to start developing in ABAP, and you'll get a small history of our tools. Somebody will say SE38, somebody will remember practically living in SE80, then we get to Eclipse and ADT, VS Code and abap-fs, and eventually somebody mentions MCP and vibing-steampunk.
 
 And of course we need an agent now. Claude, Codex, Pi, GitHub Copilot… perhaps several of them, although I would quite like them to have separate copies of whatever they are about to enthusiastically improve.
@@ -10,11 +12,9 @@ All of these give us different ways to work, but somewhere underneath them — u
 
 And I do like having a system. I'm grateful to SAP for the Developer Trials; a real system to validate against before anything goes further is invaluable.
 
-But sometimes I want to try something much smaller. Change a method, see what comes back from an OData service, adjust a CDS view and check what the Fiori application makes of it — preferably while I still remember what I was trying to find out, rather than after I've wandered off during the build. Or try two implementations at once. Or let a second agent work on the same problem, before the first one develops opinions about shared state.
+But sometimes I want to try something much smaller. Or much faster. Change a method, see what comes back from an OData service, adjust a CDS view and check what the Fiori application makes of it — preferably while I still remember what I was trying to find out, rather than after I've wandered off during the build. Or try two implementations at once. Or let a second agent work on the same problem, before the first one develops opinions about shared state.
 
-A modest wish.
-
-All my expensive side quests begin with a modest wish.
+A modest wish. All my expensive side quests begin with a modest wish.
 
 So I started wondering how much of that loop we could have locally: ABAP source, a database, some services, the tools we already know — enough to develop and run an application without attaching a SAP application server. Over the past couple of months that question turned into Open SteamGate, and before I get distracted explaining how, here is where it ended up: stock Eclipse ADT, connected to a local OSG instance, opening classes and running ABAP Unit. The system behind that connection is a folder of files and a local process.
 
@@ -28,7 +28,7 @@ Yes, the red test is intentional. The system should be able to disagree with us 
 
 "But Alice," you may reasonably interrupt, "haven't you already been doing unreasonable things with ABAP and a Z80?"
 
-Yes. But before we get carried away by the small antique processor: none of this would have got anywhere without Lars Hvam — [abaplint](https://github.com/abaplint/abaplint), its [ABAP-to-JavaScript transpiler](https://github.com/abaplint/transpiler) and the [open-abap](https://github.com/open-abap) libraries.
+Yes. But before we get carried away by the small antique processor: none of this would have got anywhere without Lars Hvam Petersen — [abaplint](https://github.com/abaplint/abaplint), its [ABAP-to-JavaScript transpiler](https://github.com/abaplint/transpiler) and the [open-abap](https://github.com/open-abap) libraries.
 
 abaplint has been around for about a decade, and the transpiler has been running ABAP outside SAP for years too — abapGit's own ABAP Unit tests run on it in CI. There is an enormous amount of engineering in being able to parse ABAP, understand its structure, translate it, and then provide the runtime behaviour the translated program expects.
 
@@ -48,7 +48,7 @@ Take the familiar MPC and DPC classes from a classic SEGW service and give them 
 
 *The service method in VS Code and its OData response: HTTP 200, six airships.*
 
-Once that worked, CDS was fairly irresistible: another way to describe and expose the data, and naturally I wanted that too. And yes, AMDP as well — with HANA Express connected, the SQLScript body of an ABAP-managed database procedure runs on HANA itself, and there is a portable subset that runs on DuckDB without HANA (from a source checkout; the SQLite inside the VS Code extension is not a target for it yet). So the local experiment can include database-side logic rather than stopping at the boundary of the method.
+Once that worked, CDS was fairly irresistible: another way to describe and expose the data, and naturally I wanted that too. And yes, AMDP as well — with HANA Express connected, the SQLScript body of an ABAP-managed database procedure runs on HANA itself, and there is a portable AMDP subset that runs on DuckDB without HANA (from a source checkout; the SQLite inside the VS Code extension is not a target for it yet). So the local experiment can include database-side logic rather than stopping at the boundary of the method.
 
 At this point a sensible person writes a README and goes for a walk. I had the tea.
 
@@ -64,7 +64,11 @@ So OSG grew an ADT façade over the local source tree: repository browsing, sour
 
 A thank you here to Marcello Urbani for abap-fs and abap-adt-api, and to Aravindh Ganapathi for his contributions to abap-fs. Being able to work with the tools people already use is what makes this interesting to me, rather than having yet another isolated runtime with its own special way of doing everything.
 
-And then Eclipse arrived. Yes, Eclipse. Stock ADT, through the RFC-to-ADT bridge as a Custom Application Server: open the package tree, edit a class, run the tests against the local system.
+Implementing the server side of ADT turned out to be the easier half of the conversation, and the reason is the open client side. Between abap-fs and VSP, practically the whole surface was already known: every request they make, every header they expect, every shape they are prepared to parse. The job was to trace around the outline of the client and draw in the missing piece of the puzzle — the piece the client had always been talking to, and which had simply never been open before.
+
+I wrote that piece in JavaScript first, because that is where the runtime lives. Then I rewrote it in ABAP, and there were reasons. If we can transpile ABAP to JavaScript — and, as it turns out, to a Z80 — then we can transpile it to other backends too, and a façade written once in the lingua franca can follow the runtime wherever it goes next. So the ADT server is ABAP now: ABAP serving ADT so that ABAP tools can edit ABAP, which is either very elegant or slightly recursive, and I have decided it is elegant.
+
+And then Eclipse arrived. Yep, Eclipse. Stock ADT, with the local system registered in Eclipse as a Custom Application Server: open the package tree, edit a class, run the tests against the local filesystem.
 
 ![Eclipse Project Explorer: the local system's packages, among them $O4D, $LSD, $ZORK, $OPEN_ABAP_APC and $ZOSD_TEST](img/03-eclipse-packages.png)
 
@@ -76,7 +80,7 @@ And then Eclipse arrived. Yes, Eclipse. Stock ADT, through the RFC-to-ADT bridge
 
 This is the bit I keep wanting to show people. There is something quietly wonderful about an IDE opening a repository tree while the "system" at the other end is a collection of files and a local process you can go and look at. The furniture is familiar. The building has become portable.
 
-There is a local WebGUI-style interface too, with converted classic reports. I'm going to resist turning this paragraph into another article, but yes, "could we also give it a GUI?" did come up, and the answer was partly yes (via [open-abap-gui](https://github.com/open-abap/open-abap-gui)).
+There is a local WebGUI-style interface too, with converted classic reports. I'm going to resist turning this paragraph into another article, but yes, "could we also give it a GUI?" did come up, and the answer was partly yes. (via [open-abap-gui](https://github.com/open-abap/open-abap-gui)).
 
 ![A classic ALV report in the local WebGUI](img/05-webgui-alv.png)
 
@@ -91,6 +95,16 @@ For me the interesting part is what happens when the environment becomes somethi
 Suppose you're refactoring a service. Run the original implementation in one instance and the changed version in another, each with its own database and the same starting data, and compare the OData responses, the SQL, the place where they diverge. That's what I mean by branching the system: the experiment includes the runtime, the object definitions and the data, not just a branch of source code that still depends on whatever is installed in a shared development system.
 
 Or give an agent a room of its own, where it can edit, activate, run tests and find out what it broke while your copy carries on working — off-stack, on a local runtime that is not a SAP system and doesn't talk to one. Several agents may still disagree, but no longer inside the same system. When the work is ready it travels the last mile the way any developer's code does: through abapGit, reviewed, with a person at the keyboard.
+
+And because the runtime is ours, it can be as talkative as we like. A real application server tells you what it is prepared to tell you: a log here, a trace there, a dump if you're lucky. This one can write down everything — every dialog step, every statement, every commit, every message on every channel — the trace of the whole universe, if you want it. Take a snapshot of the system before a request and another after it, and you have a time machine: rewind, replay, step through the same request against the same data until you find the exact place where it went wrong. Root-cause analysis from snapshots rather than from SM21 and a hunch. Nobody has to reproduce the bug on Monday morning; the bug is in the folder.
+
+Then there is the fact that both ends of the loop are JavaScript. The transpiled ABAP, the OData runtime, the database — and the Fiori application in front of them. There is no reason for the "server" to be a separate process at all, so there is a version where it isn't: the whole thing, backend and frontend, lives inside a browser tab in a Service Worker. An ABAP server you can open from a link. Hand somebody a URL and they have a system, with your service and your data in it, and nothing to install. I find this quietly absurd, and I mean that as a compliment. Behold!
+
+And of course, once you have a push channel and a runtime you can see into, somebody is going to write a demo. =) So there is a chapter where the fleet is left to rest and the push channel draws mountains and a rotating tesseract, one frame per APC message. That started as showing off and turned into an instrument. The demos run on more than one build of the runtime — Node, and two Go builds — and a plotted landscape is a very honest test: where the arithmetic differs, the picture differs, and you can see it without a diff tool. The Node runtime drew the mountains with gently rounded ridges because, deep in the generated code, `abs( … )` had been declared as an integer. The Go builds drew them sharp. The sine functions disagreed too [Node vs glibc]; the two Go builds between themselves didn't disagree at all. A frame-by-frame comparison of two GIFs found compiler and runtime differences that no unit test had thought to look for. Any demoscener could have told me this; I just had to rediscover it in ABAP.
+
+![The sharp mountains of Vivid Vibes in four panels: the Node runtime, the Go build, the Go build with the C library's sine, and a magenta difference along the ridges](img/07-vivi-mountains.gif)
+
+![The tesseract in four panels: the Node runtime shades its lines from 39 to 68 %, both Go builds give 20 or 80 %, and the difference panel is magenta](img/08-vivi-tesseract.gif)
 
 There are limits, of course, and I'll say them once. OSG is an independent implementation of a subset of ABAP application-server behaviour, not a replacement for SAP and not a complete implementation of its stack. The supported workflows and the compatibility gaps are documented, including the harness scenario that currently fails, and code intended for a real SAP system still needs validating on that system. The point is to do more of the developing and experimenting locally, with a deliberate step back to SAP when the application is ready.
 
@@ -128,6 +142,6 @@ If you want to see where that left us, the [architecture](https://github.com/ois
 
 It took rather more than a little ABAP to get here, but you get to start with the button. I have more to tell you about where the next question led — it led, unexpectedly, to compiling the tools themselves — but first I wanted to finally show you this one.
 
-Meet Open SteamGate. =)
+Meet Open SteamGate — an off-stack ABAP system, a VS Code extension, a Docker container(s), a friendly bay for your agents.
 
 [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) · [osg-demo](https://github.com/oisee/osg-demo)
