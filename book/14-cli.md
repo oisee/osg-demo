@@ -104,6 +104,73 @@ instead, so the same binary works in scripts. The labels are the report's
 selection texts, read from `zosd_fleet_cli.prog.xml` at build time, the same
 ones `-help` shows.
 
+## A file chosen with F4
+
+The fleet report reads its CSV with `OPEN DATASET`: a file the program names
+by path, as a file on the application server would be. A report that asks the
+user for a file works differently on a system: F4 on the parameter opens the
+frontend's file dialog, and the program reads the chosen file from the
+frontend with `GUI_UPLOAD`. The second report of this chapter,
+[ZOSD_FLEET_CSV](../cli/csv/zosd_fleet_csv.prog.abap), does exactly that and
+shows the file as a simple list, the column headings taken from its first
+line:
+
+<!-- code: cli/csv/zosd_fleet_csv.prog.abap lines 22-41 -->
+```abap
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  DATA lt_files  TYPE filetable.
+  DATA lv_rc     TYPE i.
+  DATA lv_action TYPE i.
+  cl_gui_frontend_services=>file_open_dialog(
+    EXPORTING window_title = 'Choose a CSV file'
+              file_filter  = 'CSV (*.csv)|*.csv|All (*.*)|*.*'
+    CHANGING  file_table   = lt_files
+              rc           = lv_rc
+              user_action  = lv_action ).
+  IF lv_action = cl_gui_frontend_services=>action_ok AND lv_rc > 0.
+    READ TABLE lt_files INDEX 1 INTO DATA(ls_file).
+    p_file = ls_file-filename.
+  ENDIF.
+
+START-OF-SELECTION.
+  cl_gui_frontend_services=>gui_upload(
+    EXPORTING filename = p_file
+              filetype = 'ASC'
+    CHANGING  data_tab = gt_lines ).
+```
+
+`test/cli.mjs` builds it beside the fleet program, into `run/fleet-csv`, and
+keeps two CSV files in `/tmp/fleet-cli/data`.
+
+1. `./fleet-csv -allow-read /tmp/fleet-cli/data`. Expected: the form, with
+   one field.
+
+   ![The CSV report's selection screen](img/csv-form.png)
+
+2. F4 on the field. Expected: a file browser in the terminal, at the folder
+   the grant allows and nothing outside it. Arrows move, Enter opens a folder
+   or chooses a file, `/` filters, Esc cancels.
+
+   ![F4: the terminal file browser at the granted folder](img/csv-f4.png)
+
+3. Enter on `fleet.csv`, then Enter to run. Expected: the chosen path back in
+   the field, then the list: the headings from the file's first line, the six
+   ships, `6 rows, 5 columns`.
+
+   ![The CSV as a list](img/csv-list.png)
+
+4. Without a screen, from that folder:
+   `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
+   prints the same list. Without `-allow-read` it prints `osabap: permission
+   denied` on stderr and exits with 1: the file dialog and `GUI_UPLOAD` use the
+   same sandbox as `DATASET`, so a file outside the grant can be neither listed
+   nor read.
+
+At this book's tag the list has an empty line after each of the first two
+rules and the count is indented by four spaces. open-steamgate removed both
+after the tag, in
+[PR #809](https://github.com/oisee/open-steamgate/pull/809).
+
 ## A relative: screens in CICS
 
 The selection screen and the dynpro are SAP's, but the way they work has a
@@ -139,15 +206,19 @@ layer in 4.6 (p. 104–106).
   inside the roots `-allow-read` / `-allow-write` grant.
 - **Classes** beside the report or from `--lib` folders; open-abap-core
   classes it names come along.
-- **One selection screen and one run** per process; no F4 value help, popups
-  or interactive lists (`AT LINE-SELECTION`) yet; no HTTP, OData or ICF.
+- **One selection screen and one run** per process. F4 runs
+  `AT SELECTION-SCREEN ON VALUE-REQUEST` in the terminal form, and the
+  frontend file dialogs open a file browser there (not in `-sapgui` mode);
+  no F1, popups or interactive lists (`AT LINE-SELECTION`) yet; no HTTP,
+  OData or ICF.
 - **Like a system**: a pattern in `CP` uses `#` as its escape character, so a
   line starting with `#` is `CP '##*'`, not `CP '#*'`. **Unlike one**: a
   selection screen upper-cases `--status m`, the command line does not, so
   the report does it with `TRANSLATE`.
 
 The specification is open-steamgate's
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/main/docs/osabap-native.md).
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md), and F4 has its own,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
 
 ## Under the hood
 

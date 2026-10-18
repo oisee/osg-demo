@@ -105,6 +105,73 @@ number; nothing loaded`, и ни один корабль из файла не с
 прочитанные из `zosd_fleet_cli.prog.xml` при сборке, те же, что показывает
 `-help`.
 
+## Файл, выбранный по F4
+
+Отчет флота читает свой CSV через `OPEN DATASET`: файл, который программа
+называет по пути, как файл на сервере приложений. Отчет, который просит
+пользователя выбрать файл, в системе устроен иначе: F4 на параметре открывает
+файловый диалог фронтенда, а программа читает выбранный файл с фронтенда через
+`GUI_UPLOAD`. Второй отчет этой главы,
+[ZOSD_FLEET_CSV](../../cli/csv/zosd_fleet_csv.prog.abap), делает ровно это и
+показывает файл простым списком, заголовки колонок берутся из его первой
+строки:
+
+<!-- code: cli/csv/zosd_fleet_csv.prog.abap lines 22-41 -->
+```abap
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  DATA lt_files  TYPE filetable.
+  DATA lv_rc     TYPE i.
+  DATA lv_action TYPE i.
+  cl_gui_frontend_services=>file_open_dialog(
+    EXPORTING window_title = 'Choose a CSV file'
+              file_filter  = 'CSV (*.csv)|*.csv|All (*.*)|*.*'
+    CHANGING  file_table   = lt_files
+              rc           = lv_rc
+              user_action  = lv_action ).
+  IF lv_action = cl_gui_frontend_services=>action_ok AND lv_rc > 0.
+    READ TABLE lt_files INDEX 1 INTO DATA(ls_file).
+    p_file = ls_file-filename.
+  ENDIF.
+
+START-OF-SELECTION.
+  cl_gui_frontend_services=>gui_upload(
+    EXPORTING filename = p_file
+              filetype = 'ASC'
+    CHANGING  data_tab = gt_lines ).
+```
+
+`test/cli.mjs` собирает его рядом с программой флота, в `run/fleet-csv`, и
+кладет два CSV-файла в `/tmp/fleet-cli/data`.
+
+1. `./fleet-csv -allow-read /tmp/fleet-cli/data`. Ожидаемо: форма с одним
+   полем.
+
+   ![Экран выбора отчета CSV](../img/csv-form.png)
+
+2. F4 на поле. Ожидаемо: файловый браузер в терминале, в папке, которую
+   разрешает доступ, и ничего за ее пределами. Стрелки двигают, Enter
+   открывает папку или выбирает файл, `/` фильтрует, Esc отменяет.
+
+   ![F4: файловый браузер в терминале, в разрешенной папке](../img/csv-f4.png)
+
+3. Enter на `fleet.csv`, затем Enter для запуска. Ожидаемо: выбранный путь
+   возвращается в поле, затем список: заголовки из первой строки файла, шесть
+   кораблей, `6 rows, 5 columns`.
+
+   ![CSV в виде списка](../img/csv-list.png)
+
+4. Без экрана, из той же папки:
+   `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
+   печатает тот же список. Без `-allow-read` программа пишет `osabap:
+   permission denied` в stderr и выходит с кодом 1: файловый диалог и
+   `GUI_UPLOAD` живут в той же песочнице, что и `DATASET`, поэтому файл вне
+   разрешенного нельзя ни увидеть в списке, ни прочитать.
+
+На теге этой книги в списке есть пустая строка после каждой из двух первых
+черт, а итог сдвинут на четыре пробела. open-steamgate убрал и то и другое
+уже после тега, в
+[PR #809](https://github.com/oisee/open-steamgate/pull/809).
+
 ## Родственник: экраны в CICS
 
 Экран выбора и dynpro - изобретения SAP, но у их устройства есть близкий
@@ -140,17 +207,19 @@ IBM по CICS описывает псевдодиалоговую обработ
   внутри корней, которые разрешают `-allow-read` / `-allow-write`.
 - **Классы** рядом с отчетом или из папок `--lib`; классы open-abap-core,
   которые он называет, подтягиваются сами.
-- **Один экран выбора и один запуск** на процесс; справки F4, всплывающих окон
-  и интерактивных списков (`AT LINE-SELECTION`) пока нет; HTTP, OData и ICF
-  нет.
+- **Один экран выбора и один запуск** на процесс. F4 выполняет
+  `AT SELECTION-SCREEN ON VALUE-REQUEST` в форме терминала, а файловые
+  диалоги фронтенда открывают там файловый браузер (не в режиме `-sapgui`);
+  F1, всплывающих окон и интерактивных списков (`AT LINE-SELECTION`) пока
+  нет; HTTP, OData и ICF нет.
 - **Как в системе**: в шаблоне `CP` символ `#` - экранирующий, поэтому
   строка, начинающаяся с `#`, это `CP '##*'`, а не `CP '#*'`. **Не как в
   системе**: экран выбора переводит `--status m` в верхний регистр, а
   командная строка нет, поэтому отчет делает это сам через `TRANSLATE`.
 
 Спецификация - в
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/main/docs/osabap-native.md)
-open-steamgate.
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md) open-steamgate, у F4 своя,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
 
 ## Под капотом
 
