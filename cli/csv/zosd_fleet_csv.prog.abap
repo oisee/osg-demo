@@ -1,4 +1,4 @@
-REPORT zosd_fleet_csv LINE-SIZE 72.
+REPORT zosd_fleet_csv NO STANDARD PAGE HEADING LINE-SIZE 72.
 
 * Load a CSV from the frontend and show it as a simple list:
 * the first line gives the column headings.
