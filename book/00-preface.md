@@ -74,7 +74,7 @@ match for Activate.
 | Out of the sandbox | 7 Take it to a system | an abapGit zip with what may travel |
 | Operations | 8 Business log, 9 Background jobs | BAL logs, a job, a job chain, a doctor |
 | Code that writes code | 10 Generated code, 11 Lift, 12 Rules, 13 Trace | templates and traces (L0, L1, L2), a lifted routine, a fleet rule compiled to ABAP with its proof, one line traced back to the rule |
-| Out of the server | 14 My ABAP escaped | a report compiled into a native command line program and terminal form |
+| Out of the server | 14 My ABAP escaped | a report compiled into a native command line program and terminal form; F4 opens a file browser in the terminal, and a second report shows the chosen CSV as a list |
 | The workbench | 15 From a service to its code | the System view, `.http` requests resolved to their DPC method, a call from the code to its HTTP answer, the readers of a class |
 | Orchestration | 16 The night set, 17 The governor | a set of rules in YAML (DSL L3): a filter stage, a worklist, piles run as jobs, a gate that opens the next stage once, a nightly schedule; a budget of open alerts per run that stops it until a person continues it with a reason |
 | Because we can | 18 JavaScript and C in ABAP | QuickJS running as ABAP on a real kernel (abapiti's result); in your sandbox, a C function compiled to WebAssembly and by abapiti to an ABAP class, drawing the Mandelbrot set in the classrun console, byte for byte as native C |

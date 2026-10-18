@@ -1,4 +1,4 @@
-// Pictures of the fleet's command line program for book chapter 14, into
+// Pictures of the fleet's command line programs for book chapter 14, into
 // book/img/: terminal sessions of the CLI and the TUI form.
 //
 //   OSD_HOME=<open-steamgate checkout> node test/cli.mjs --keep /tmp/fleet-cli
@@ -28,6 +28,7 @@ const fail = (why) => {
   process.exit(1);
 };
 if (!existsSync(join(run, "fleet"))) fail(`no ${join(run, "fleet")}: run test/cli.mjs --keep ${kept} first`);
+if (!existsSync(join(run, "fleet-csv"))) fail(`no ${join(run, "fleet-csv")}: run test/cli.mjs --keep ${kept} first`);
 if (spawnSync("tmux", ["-V"]).status !== 0) fail("the TUI shots need tmux");
 const out = join(repo, "book", "img");
 mkdirSync(out, {recursive: true});
@@ -133,6 +134,20 @@ try {
   must("send-keys", "-t", "fleet-tui", "Enter");
   // step 6 of the session above docked S004, so one ship is left in maintenance
   await shoot("tui-result", page("./fleet -db fleet.sqlite", ansiToHtml(await screenWith(/S006 Old Boiler[^\n]*\n\s*1 ships$/m)), 90));
+
+  // the CSV report: an empty form, F4's granted folder, then the uploaded list
+  tmux("kill-session", "-t", "fleet-tui");
+  const data = join(kept, "data");
+  const command = `./fleet-csv -allow-read ${data}`;
+  must("new-session", "-d", "-s", "fleet-tui", "-x", "90", "-y", "22", `cd '${data}' && '${join(run, "fleet-csv")}' -allow-read '${data}'; sleep 60`);
+  await shoot("csv-form", page(command, ansiToHtml(await screenWith("Fleet CSV file")), 90));
+  must("send-keys", "-t", "fleet-tui", "F4");
+  for (const label of ["Choose a CSV file", data, "ships.csv"]) await screenWith(label);
+  await shoot("csv-f4", page(command, ansiToHtml(await screenWith("fleet.csv")), 90));
+  must("send-keys", "-t", "fleet-tui", "Enter");
+  await screenWith(join(data, "fleet.csv"));
+  must("send-keys", "-t", "fleet-tui", "Enter");
+  await shoot("csv-list", page(command, ansiToHtml(await screenWith("6 rows, 5 columns")), 90));
 } finally {
   tmux("kill-session", "-t", "fleet-tui");
   await browser.close();

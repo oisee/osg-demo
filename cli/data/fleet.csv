@@ -1,0 +1,7 @@
+SHIP_ID,NAME,STATUS,STEAM_PCT,HOME_PORT
+S001,Albatross,A,82,Port Aurel
+S002,Nimbus,D,100,Port Aurel
+S003,Brass Heron,A,64,Cloudhaven
+S004,Cumulus,M,15,Cloudhaven
+S005,Lady Kelvin,D,90,Tinmere
+S006,Old Boiler,M,0,Tinmere

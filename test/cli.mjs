@@ -1,4 +1,4 @@
-// Builds the fleet's command line program and runs the scenario of book
+// Builds the fleet's command line programs and runs the scenario of book
 // chapter 14 against it:
 //
 //   OSD_HOME=<open-steamgate checkout> node test/cli.mjs [--keep DIR]
@@ -8,6 +8,7 @@
 // (copies of src/ddic) and its selection texts (.prog.xml) beside it, through
 // the ABAP-to-Go transpiler into one native binary. It needs Go 1.26 on PATH
 // and the checkout's library clones at their pins (npm run bootstrap).
+// It also compiles cli/csv/zosd_fleet_csv.prog.abap and checks its CSV list.
 // --keep DIR leaves the binary and its working folder there (test/cli-shots.mjs
 // uses them). With GOOS/GOARCH for another platform it only builds, and says
 // where the binary is.
@@ -47,21 +48,27 @@ const native = target.os === ({win32: "windows"}[process.platform] || process.pl
   && target.arch === ({x64: "amd64"}[process.arch] || process.arch);
 const exe = target.os === "windows" ? ".exe" : "";
 
-console.log(`cli: building ${report} for ${target.os}/${target.arch} with ${home}`);
-rmSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), {force: true});
-const build = spawnSync(process.execPath, ["tools/gogen/osabap.mjs", report],
-  {cwd: home, encoding: "utf8", env: {...process.env, GOFLAGS: process.env.GOFLAGS ?? "-buildvcs=false"}});
-if (build.status !== 0) {
-  console.error(`cli: the build failed\n${(build.stdout + build.stderr).slice(-1500)}`);
-  process.exit(1);
-}
 const run = join(work, "run");
 rmSync(run, {recursive: true, force: true});
 mkdirSync(run, {recursive: true});
 const fleet = join(run, `fleet${exe}`);
-copyFileSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), fleet);
+const csv = join(run, `fleet-csv${exe}`);
+const csvReport = join(repo, "cli", "csv", "zosd_fleet_csv.prog.abap");
+const buildReport = (report, binary) => {
+  console.log(`cli: building ${report} for ${target.os}/${target.arch} with ${home}`);
+  rmSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), {force: true});
+  const build = spawnSync(process.execPath, ["tools/gogen/osabap.mjs", report],
+    {cwd: home, encoding: "utf8", env: {...process.env, GOFLAGS: process.env.GOFLAGS ?? "-buildvcs=false"}});
+  if (build.status !== 0) {
+    console.error(`cli: the build failed\n${(build.stdout + build.stderr).slice(-1500)}`);
+    process.exit(1);
+  }
+  copyFileSync(join(home, "tools", "gogen", ".out", `osabap${exe}`), binary);
+};
+buildReport(report, fleet);
 if (!native) {
-  console.log(`cli: built for ${target.os}/${target.arch}, not run here: ${fleet}`);
+  buildReport(csvReport, csv);
+  console.log(`cli: built for ${target.os}/${target.arch}, not run here: ${fleet}, ${csv}`);
   process.exit(0);
 }
 cpSync(join(repo, "cli", "data"), join(run, "data"), {recursive: true});
@@ -70,8 +77,8 @@ writeFileSync(join(run, "data", "bad.csv"), "S010,Plover,A,40,Tinmere\nS008,Gaug
 writeFileSync(join(run, "data", "last.csv"), "S009,Kestrel,A,50,Tinmere");
 
 const results = [];
-const check = (name, args, want, input) => {
-  const r = spawnSync(fleet, args, {cwd: run, encoding: "utf8", input});
+const check = (name, args, want, input, binary = fleet, cwd = run) => {
+  const r = spawnSync(binary, args, {cwd, encoding: "utf8", input});
   const out = `${r.stdout}${r.stderr}`;
   const problems = want(out, r.status, r.stderr, r.stdout);
   results.push(!problems);
@@ -117,6 +124,37 @@ check("--file with -allow-read loads the CSV", ["-db", "fleet.sqlite", "-allow-r
     || (/S008|S010/.test(out) ? "a ship of the refused file was kept" : ""));
 check("a last line without a line feed is read", ["-db", "fleet.sqlite", "-allow-read", "data", "-dataset-home", "data", "--file", "last.csv"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "Loaded 1 ships from last.csv", "S009 Kestrel Aloft 50 Tinmere", "8 ships"));
+
+// a frontend CSV upload needs a read grant too; this folder is also the F4 browser's
+buildReport(csvReport, csv);
+const data = join(work, "data");
+rmSync(data, {recursive: true, force: true});
+mkdirSync(data, {recursive: true});
+for (const file of ["fleet.csv", "ships.csv"]) copyFileSync(join(repo, "cli", "data", file), join(data, file));
+const checkCsv = (name, args, want) => check(name, args, want, undefined, csv, data);
+checkCsv("CSV -help has the file field and read grant", ["-help"], (out, rc) =>
+  rc !== 0 ? `rc ${rc}` : has(out, "--file", "Fleet CSV file (P_FILE, value)", "--p-name", "-allow-read DIR"));
+// the tag leaves empty lines after ULINE and indents the count; main does not
+const lines = (out) => out.split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
+const rule = "-".repeat(72);
+const list = [
+  "fleet.csv",
+  rule,
+  "| SHIP_ID | NAME        | STATUS | STEAM_PCT | HOME_PORT  |",
+  rule,
+  "| S001    | Albatross   | A      | 82        | Port Aurel |",
+  "| S002    | Nimbus      | D      | 100       | Port Aurel |",
+  "| S003    | Brass Heron | A      | 64        | Cloudhaven |",
+  "| S004    | Cumulus     | M      | 15        | Cloudhaven |",
+  "| S005    | Lady Kelvin | D      | 90        | Tinmere    |",
+  "| S006    | Old Boiler  | M      | 0         | Tinmere    |",
+  rule,
+  "6 rows, 5 columns",
+].join("\n");
+checkCsv("CSV with -allow-read lists the headings and six ships", ["--p-file", "fleet.csv", "-allow-read", data], (out, rc, err, stdout) =>
+  rc !== 0 ? `rc ${rc}` : err ? `stderr: ${err}` : lines(stdout) !== list ? "not the six-row CSV list with three 72-character rules" : "");
+checkCsv("CSV without -allow-read: refused by the sandbox", ["--p-file", "fleet.csv"], (out, rc, err, stdout) =>
+  rc !== 1 ? `rc ${rc}` : err !== "osabap: permission denied\n" ? "not the permission denial" : stdout ? "the list was written without a read grant" : "");
 
 const failed = results.filter((ok) => !ok).length;
 console.log(`cli: ${results.length - failed} passed, ${failed} failed (binary: ${fleet})`);
