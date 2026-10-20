@@ -171,6 +171,41 @@ rules and the count is indented by four spaces. open-steamgate removed both
 after the tag, in
 [PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
+## The same steps on a Z80
+
+open-steamgate is not the only compiler that takes ABAP off the server.
+MinZ, a compiler for the Z80 family, has an ABAP frontend of its own and took
+this chapter's idea to three eight-bit machines. Its own report,
+[zfleet_csv_alv.abap](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/examples/abap/zfleet_csv_alv.abap)
+(1,875 bytes), takes the same steps as ZOSD_FLEET_CSV up to the table: F4 runs
+`CL_GUI_FRONTEND_SERVICES=>FILE_OPEN_DIALOG`, `GUI_UPLOAD` reads the chosen
+file, and `SPLIT` fills a typed table. Then it shows the table with
+`CL_SALV_TABLE=>FACTORY` as an ALV grid. The file is `FLEET.CSV`, two
+airships: Atlas and Beacon.
+
+The source is not changed between the machines. MinZ lowers it to its
+high-level IR (HIR), then to MIR2, then to Z80 code:
+
+![CP/M: FLEET.COM, 40,257 bytes](img/minz-cpm-alv.png)
+
+![Agon (eZ80, Z80-mode code): FLEET.BIN, 45,652 bytes](img/minz-agon-alv.png)
+
+![ZX Spectrum (Pentagon 128 model): FLEET.bin, 34,847 bytes, from a TR-DOS disk image](img/minz-zx-alv.png)
+
+Each picture is one unchanged frame of MinZ's own capture under emulation:
+CP/M on the Z80/MZE emulator; Agon with real debugger pauses; the Spectrum in
+the MZX emulator, which reads the disk image through sector traps and runs no
+system or DOS ROM. None of them is a claim about physical hardware, and none
+is a benchmark. The code came in three MinZ pull requests: CP/M in #200
+(merge [339d31b2](https://github.com/oisee/minz/commit/339d31b210967963cdaeecdc4b83649671547d8c)),
+Agon in #201 (merge [88f739d6](https://github.com/oisee/minz/commit/88f739d69408f269d2f4fb8549c6b0a51a934879)),
+the Spectrum in #203 (merge [5fff4123](https://github.com/oisee/minz/commit/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd)).
+The end-to-end records are
+[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md)
+for CP/M and Agon and
+[reports/native-abap/2026-10-18-zx-trdos-csv-alv.md](https://github.com/oisee/minz/blob/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd/reports/native-abap/2026-10-18-zx-trdos-csv-alv.md)
+for the Spectrum.
+
 ## A relative: screens in CICS
 
 The selection screen and the dynpro are SAP's, but the way they work has a
@@ -320,3 +355,26 @@ FORM load.
   WRITE: / 'Loaded', gv_loaded, 'ships from', p_file.
 ENDFORM.
 ```
+
+### The model, not the language
+
+gogen's typed IR is not tied to Go. open-steamgate also writes JavaScript
+from the same IR, with the same value model as the Go backend: plain numbers
+instead of boxed ABAP values, synchronous calls instead of an `await` on
+each one, the calculation type decided at compile time. Its README at this
+book's tag compares three programs: the transpiler's JavaScript, JavaScript
+from the IR, and Go from the IR
+([tools/gogen/README.md, "Language or model?"](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+
+| work | transpiler JS | JS from the IR | Go |
+| --- | ---: | ---: | ---: |
+| fib(25) | 24.0 ms | 0.96 ms | 0.24 ms |
+| primes to 50 000 | 93 ms | 3.4 ms | 1.6 ms |
+| table of 10⁶ rows | 311 ms | 11.3 ms | 8.7 ms |
+
+Most of the gap is the model, not the language. The same IR in JavaScript is
+7 to 28 times faster than the transpiler's output across the README's six
+workloads, and Go adds 1.2 to 4 times on top, most on calls. The numbers were
+measured on 2026-09-23 on one 16-core x86-64 workstation (WSL2), Node 26.9,
+Go 1.26.0. They describe these programs on that machine, not a ranking of
+languages.
