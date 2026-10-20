@@ -172,6 +172,38 @@ START-OF-SELECTION.
 уже после тега, в
 [PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
+## Тот же отчет на Z80
+
+open-steamgate не единственный компилятор, который уводит ABAP с сервера.
+У MinZ, компилятора для семейства Z80, есть свой фронтенд ABAP, и он довел
+идею этого раздела до трех восьмибитных машин. Его отчет,
+[zfleet_csv_alv.abap](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/examples/abap/zfleet_csv_alv.abap)
+(1875 байт), до таблицы делает то же, что ZOSD_FLEET_CSV: F4 вызывает
+`CL_GUI_FRONTEND_SERVICES=>FILE_OPEN_DIALOG`, `GUI_UPLOAD` читает выбранный
+файл, `SPLIT` заполняет типизированную таблицу. Потом отчет показывает
+таблицу через `CL_SALV_TABLE=>FACTORY` как ALV-сетку. Файл `FLEET.CSV`, в нем
+два дирижабля: Atlas и Beacon.
+
+Исходник между машинами не меняется. MinZ опускает его в свое
+высокоуровневое представление (HIR), затем в MIR2, затем в код Z80:
+
+![CP/M: FLEET.COM, 40 257 байт](../img/minz-cpm-alv.png)
+
+![Agon (eZ80, код в режиме Z80): FLEET.BIN, 45 652 байта](../img/minz-agon-alv.png)
+
+![ZX Spectrum (модель Pentagon 128): FLEET.bin, 34 847 байт, с образа диска TR-DOS](../img/minz-zx-alv.png)
+
+Каждая картинка — один неизмененный кадр из записи самого MinZ в эмуляторе:
+CP/M в эмуляторе Z80/MZE; Agon с настоящими паузами отладчика; Spectrum в
+эмуляторе MZX, который читает образ диска через ловушки секторов и не
+выполняет ни системного ПЗУ, ни ПЗУ DOS. Ни одна из них не утверждает ничего
+о настоящем железе и не является бенчмарком. Код пришел в трех pull request
+MinZ: CP/M в #200 (merge [339d31b2](https://github.com/oisee/minz/commit/339d31b210967963cdaeecdc4b83649671547d8c)),
+Agon в #201 (merge [88f739d6](https://github.com/oisee/minz/commit/88f739d69408f269d2f4fb8549c6b0a51a934879)),
+Spectrum в #203 (merge [5fff4123](https://github.com/oisee/minz/commit/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd)).
+Сквозной отчет —
+[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md).
+
 ## Родственник: экраны в CICS
 
 Экран выбора и dynpro - изобретения SAP, но у их устройства есть близкий
@@ -321,3 +353,24 @@ FORM load.
   WRITE: / 'Loaded', gv_loaded, 'ships from', p_file.
 ENDFORM.
 ```
+
+### Модель, а не язык
+
+Типизированный IR gogen не привязан к Go. open-steamgate пишет из того же IR
+и JavaScript, с той же моделью значений, что у бэкенда Go: простые числа
+вместо упакованных значений ABAP, синхронные вызовы вместо `await` на
+каждом, тип вычисления решен при компиляции. README на теге этой книги
+сравнивает три программы: JavaScript транспилера, JavaScript из IR и Go из IR
+([tools/gogen/README.md, «Language or model?»](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+
+| работа | JS транспилера | JS из IR | Go |
+| --- | ---: | ---: | ---: |
+| fib(25) | 24,0 мс | 0,96 мс | 0,24 мс |
+| простые числа до 50 000 | 93 мс | 3,4 мс | 1,6 мс |
+| таблица из 10⁶ строк | 311 мс | 11,3 мс | 8,7 мс |
+
+Большая часть разрыва — модель, а не язык. Тот же IR на JavaScript в 7–28 раз
+быстрее вывода транспилера на шести нагрузках из README, а Go добавляет
+сверху еще в 1,2–4 раза, больше всего на вызовах. Замерено 2026-09-23 на одной
+16-ядерной рабочей станции x86-64 (WSL2), Node 26.9, Go 1.26.0. Это цифры
+этих программ на этой машине, а не рейтинг языков.
