@@ -171,11 +171,11 @@ rules and the count is indented by four spaces. open-steamgate removed both
 after the tag, in
 [PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
-## The same report on a Z80
+## The same steps on a Z80
 
 open-steamgate is not the only compiler that takes ABAP off the server.
 MinZ, a compiler for the Z80 family, has an ABAP frontend of its own and took
-this section's idea to three eight-bit machines. Its report,
+this chapter's idea to three eight-bit machines. Its own report,
 [zfleet_csv_alv.abap](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/examples/abap/zfleet_csv_alv.abap)
 (1,875 bytes), takes the same steps as ZOSD_FLEET_CSV up to the table: F4 runs
 `CL_GUI_FRONTEND_SERVICES=>FILE_OPEN_DIALOG`, `GUI_UPLOAD` reads the chosen
@@ -200,8 +200,11 @@ is a benchmark. The code came in three MinZ pull requests: CP/M in #200
 (merge [339d31b2](https://github.com/oisee/minz/commit/339d31b210967963cdaeecdc4b83649671547d8c)),
 Agon in #201 (merge [88f739d6](https://github.com/oisee/minz/commit/88f739d69408f269d2f4fb8549c6b0a51a934879)),
 the Spectrum in #203 (merge [5fff4123](https://github.com/oisee/minz/commit/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd)).
-The end-to-end record is
-[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md).
+The end-to-end records are
+[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md)
+for CP/M and Agon and
+[reports/native-abap/2026-10-18-zx-trdos-csv-alv.md](https://github.com/oisee/minz/blob/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd/reports/native-abap/2026-10-18-zx-trdos-csv-alv.md)
+for the Spectrum.
 
 ## A relative: screens in CICS
 

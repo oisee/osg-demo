@@ -172,11 +172,11 @@ START-OF-SELECTION.
 уже после тега, в
 [PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
-## Тот же отчет на Z80
+## Те же шаги на Z80
 
 open-steamgate не единственный компилятор, который уводит ABAP с сервера.
 У MinZ, компилятора для семейства Z80, есть свой фронтенд ABAP, и он довел
-идею этого раздела до трех восьмибитных машин. Его отчет,
+идею этой главы до трех восьмибитных машин. Его собственный отчет,
 [zfleet_csv_alv.abap](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/examples/abap/zfleet_csv_alv.abap)
 (1875 байт), до таблицы делает то же, что ZOSD_FLEET_CSV: F4 вызывает
 `CL_GUI_FRONTEND_SERVICES=>FILE_OPEN_DIALOG`, `GUI_UPLOAD` читает выбранный
@@ -201,8 +201,11 @@ CP/M в эмуляторе Z80/MZE; Agon с настоящими паузами 
 MinZ: CP/M в #200 (merge [339d31b2](https://github.com/oisee/minz/commit/339d31b210967963cdaeecdc4b83649671547d8c)),
 Agon в #201 (merge [88f739d6](https://github.com/oisee/minz/commit/88f739d69408f269d2f4fb8549c6b0a51a934879)),
 Spectrum в #203 (merge [5fff4123](https://github.com/oisee/minz/commit/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd)).
-Сквозной отчет —
-[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md).
+Сквозные записи —
+[reports/native-abap/2026-10-18-f4-csv-alv-e2e.md](https://github.com/oisee/minz/blob/88f739d69408f269d2f4fb8549c6b0a51a934879/reports/native-abap/2026-10-18-f4-csv-alv-e2e.md)
+для CP/M и Agon и
+[reports/native-abap/2026-10-18-zx-trdos-csv-alv.md](https://github.com/oisee/minz/blob/5fff4123c12538d7cb046b4b5bf7bee6366fb7cd/reports/native-abap/2026-10-18-zx-trdos-csv-alv.md)
+для Spectrum.
 
 ## Родственник: экраны в CICS
 
@@ -357,7 +360,7 @@ ENDFORM.
 ### Модель, а не язык
 
 Типизированный IR gogen не привязан к Go. open-steamgate пишет из того же IR
-и JavaScript, с той же моделью значений, что у бэкенда Go: простые числа
+и JavaScript, с той же моделью значений, что у бэкенда Go: обычные числа
 вместо упакованных значений ABAP, синхронные вызовы вместо `await` на
 каждом, тип вычисления решен при компиляции. README на теге этой книги
 сравнивает три программы: JavaScript транспилера, JavaScript из IR и Go из IR
