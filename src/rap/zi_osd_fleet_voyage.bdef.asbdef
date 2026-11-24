@@ -1,0 +1,53 @@
+managed implementation in class zbp_osd_fleet_voyage unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZI_OSD_FLEET_VOYAGE alias Voyage
+persistent table zosd_fleet_voyage
+draft table zosd_fleet_voyage_d
+lock master
+total etag last_changed_at
+etag master local_changed_at
+{
+  create;
+  update;
+  delete;
+  field ( numbering : managed, readonly ) voyage_uuid;
+  field ( readonly ) status, steam_needed, last_changed_at, local_changed_at;
+  field ( mandatory ) route;
+  association _Stops { create; with draft; }
+  determination SetPlanned on modify { create; }
+  determination CalcSteam on modify { create; field route; }
+  internal action RecalcSteam;
+  validation CheckShip on save { create; field ship_id; }
+  action Approve result [1] $self;
+  action Cancel result [1] $self;
+
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare
+  {
+    validation CheckShip;
+  }
+
+  mapping for zosd_fleet_voyage corresponding;
+}
+
+define behavior for ZI_OSD_FLEET_STOP alias Stop
+persistent table zosd_fleet_stop
+draft table zosd_fleet_stop_d
+lock dependent by _Voyage
+etag master stop_changed_at
+{
+  update;
+  delete;
+  field ( numbering : managed, readonly ) stop_uuid;
+  field ( readonly ) voyage_uuid, stop_changed_at;
+  field ( mandatory ) port_name;
+  association _Voyage { with draft; }
+  determination RecalcVoyageSteam on modify { create; update; }
+
+  mapping for zosd_fleet_stop corresponding;
+}
