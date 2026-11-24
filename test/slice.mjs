@@ -5,7 +5,7 @@
 //
 //   OSD_HOME=<open-steamgate checkout> node test/slice.mjs
 //
-// The engine checkout needs `npm install && npm run bootstrap` done once.
+// The engine checkout needs `npm ci && npm run bootstrap` done once.
 // Its main branch at 0ba17ed (oisee/open-steamgate#173) or later: the tile
 // opens the intent #AirshipFleet-display, which the launchpad resolves from
 // the pack's manifest to the app's BSP copy (/sap/bc/ui5_ui5/sap/zosg_demo/).

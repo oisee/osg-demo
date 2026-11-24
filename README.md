@@ -57,7 +57,7 @@ Chapters 10 and 11 use open-steamgate's generation layers, in which a generated 
 
 ## Check it
 
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then:
+In an open-steamgate checkout, run `npm ci && npm run bootstrap` once (bootstrap builds and links the transpiler the checkout pins). Then:
 
 ```
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped
