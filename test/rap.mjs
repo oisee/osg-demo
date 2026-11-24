@@ -133,8 +133,9 @@ await check("1 ABAP Unit of ZCL_OSD_FLEET_VOYAGE_EML", async () => {
 
 // 3. the engine, on a database of its own
 dbDir = mkdtempSync(join(tmpdir(), "osg-rap-"));
+const dbFile = join(dbDir, (process.env.STG_DB ?? "sqlite") === "duckdb" ? "osd.duckdb" : "osd.sqlite");
 server = spawn(process.execPath, ["test/run.mjs"],
-  {cwd: home, env: {...env, STG_DB_PATH: join(dbDir, "osd.sqlite")}, stdio: ["ignore", "ignore", "inherit"]});
+  {cwd: home, env: {...env, STG_DB_PATH: dbFile}, stdio: ["ignore", "ignore", "inherit"]});
 console.log(`rap: engine PID ${server.pid} on port ${port}`);
 const deadline = Date.now() + 180_000;
 for (;;) {
