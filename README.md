@@ -67,6 +67,7 @@ OSD_HOME=/path/to/open-steamgate node test/l3.mjs                              #
 OSD_HOME=/path/to/open-steamgate node test/iti.mjs                             # chapter 18: C in ABAP draws what native C draws
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
+OSD_HOME=/path/to/open-steamgate node test/rap.mjs                               # chapter 21: the RAP voyage object, EML, V4 draft, 9 checks
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
@@ -75,15 +76,16 @@ OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         
 
 `test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2, 9 and 15–17; its header says what it needs (VS Code, the extension's VSIX, Xvfb).
 
-CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the command line program, job, L3 and C-in-ABAP checks on every change, against the open-steamgate tag the book is written for (`book/baseline.yaml`; that result decides); the same run against open-steamgate `main` is a canary: it shows as `fleet (main)`, red when main breaks something, without failing the run ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
+CI runs the slice on SQLite and DuckDB (with `SLICE_SKIP_UI=1`, so the browser check is skipped) and the command line program, job, L3, C-in-ABAP and RAP checks on every change, against the open-steamgate tag the book is written for (`book/baseline.yaml`; that result decides); the same run against open-steamgate `main` is a canary: it shows as `fleet (main)`, red when main breaks something, without failing the run ([smoke.yml](.github/workflows/smoke.yml)); slice check 16 runs the lift check and check 17 the L2 rule's. [Appendix A](book/90-run-the-checks.md) says what each covers.
 
 ## Repository map
 
 | Where | What |
 |---|---|
-| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/l2/` the L2 rule and what it builds to; `src/iti/` and `iti/` chapter 18's C in ABAP; `src/l3/` the night set and the watch set (DSL L3, chapters 16 and 17), their rules, what they build to and their classruns |
+| `src/` | the ABAP objects, DDIC, SEGW model, CDS; `src/rap/` the RAP voyage business object (chapter 21: views, behavior definition, service, behavior pool, EML class); `src/l2/` the L2 rule and what it builds to; `src/iti/` and `iti/` chapter 18's C in ABAP; `src/l3/` the night set and the watch set (DSL L3, chapters 16 and 17), their rules, what they build to and their classruns |
 | `data/` | seed rows for the local system (not carried to a system) |
 | `webapp/` | the Fiori Elements app |
+| `voyage/` | the Voyages app: a Fiori Elements V4 list report and object page over the RAP service, with draft (chapter 21) |
 | `cli/` | the fleet's command line program (chapter 14), not part of the pack |
 | `http/` | the fleet service's requests as a `.http` file (chapter 15) |
 | `book/`, `book/ru/` | the book in English and Russian; `book/build.sh` renders EPUB, PDF and HTML of both |
