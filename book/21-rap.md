@@ -40,8 +40,8 @@ The system runs as in chapter 1. The URLs assume port 8099.
 
    ![The object page of the Port Aurel - Cloudhaven voyage with its two ports](img/voyage-object-page.png)
 
-3. Press **Edit**. In **Ports** press **Create**, type order `3` and port
-   `Tinmere`, and leave the field. Expected: **Draft** beside the title,
+3. Press **Edit**. In **Ports** press **Create**, replace the order `0` with `3`,
+   type port `Tinmere`, and leave the field. Expected: **Draft** beside the title,
    the new row on top of the table, and steam needed 45. Nothing is saved
    yet: you are editing a *draft*, a copy of the voyage that lives beside
    the active one until you save or discard it. Press **Discard Draft** and
@@ -49,13 +49,17 @@ The system runs as in chapter 1. The URLs assume port 8099.
 
    ![The voyage in edit mode: a third port added, steam needed 45 in the draft](img/voyage-draft-edit.png)
 
-4. Back in the list, press **Create**. Enter a route, ship `S005` and one
-   port, then **Save**. Expected: a new voyage, status `P` (planned), steam
-   needed 25.
+4. Back in the list, press **Create**. Expected: a page *New: Voyage*,
+   already with status `P` and steam needed 15. Enter a route and ship
+   `S005`, add one port as in step 3, then press **Create** in the footer
+   (a new object has no Save). Expected: *Object created*, status `P`
+   (planned), steam needed 25.
 5. Plan one for a ship the fleet does not have: **Create**, route
-   `Nowhere`, ship `S999`, **Save**. Expected: the app refuses with
-   `Ship S999 is not in the fleet`, and the list does not get a new voyage.
-   Discard the draft.
+   `Nowhere`, ship `S999`, and **Create** in the footer. Expected: an error
+   dialog with `Ship S999 is not in the fleet` (twice: once for Prepare,
+   once for Activate). Close it and press **Discard Draft**: the list has
+   no new voyage. Until you discard, the list shows the refused voyage as a
+   draft row.
 6. Approve S002's planned voyage. The app has no button for it; the
    service has the action:
 
@@ -70,8 +74,9 @@ The system runs as in chapter 1. The URLs assume port 8099.
    list: S002's voyage is approved.
 7. The service's model: `$B/$metadata`. Expected: `VoyageType` and
    `StopType`, each keyed by its UUID and `IsActiveEntity`; the bound
-   actions `Edit`, `Activate`, `Prepare`, `Discard`, `Resume`, `Approve`
-   and `Cancel`; and `Common.DraftRoot` on the `Voyage` set.
+   actions `Edit`, `Activate`, `Prepare`, `Resume`, `Approve` and
+   `Cancel`; and `Common.DraftRoot` on the `Voyage` set. There is no
+   `Discard` action: over OData V4 a draft is discarded with a DELETE.
 
 The data comes from the seed in `data/`, which replaces the rows at every
 start, as in chapter 3.
@@ -149,7 +154,8 @@ Read it from the top:
 - `managed`: the framework writes the tables; the pool only adds rules.
   `with draft` gives every voyage a draft table beside its active one, and
   the draft actions (`Edit`, `Activate`, `Discard`, `Resume`, `Prepare`)
-  are what the app called in steps 3 to 5.
+  are what the app called in steps 3 to 5; `Discard` reaches the service as
+  a DELETE of the draft.
 - `numbering : managed`: the key is a UUID the framework draws.
 - `total etag` and `etag master`: optimistic locking, both for the draft
   and for the active voyage.
@@ -445,7 +451,8 @@ OSD_PACKS=/path/to/osg-demo npm run transpile
 OSD_PACKS=/path/to/osg-demo node tools/osd-unit.mjs CLAS ZCL_OSD_FLEET_VOYAGE_EML
 ```
 
-Expected: `ZCL_OSD_FLEET_VOYAGE_EML: 3 methods in 1 test classes, 3 passed, 0 failed`.
+Expected: `ZCL_OSD_FLEET_VOYAGE_EML: 3 methods in 1 test classes, 3 passed, 0 failed`,
+and the time it took.
 The happy path:
 
 <!-- code: src/rap/zcl_osd_fleet_voyage_eml.clas.testclasses.abap method draft_stops_activate_approve -->

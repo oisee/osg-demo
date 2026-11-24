@@ -41,8 +41,8 @@ EML, операторы `MODIFY ENTITIES`, `READ ENTITIES`, `COMMIT ENTITIES` и
 
    ![Объектная страница рейса Port Aurel - Cloudhaven с двумя портами](../img/voyage-object-page.png)
 
-3. Нажмите **Edit**. В разделе **Ports** нажмите **Create**, введите порядок
-   `3` и порт `Tinmere` и уйдите с поля. Ожидается: **Draft** рядом с
+3. Нажмите **Edit**. В разделе **Ports** нажмите **Create**, замените порядок
+   `0` на `3`, введите порт `Tinmere` и уйдите с поля. Ожидается: **Draft** рядом с
    заголовком, новая строка вверху таблицы и нужный пар 45. Пока ничего не
    сохранено: вы правите *черновик*, копию рейса, которая живёт рядом с
    активной, пока вы её не сохраните или не отбросите. Нажмите **Discard
@@ -50,13 +50,17 @@ EML, операторы `MODIFY ENTITIES`, `READ ENTITIES`, `COMMIT ENTITIES` и
 
    ![Рейс в режиме правки: добавлен третий порт, в черновике нужно 45 единиц пара](../img/voyage-draft-edit.png)
 
-4. Вернитесь к списку и нажмите **Create**. Введите маршрут, корабль `S005`
-   и один порт, затем **Save**. Ожидается: новый рейс со статусом `P`
-   (запланирован) и потребностью в паре 25.
+4. Вернитесь к списку и нажмите **Create**. Ожидается: страница *New:
+   Voyage*, уже со статусом `P` и паром 15. Введите маршрут и корабль
+   `S005`, добавьте один порт, как в шаге 3, и нажмите **Create** внизу
+   страницы (у нового объекта нет Save). Ожидается: *Object created*,
+   статус `P` (запланирован), нужный пар 25.
 5. Запланируйте рейс для корабля, которого во флоте нет: **Create**, маршрут
-   `Nowhere`, корабль `S999`, **Save**. Ожидается: приложение отказывает с
-   сообщением `Ship S999 is not in the fleet`, и нового рейса в списке нет.
-   Отбросьте черновик.
+   `Nowhere`, корабль `S999` и **Create** внизу страницы. Ожидается: окно
+   ошибки с `Ship S999 is not in the fleet` (дважды: от Prepare и от
+   Activate). Закройте его и нажмите **Discard Draft**: нового рейса в
+   списке нет. Пока черновик не отброшен, список показывает отклонённый
+   рейс строкой черновика.
 6. Одобрите запланированный рейс S002. Кнопки для этого в приложении нет, а
    действие у службы есть:
 
@@ -71,8 +75,9 @@ EML, операторы `MODIFY ENTITIES`, `READ ENTITIES`, `COMMIT ENTITIES` и
    рейс S002 одобрен.
 7. Модель службы: `$B/$metadata`. Ожидается: `VoyageType` и `StopType`,
    у каждого ключ из UUID и `IsActiveEntity`; связанные действия `Edit`,
-   `Activate`, `Prepare`, `Discard`, `Resume`, `Approve` и `Cancel`; и
-   `Common.DraftRoot` на наборе `Voyage`.
+   `Activate`, `Prepare`, `Resume`, `Approve` и `Cancel`; и
+   `Common.DraftRoot` на наборе `Voyage`. Действия `Discard` нет: в OData V4
+   черновик отбрасывают запросом DELETE.
 
 Данные берутся из начального заполнения в `data/`, которое при каждом старте
 заменяет строки, как в главе 3.
@@ -150,7 +155,8 @@ etag master local_changed_at
 - `managed`: таблицы пишет фреймворк, пул только добавляет правила.
   `with draft` даёт каждому рейсу таблицу черновиков рядом с активной, а
   действия черновика (`Edit`, `Activate`, `Discard`, `Resume`, `Prepare`) —
-  это то, что приложение вызывало в шагах 3–5.
+  это то, что приложение вызывало в шагах 3–5; `Discard` доходит до службы
+  как DELETE черновика.
 - `numbering : managed`: ключ — UUID, который выдаёт фреймворк.
 - `total etag` и `etag master`: оптимистическая блокировка, и для черновика,
   и для активного рейса.
@@ -443,7 +449,8 @@ OSD_PACKS=/path/to/osg-demo npm run transpile
 OSD_PACKS=/path/to/osg-demo node tools/osd-unit.mjs CLAS ZCL_OSD_FLEET_VOYAGE_EML
 ```
 
-Ожидается: `ZCL_OSD_FLEET_VOYAGE_EML: 3 methods in 1 test classes, 3 passed, 0 failed`.
+Ожидается: `ZCL_OSD_FLEET_VOYAGE_EML: 3 methods in 1 test classes, 3 passed, 0 failed`
+и время прогона.
 Удачный путь:
 
 <!-- code: src/rap/zcl_osd_fleet_voyage_eml.clas.testclasses.abap method draft_stops_activate_approve -->
