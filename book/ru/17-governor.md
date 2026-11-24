@@ -71,7 +71,11 @@ settings:
 
 ![Состояние watch у GLASS: Doctor RUNNING, блокировка HELD, одно открытое сообщение](../img/vscode-watch-glass.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 ![После CONTINUE: Doctor STOPPED, блокировка RELEASED, обе проверки DONE и два открытых сообщения](../img/vscode-watch-final.png)
+
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Прогон останавливается у стекла
 

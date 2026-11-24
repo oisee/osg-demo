@@ -27,6 +27,8 @@ queue before and after each step.
 
 ![OSD jobs: a readable summary of the completed ZOSD_FLEET_AUDIT job](img/vscode-fleet-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
    in the open-steamgate checkout.

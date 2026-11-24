@@ -144,6 +144,8 @@ SQLite и следит за обработчиком (`osd.jobs.worker=auto`); �
 
 ![OSD jobs: читаемая сводка завершённых заданий стопок ночного набора](../img/vscode-night-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 Чтобы увидеть очередь, как ниже, запустите OSD из checkout с `STG_DB=file`,
 `STG_DB_PATH` и `OSD_PACKS` и запускайте обработчик вручную.
 

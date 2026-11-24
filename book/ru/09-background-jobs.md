@@ -27,6 +27,8 @@
 
 ![OSD jobs: читаемая сводка завершённого задания ZOSD_FLEET_AUDIT](../img/vscode-fleet-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 1. Запустите OSD с файловой базой данных, например
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
    в checkout open-steamgate.

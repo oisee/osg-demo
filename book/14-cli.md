@@ -158,6 +158,7 @@ keeps two CSV files in `/tmp/fleet-cli/data`.
    ships, `6 rows, 5 columns`.
 
    ![The CSV as a list](img/csv-list.png)
+
    <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
 
 4. Without a screen, from that folder:

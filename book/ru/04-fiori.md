@@ -8,10 +8,14 @@
 
    ![Отчет-список: шесть дирижаблей с текстами статусов](../img/fiori-list-report.png)
 
+   <!-- shot: launchpad shell header shows the old airship logo; 0.7.3140 has the gear-gate logo (OSG 2ee859c8) -->
+
 2. В панели фильтров откройте справку по значениям для **Status**, выберите `Maintenance` и нажмите **Go**. Ожидается: Cumulus и Old Boiler. Справка по значениям показывает три статуса из `StatusVHSet`.
 
 3. Нажмите **Old Boiler**. Ожидается: объектная страница показывает его общие данные и пустую таблицу **Voyages**. Вернитесь и откройте **Albatross**: в его таблице **Voyages** шесть рейсов.
 
    ![Объектная страница (здесь S001 Albatross) с ее рейсами](../img/fiori-object-page.png)
+
+   <!-- shot: launchpad shell header shows the old airship logo; 0.7.3140 has the gear-gate logo (OSG 2ee859c8) -->
 
 4. Плитка проходит через панель запуска так же, как в системе: `#AirshipFleet-display` - это intent, который [manifest](../../webapp/manifest.json) приложения объявляет в `crossNavigation.inbounds`, а панель запуска открывает компонент `osd.fleet` из BSP-копии приложения, `/sap/bc/ui5_ui5/sap/zosg_demo/`. То же приложение работает и автономно по адресу `http://localhost:8099/app/osg-demo/`; см. [контракт](../../docs/fleet-contract.md#app).
