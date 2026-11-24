@@ -84,6 +84,58 @@ running; A4H is a separate machine. On this program
 the JavaScript runtime took 85 minutes; the Go runtime took a quarter of a
 minute.
 
+## Self-hosting, step by step
+
+A tool written in a language is *self-hosting* when it can run on, and work
+on, that language's own machinery. open-steamgate set itself five steps on
+14 October 2026, to be taken in the order 1, 2, 4, 3, 5. Its
+[self-hosting page](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/self-hosting.md)
+keeps the table, and each finished step has a record in `docs/history`. Four
+steps are done at this book's tag; each is done for a stated scope, and the
+records say where that scope ends.
+
+**Step 1: abaplint checks open-steamgate.** The translated abaplint checks
+open-steamgate's own ABAP: 2,785 files, 2,210 objects, with the locked
+libraries, the default packs and open-steamgate's syntax settings. It
+reports 80 issues, the same bytes as abaplint 2.120.56 on Node. As Go it
+took 48 s; as ABAP on osgo, 133 s.
+
+**Step 2: abaplint checks itself.** The same check over the ABAP that
+abapiti wrote for abaplint: 4,676 files and 716 dependencies. Node and both
+translated paths agree byte for byte. This is the checker's fixed point,
+and a weak one: there are zero issues to agree on. osgo needed 1,379 s and
+17 GB, Go 435 s and 43 GB, Node 63 s.
+
+**Step 4: gogen leaves Node.** gogen, the ABAP-to-Go compiler of
+chapter 14, is written in JavaScript and runs on Node. abapiti translated
+its compiling path into Go. That Go program compiled the reference class
+`ZCL_GOGEN_T_RUNTIME` and wrote the same Go, byte for byte, as gogen on
+Node; the output builds and its unit test passes.
+
+![Step 4 as a T-diagram: gogen, ABAP to Go written in JavaScript, goes through abapiti, TypeScript to Go written in Go, and comes out as gogen written in Go.](img/selfhost-port.png)
+
+Read each T as a compiler: on its arms, the language it reads and the language it writes; on its stem, the language it is written in. Below the stem stands what runs it. In those terms this is a port, not a compiler compiling
+itself: the compiler moved to a new stem. gogen is written in JavaScript,
+not in ABAP, so it can never be its own input. And it is one class so far.
+Over osgo's whole input set, 1,340 objects, the first measurement on
+8 November stopped in every object at a construct abapiti did not yet
+translate (`crash=1340`, 92 such places reached). The page lists them.
+
+**Step 3: osgo checks your syntax itself.** When the editor asks the server
+for a syntax check (the ADT requests CHECKRUN, CHECK and the outline), osgo
+answers with abaplint translated into Go and linked into the same process.
+Over 3,028 inputs, clean, broken and unsaved, each of the two translated
+engines gave the same ordered diagnostics as Node in 38 of 38 comparisons. Go is the
+default when that library is linked; a build without it still asks Node.
+
+**Step 5**, the transpiler itself through abapiti, is planned and claims
+nothing yet.
+
+The records:
+[steps 1 and 2](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/history/2026-10-14-self-hosting-steps-1-2.md),
+[step 4](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/history/2026-10-20-self-hosting-step4.md),
+[step 3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/history/2026-10-22-self-hosting-step3.md).
+
 ## What comes next
 
 abapiti does more than translate. **GRACE**, the engine inside it, derives
