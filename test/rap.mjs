@@ -67,6 +67,8 @@ const results = [];
 let server;
 let dbDir;
 
+// the engine is stopped and the throwaway database removed on every way
+// out: the end of the run, an early exit, a thrown error or a signal
 function stop() {
   if (server?.pid !== undefined && server.exitCode === null) {
     try {
@@ -74,6 +76,10 @@ function stop() {
     } catch {
       // already gone
     }
+  }
+  if (dbDir !== undefined) {
+    rmSync(dbDir, {recursive: true, force: true});
+    dbDir = undefined;
   }
 }
 process.on("exit", stop);
@@ -264,8 +270,8 @@ await check("8 the pack's rows are gone again", async () => {
 });
 
 if (process.env.SLICE_SKIP_UI === "1") {
-  results.push({name: "9 the Voyages tile -> list report, create, save", ok: true, skipped: true});
-  console.log("SKIP  9 the Voyages tile -> list report, create, save -- SLICE_SKIP_UI=1");
+  results.push({name: "9 the Voyages tile -> list report, create, a port, save", ok: true, skipped: true});
+  console.log("SKIP  9 the Voyages tile -> list report, create, a port, save -- SLICE_SKIP_UI=1");
 } else {
   await check("9 the Voyages tile -> list report, create, a port, save", async () => {
     const {chromium} = createRequire(join(home, "package.json"))("playwright");
@@ -307,12 +313,12 @@ if (process.env.SLICE_SKIP_UI === "1") {
       // what the draft holds on the server: a field change is PATCHed when
       // the field is left, so poll the service rather than trust a toast
       const draft = async () => (await call(`${v4}/Voyage${key(id, false)}`)).body;
-      const until = async (what, timeout = 60_000) => {
+      const until = async (what, label, timeout = 60_000) => {
         const end = Date.now() + timeout;
         for (;;) {
           const body = await draft();
           if (what(body)) return body;
-          if (Date.now() > end) throw new Error(`the draft never held it: ${JSON.stringify(body).slice(0, 300)}`);
+          if (Date.now() > end) throw new Error(`${label}: the draft never held it: ${JSON.stringify(body).slice(0, 300)}`);
           await new Promise((ok) => setTimeout(ok, 500));
         }
       };
@@ -323,7 +329,7 @@ if (process.env.SLICE_SKIP_UI === "1") {
       const ship = page.getByLabel("Ship").locator("visible=true").first();
       await ship.fill("S001");
       await ship.press("Tab");
-      await until((body) => body.route === text && body.ship_id === "S001");
+      await until((body) => body.route === text && body.ship_id === "S001", "the route and the ship");
       await page.getByRole("button", {name: "Create"}).locator("visible=true").first().click();
       const port = page.locator("table input").locator("visible=true").last();
       await port.waitFor({timeout: 30_000});
@@ -355,15 +361,15 @@ if (process.env.SLICE_SKIP_UI === "1") {
       expect(stopsOfIt.body.value.map((s) => s.port_name).join() === "Bergen", JSON.stringify(stopsOfIt.body.value));
       await page.waitForLoadState("networkidle").catch(() => {});
       for (const e of errors) console.log(`      console error: ${e.replace(/\s+/g, " ").slice(0, 200)}`);
-      // sap.fe logs one recoverable 412 while it saves: the steam
-      // determination moves the voyage's ETag behind the client (a field of
-      // the root recomputed whenever a stop changes), sap.fe asks again with
-      // the fresh tag and the save goes through -- which is what the
-      // assertions above checked. Everything else must be clean.
-      const etagRetry = /If-Match does not match the current ETag|Communication error: 412/;
+      // No 412 is tolerated: the stop's determination changes the voyage
+      // (its steam, and so its ETag), but the Common.SideEffects annotation
+      // makes sap.fe read the voyage again after a stop changes, and the
+      // fresh ETag comes with it, so the save sends the current one. Without
+      // that annotation sap.fe logged one recoverable 412 here; with it,
+      // three runs in a row logged none, so a 412 now means the side effect
+      // was lost. Only the app's missing flexibility bundles are expected.
       const named = errors.filter((e) => ours.test(e)
-        && !/resource osd\/voyage\/changes\/(?:changes|flexibility)-bundle\.json could not be loaded/.test(e)
-        && !etagRetry.test(e));
+        && !/resource osd\/voyage\/changes\/(?:changes|flexibility)-bundle\.json could not be loaded/.test(e));
       expect(failures.length === 0, `HTTP errors on this pack: ${failures.join("; ")}`);
       expect(named.length === 0, `console errors naming this pack: ${named.join(" | ").slice(0, 400)}`);
       // leave nothing behind
@@ -376,7 +382,6 @@ if (process.env.SLICE_SKIP_UI === "1") {
 }
 
 stop();
-if (dbDir !== undefined) rmSync(dbDir, {recursive: true, force: true});
 const failed = results.filter((r) => !r.ok);
 const skipped = results.filter((r) => r.skipped);
 console.log(`rap: ${results.length - failed.length - skipped.length} passed, ${failed.length} failed, ${skipped.length} skipped`);
