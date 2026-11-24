@@ -22,13 +22,14 @@ ABAP-системе, которая работает внутри VS Code: open-
 
 ## Об этом издании
 
-Книга написана для расширения VS Code open-steamgate **0.7.1696 или новее**;
+Книга написана для расширения VS Code open-steamgate **0.7.3140 или новее**;
 это издание книги v0.6. Снимки рабочей среды пересняты с проверенным
-VSIX релиза `vscode-stable-v0.7.1696`.
+VSIX релиза `vscode-stable-v0.7.3140`.
+<!-- shot: phase 2: not yet true; the workbench pictures are still from the previous baseline until they are retaken with this VSIX -->
 
 Где глава работает в checkout open-steamgate (главы
 7 и 14, командные строки в других главах, проверки приложения A), берите тег
-**`vscode-stable-v0.7.1696` или новее**. Где расширение пока не делает того, что нужно
+**`vscode-stable-v0.7.3140` или новее**. Где расширение пока не делает того, что нужно
 шагу, шаг говорит об этом.
 
 ## Перед началом
@@ -37,7 +38,7 @@ VSIX релиза `vscode-stable-v0.7.1696`.
    стабильный канал): найдите его в представлении Extensions или возьмите `.vsix`
    из последнего
    [релиза `vscode-stable-v*`](https://github.com/oisee/open-steamgate/releases)
-   (0.7.1696 или новее) и
+   (0.7.3140 или новее) и
    выполните **Extensions: Install from VSIX...**.
 2. Клонируйте [oisee/osg-demo](https://github.com/oisee/osg-demo) и откройте
    клон как папку VS Code.

@@ -253,8 +253,8 @@ IBM по CICS описывает псевдодиалоговую обработ
   командная строка нет, поэтому отчет делает это сам через `TRANSLATE`.
 
 Спецификация - в
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md) open-steamgate, у F4 своя,
-[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-native.md) open-steamgate, у F4 своя,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-f4.md).
 
 ## Под капотом
 
@@ -364,7 +364,7 @@ ENDFORM.
 вместо упакованных значений ABAP, синхронные вызовы вместо `await` на
 каждом, тип вычисления решен при компиляции. README на теге этой книги
 сравнивает три программы: JavaScript транспилера, JavaScript из IR и Go из IR
-([tools/gogen/README.md, «Language or model?»](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+([tools/gogen/README.md, «Language or model?»](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
 
 | работа | JS транспилера | JS из IR | Go |
 | --- | ---: | ---: | ---: |

@@ -8,7 +8,7 @@
 //
 // Run this command under OSD_HOME/tools/osd-heavy.sh; put Node 24 on PATH.
 // - CODE: the code binary of the desktop VS Code tarball (no install needed);
-// - VSIX: a released extension (gh release download vscode-stable-v0.7.1696 --repo
+// - VSIX: a released extension (gh release download vscode-stable-v0.7.3140 --repo
 //   oisee/open-steamgate --pattern '*.vsix');
 // - OSD_HOME: the tag checkout after npm ci, npm run transpiler:pin,
 //   and npm run bootstrap for warm support

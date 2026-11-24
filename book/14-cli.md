@@ -252,8 +252,8 @@ layer in 4.6 (p. 104–106).
   the report does it with `TRANSLATE`.
 
 The specification is open-steamgate's
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md), and F4 has its own,
-[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-native.md), and F4 has its own,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-f4.md).
 
 ## Under the hood
 
@@ -364,7 +364,7 @@ instead of boxed ABAP values, synchronous calls instead of an `await` on
 each one, the calculation type decided at compile time. Its README at this
 book's tag compares three programs: the transpiler's JavaScript, JavaScript
 from the IR, and Go from the IR
-([tools/gogen/README.md, "Language or model?"](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+([tools/gogen/README.md, "Language or model?"](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
 
 | work | transpiler JS | JS from the IR | Go |
 | --- | ---: | ---: | ---: |

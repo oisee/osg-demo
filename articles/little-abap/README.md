@@ -2,7 +2,7 @@
 
 *…and now there is a pocket ABAP runtime inside a VS Code extension. =)*
 
-TL;DR: start here: [launchpad/Sysinfo](https://oisee.github.io/open-steamgate/main/app/flp.html#Shell-home) · github: [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) | [osg-demo](https://github.com/oisee/osg-demo)
+TL;DR: start here: [launchpad/Sysinfo](https://oisee.github.io/open-steamgate/main/app/flp.html#Shell-home) · github: [open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.3140) | [osg-demo](https://github.com/oisee/osg-demo)
 
 Ask an ABAP developer what they need to start developing in ABAP, and you'll get a small history of our tools. Somebody will say SE38, somebody will remember practically living in SE80, then we get to Eclipse and ADT, VS Code and abap-fs, and eventually somebody mentions MCP and vibing-steampunk.
 
@@ -116,7 +116,7 @@ Because after building all of this, asking people to assemble the environment be
 
 The extension carries a system seed, its dependencies and a prebuilt generation. When you start it, it prepares a writable local copy and brings the system up — so it gives you a local ABAP environment of your own, not just another way to connect to a remote one. Which means there is now an ABAP runtime inside your VS Code extension, and the extension starts it for you.
 
-Install the [stable VSIX](https://github.com/oisee/open-steamgate/releases/tag/vscode-stable-v0.7.1696) with **Extensions: Install from VSIX…**. For a standalone instance there is a [Docker Compose setup](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docker/compose.sqlite.yml), and the [connection guide](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/adt-over-rfc.md) describes how to point Eclipse at it. There is also a browser-only version — transpiled ABAP, the OData runtime and a local database inside a Service Worker — for the days when even an extension is too much.
+Install the [stable VSIX](https://github.com/oisee/open-steamgate/releases/tag/vscode-stable-v0.7.3140) with **Extensions: Install from VSIX…**. For a standalone instance there is a [Docker Compose setup](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docker/compose.sqlite.yml), and the [connection guide](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/adt-over-rfc.md) describes how to point Eclipse at it. There is also a browser-only version — transpiled ABAP, the OData runtime and a local database inside a Service Worker — for the days when even an extension is too much.
 
 But I'd start with the extension and osg-demo, because then you have something to explore immediately.
 
@@ -138,10 +138,10 @@ There was one thing I did not expect from all this. Rebuilding the environment I
 
 Why does every message on a push channel run as a dialog step of its own, with its own commit? Why does a restarted daemon come back with nothing in its attributes? It's all in the keyword documentation, under database LUW and the ABAP Daemon Framework. You just don't go looking until you need the answer yourself — and then discover that somebody at SAP needed it, too, a long time ago.
 
-If you want to see where that left us, the [architecture](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696#architecture) is one picture in the README: a pool of work processes behind a proxy, ICF and APC in front of the Gateway, a seam to the database. The names will look familiar. That was not entirely the plan.
+If you want to see where that left us, the [architecture](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.3140#architecture) is one picture in the README: a pool of work processes behind a proxy, ICF and APC in front of the Gateway, a seam to the database. The names will look familiar. That was not entirely the plan.
 
 It took rather more than a little ABAP to get here, but you get to start with the button. I have more to tell you about where the next question led — it led, unexpectedly, to compiling the tools themselves — but first I wanted to finally show you this one.
 
 Meet Open SteamGate — an off-stack ABAP system, a VS Code extension, a Docker container(s), a friendly bay for your agents.
 
-[open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.1696) · [osg-demo](https://github.com/oisee/osg-demo)
+[open-steamgate](https://github.com/oisee/open-steamgate/tree/vscode-stable-v0.7.3140) · [osg-demo](https://github.com/oisee/osg-demo)
