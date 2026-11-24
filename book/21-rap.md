@@ -28,7 +28,8 @@ The system runs as in chapter 1. The URLs assume port 8099.
 1. Open the launchpad and the **Voyages** tile. Expected: a list report
    with three voyages: S001 *Port Aurel - Cloudhaven*, status `A`, steam
    needed 35; S003 *Cloudhaven - Tinmere - Port Aurel*, `A`, 45; S002
-   *Tinmere - Port Aurel*, `P`, 25.
+   *Tinmere - Port Aurel*, `P`, 25. The first column is the voyage's key, a
+   UUID; the status shows its code.
 
    ![The Voyages list report: three voyages with ship, route, departure, status and steam needed](img/voyage-list-report.png)
 
@@ -39,17 +40,18 @@ The system runs as in chapter 1. The URLs assume port 8099.
 
    ![The object page of the Port Aurel - Cloudhaven voyage with its two ports](img/voyage-object-page.png)
 
-3. Press **Edit** and add a port, `Tinmere`. Expected: steam needed
-   becomes 45 while you edit. Nothing is saved yet: you are editing a
-   *draft*, a copy of the voyage that lives beside the active one until you
-   save or discard it. Press **Discard**: the voyage is as it was.
+3. Press **Edit**. In **Ports** press **Create**, type order `3` and port
+   `Tinmere`, and leave the field. Expected: **Draft** beside the title,
+   the new row on top of the table, and steam needed 45. Nothing is saved
+   yet: you are editing a *draft*, a copy of the voyage that lives beside
+   the active one until you save or discard it. Press **Discard Draft** and
+   confirm: the voyage is as it was, with two ports and 35.
 
    ![The voyage in edit mode: a third port added, steam needed 45 in the draft](img/voyage-draft-edit.png)
 
 4. Back in the list, press **Create**. Enter a route, ship `S005` and one
    port, then **Save**. Expected: a new voyage, status `P` (planned), steam
-   needed 25. The browser's network log shows one answer 412 during the save;
-   the next section says why it is harmless.
+   needed 25.
 5. Plan one for a ship the fleet does not have: **Create**, route
    `Nowhere`, ship `S999`, **Save**. Expected: the app refuses with
    `Ship S999 is not in the fleet`, and the list does not get a new voyage.
@@ -527,11 +529,28 @@ with an intent and a tile:
 }
 ```
 
-The 412 of step 4: the stop's determination changes a field of the
-voyage, so the voyage's ETag moves after the app last read it. The app's
-first `Prepare` is refused with 412 `If-Match does not match the current
-ETag of the entity`. The app reads the new tag and asks again, and the save
-goes through. That is optimistic locking doing its job.
+One thing the app must be told. When a port changes, the server
+recomputes the voyage's steam in the draft at once, but Fiori Elements
+re-reads only what it knows depends on the change. A side effect in the
+app's annotations says so:
+
+<!-- code: voyage/annotations/annotations.xml lines 34-39 -->
+```xml
+<Annotation Term="Common.SideEffects" Qualifier="Stops">
+  <Record Type="Common.SideEffectsType">
+    <PropertyValue Property="SourceEntities"><Collection><NavigationPropertyPath>to_Stops</NavigationPropertyPath></Collection></PropertyValue>
+    <PropertyValue Property="TargetProperties"><Collection><String>steam_needed</String></Collection></PropertyValue>
+  </Record>
+</Annotation>
+```
+
+With it, leaving a port field sends the change and a read of
+`steam_needed` in one batch, and step 3's 45 appears. Without it the page
+keeps showing 35 until it is reloaded, and the voyage's ETag, which the
+determination moved too, goes stale: the next save is first refused with
+412 `If-Match does not match the current ETag of the entity`, and the app
+reads the new tag and tries again. The side effect brings the fresh tag
+along with the steam.
 
 ## What this runtime does not do
 
