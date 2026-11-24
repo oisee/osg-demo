@@ -162,8 +162,6 @@ START-OF-SELECTION.
 
    ![CSV в виде списка](../img/csv-list.png)
 
-   <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
-
 4. Без экрана, из той же папки:
    `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
    печатает тот же список. Без `-allow-read` программа пишет `osabap:
