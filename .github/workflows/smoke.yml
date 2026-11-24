@@ -114,3 +114,10 @@ jobs:
         env:
           OSD_HOME: ${{ github.workspace }}/osd
         run: node test/iti.mjs
+      - name: Fleet RAP business object (chapter 21)
+        if: success() || failure()
+        working-directory: demo
+        env:
+          OSD_HOME: ${{ github.workspace }}/osd
+          SLICE_SKIP_UI: "1"
+        run: node test/rap.mjs

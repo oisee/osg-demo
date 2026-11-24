@@ -1,0 +1,5 @@
+[
+  {"voyage_uuid": "00000000000000000000000000000001", "ship_id": "S001", "route": "Port Aurel - Cloudhaven", "dep_date": "2026-12-05", "status": "A", "steam_needed": 35, "last_changed_at": "20261120101500.0000000", "local_changed_at": "20261120101500.0000000"},
+  {"voyage_uuid": "00000000000000000000000000000002", "ship_id": "S003", "route": "Cloudhaven - Tinmere - Port Aurel", "dep_date": "2026-12-12", "status": "A", "steam_needed": 45, "last_changed_at": "20261121093000.0000000", "local_changed_at": "20261121093000.0000000"},
+  {"voyage_uuid": "00000000000000000000000000000003", "ship_id": "S002", "route": "Tinmere - Port Aurel", "dep_date": "2026-12-20", "status": "P", "steam_needed": 25, "last_changed_at": "20261122164500.0000000", "local_changed_at": "20261122164500.0000000"}
+]

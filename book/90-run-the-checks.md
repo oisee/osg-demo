@@ -12,6 +12,7 @@ region of `ZCL_OSD_FLEET_LIFT=>AFTER` is what the lift recipe renders from
 | `test/jobs.mjs` | 7: one job, both chains, the doctor | SQLite file | yes |
 | `test/l3.mjs` | 7: chapter 16's night set in one step, in jobs through the worker (seven jobs, the gate between the stages), its state, the schedule switched on and off; chapter 17's watch set stopping at its glass and continued with a reason; daemon start, pause at glass and stop; `--print` shows the classruns' output | SQLite file | yes, last |
 | `test/iti.mjs` | 2: chapter 18's C, compiled natively (when `cc` is there), prints `iti/mandel.expected.txt`; the classrun of the class abapiti made from it prints the same | SQLite file | yes |
+| `test/rap.mjs` | 9: chapter 21's voyage object: the EML class's ABAP Unit (3 tests), the V4 model with its draft actions, the seeded voyages and their steam, a draft with a stop through Prepare and Activate, Approve, an unknown ship refused with nothing written, the same instances over V2, the rows removed again, and the Voyages app from its tile (browser; `SLICE_SKIP_UI=1` skips it) | SQLite or DuckDB file | yes, without the browser check |
 | `test/lift.mjs` | the lifted region is in step with its recipe | any | through slice check 16 |
 | `test/l2.mjs` | the L2 rule's class, v1 traces and metadata are what the rule builds to (`--write` rebuilds) | any | through slice check 17 |
 | `test/cli.mjs` | builds the fleet's command line program with osabap (Go 1.26) and runs chapter 14's steps as checks | SQLite file | yes |

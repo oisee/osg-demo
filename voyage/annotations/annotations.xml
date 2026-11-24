@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The UI annotations of the voyages app. On a system they would come from
+     the views' metadata extensions; the draft annotations
+     (Common.DraftRoot, DraftNode) and the rest are the service's own
+     $metadata (src/rap, book chapter 21). -->
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="../../../../../opu/odata4/sap/ZUI_OSD_FLEET_VOY/$metadata">
+    <edmx:Include Namespace="ZUI_OSD_FLEET_VOY"/>
+  </edmx:Reference>
+  <edmx:DataServices>
+    <Schema Namespace="osd.voyage.annotations" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType">
+        <!-- the field sap.fe shows the draft indicator beside (Draft, Locked by ...) -->
+        <Annotation Term="Common.SemanticKey">
+          <Collection><PropertyPath>voyage_uuid</PropertyPath></Collection>
+        </Annotation>
+        <Annotation Term="UI.HeaderInfo">
+          <Record Type="UI.HeaderInfoType">
+            <PropertyValue Property="TypeName" String="Voyage"/>
+            <PropertyValue Property="TypeNamePlural" String="Voyages"/>
+            <PropertyValue Property="Title">
+              <Record Type="UI.DataField"><PropertyValue Property="Value" Path="route"/></Record>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <!-- the steam follows the stops (the stop's RecalcVoyageSteam): a change
+             below the voyage makes sap.fe read it again, in the draft, when the field is left -->
+        <Annotation Term="Common.SideEffects" Qualifier="Stops">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceEntities"><Collection><NavigationPropertyPath>to_Stops</NavigationPropertyPath></Collection></PropertyValue>
+            <PropertyValue Property="TargetProperties"><Collection><String>steam_needed</String></Collection></PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionFields">
+          <Collection><PropertyPath>route</PropertyPath><PropertyPath>ship_id</PropertyPath></Collection>
+        </Annotation>
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="voyage_uuid"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="route"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ship_id"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="dep_date"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="status"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="steam_needed"/></Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.Facets">
+          <Collection>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="General"/>
+              <PropertyValue Property="Label" String="General"/>
+              <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#General"/>
+            </Record>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="Stops"/>
+              <PropertyValue Property="Label" String="Ports"/>
+              <PropertyValue Property="Target" AnnotationPath="to_Stops/@UI.LineItem"/>
+            </Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.FieldGroup" Qualifier="General">
+          <Record Type="UI.FieldGroupType">
+            <PropertyValue Property="Data">
+              <Collection>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="route"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ship_id"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="dep_date"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="status"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="steam_needed"/></Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/voyage_uuid">
+        <Annotation Term="Common.Label" String="Voyage"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/route">
+        <Annotation Term="Common.Label" String="Route"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/ship_id">
+        <Annotation Term="Common.Label" String="Ship"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/dep_date">
+        <Annotation Term="Common.Label" String="Departure"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/status">
+        <Annotation Term="Common.Label" String="Status"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.VoyageType/steam_needed">
+        <Annotation Term="Common.Label" String="Steam needed"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.StopType">
+        <Annotation Term="UI.HeaderInfo">
+          <Record Type="UI.HeaderInfoType">
+            <PropertyValue Property="TypeName" String="Port"/>
+            <PropertyValue Property="TypeNamePlural" String="Ports"/>
+            <PropertyValue Property="Title">
+              <Record Type="UI.DataField"><PropertyValue Property="Value" Path="port_name"/></Record>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="stop_order"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="port_name"/></Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.StopType/port_name">
+        <Annotation Term="Common.Label" String="Port"/>
+      </Annotations>
+      <Annotations Target="ZUI_OSD_FLEET_VOY.StopType/stop_order">
+        <Annotation Term="Common.Label" String="Order"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

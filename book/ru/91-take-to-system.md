@@ -4,36 +4,46 @@
 
 ## Сборка офлайн-zip
 
-Используйте checkout open-steamgate на теге `vscode-stable-v0.7.3140` или новее. Его `segw:zip` принимает `--unit` и `--manifest` и перебазирует манифест приложения под его расположение в BSP. Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без объектов, работающих только локально (ниже: четыре объекта и папки `src/l3` и `src/iti`), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
+Используйте checkout open-steamgate на теге `vscode-stable-v0.7.3140` или новее. Его `segw:zip` принимает `--unit` и `--manifest` и перебазирует манифест приложения под его расположение в BSP. Инструмент отвергает каждый объект, которого нет в списке модуля развертывания, поэтому подготовьте копию этой папки без объектов, работающих только локально (ниже: четыре объекта; определение поведения, определение службы, пул поведения и класс EML бизнес-объекта рейсов в `src/rap`; папки `src/l3` и `src/iti`), а затем упакуйте копию в zip. Задайте в `DEMO` путь к своему клону и выполните эти команды из checkout open-steamgate:
 
 ```sh
 DEMO=/path/to/osg-demo
 STAGE="$(mktemp -d)/osg-demo"
 cp -r "$DEMO" "$STAGE" && rm -rf "$STAGE/.git"
-rm -r "$STAGE"/src/l3 "$STAGE"/src/iti "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/l2/*.trace.meta.json "$STAGE"/src/zosd_fleet.tran.xml
+rm -r "$STAGE"/src/l3 "$STAGE"/src/iti "$STAGE"/src/zcl_osd_fleet_tran.clas.* "$STAGE"/src/zcl_osd_fleet_tpl.clas.* "$STAGE"/src/zcl_osd_fleet_doctor.clas.* "$STAGE"/src/l2/*.l2.yaml "$STAGE"/src/l2/*.trace.json "$STAGE"/src/l2/*.trace.meta.json "$STAGE"/src/zosd_fleet.tran.xml \
+  "$STAGE"/src/rap/*.bdef.* "$STAGE"/src/rap/*.srvd.* "$STAGE"/src/rap/zbp_osd_fleet_voyage.clas.* "$STAGE"/src/rap/zcl_osd_fleet_voyage_eml.clas.*
 npm run segw:zip -- "$STAGE" --unit osg-demo \
   --manifest "$DEMO/deploy/manifest.json" --out /tmp/osg-demo.zip
 unzip -Z1 /tmp/osg-demo.zip
 rm -rf "$(dirname "$STAGE")"
 ```
 
-Получив саму папку, инструмент рассматривает ее как пак (pack): он компилирует `src/zosd_fleet.stg.yaml` в объекты SEGW, отдает предпочтение написанному вручную `ZCL_ZOSD_FLEET_DPC_EXT` перед сгенерированным и превращает `webapp/` в BSP-приложение с его узлом ICF. Ожидается: `/tmp/osg-demo.zip: ... deploy unit "osg-demo"`, затем что попало в архив, по типам объектов (инструмент дополняет (pad) имена IWSV/IWMO перед их версией, а строка SICF заканчивается идентификатором узла; здесь и то и другое сокращено):
+Получив саму папку, инструмент рассматривает ее как пак (pack): он компилирует `src/zosd_fleet.stg.yaml` в объекты SEGW, отдает предпочтение написанному вручную `ZCL_ZOSD_FLEET_DPC_EXT` перед сгенерированным и превращает `webapp/` в BSP-приложение с его узлом ICF. Ожидается такой вывод (так его напечатал инструмент на этом теге): сводка по zip, затем что попало в архив, по типам объектов (инструмент дополняет (pad) имена IWSV/IWMO пробелами перед их версией, а строка SICF заканчивается идентификатором узла), по строке `NOT carried` на каждый файл начальных данных и подсказка для импорта:
 
 ```
-CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_chain, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_l2_maint, zcl_osd_fleet_lift, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
-DDLS  zc_osd_fleetcube
-IWMO  zosd_fleet_mdl 0001
-IWPR  zosd_fleet
-IWSV  zosd_fleet_srv 0001
-PROG  zosd_fleet_alv, zosd_fleet_balv, zosd_fleet_job, zosd_fleet_ready, zosd_fleet_voyage
-SHLP  zosd_fleet_status_sh
-SICF  zosg_demo <node id>
-TABL  zosd_fleet_ship, zosd_fleet_stat, zosd_fleet_voy
-WAPA  zosg_demo
-NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+/tmp/osg-demo.zip: 73 files, 63.1 KB, deploy unit "osg-demo"
+  CLAS  zcl_osd_fleet_audit, zcl_osd_fleet_bal, zcl_osd_fleet_bal_view, zcl_osd_fleet_chain, zcl_osd_fleet_fuel, zcl_osd_fleet_job, zcl_osd_fleet_l2_maint, zcl_osd_fleet_lift, zcl_osd_fleet_report, zcl_osd_fleet_summary, zcl_zosd_fleet_dpc, zcl_zosd_fleet_dpc_ext, zcl_zosd_fleet_mpc, zcl_zosd_fleet_mpc_ann, zcl_zosd_fleet_mpc_ext, zosd_demo_hello
+  DDLS  zc_osd_fleetcube, zi_osd_fleet_stop, zi_osd_fleet_voyage
+  IWMO  zosd_fleet_mdl                  0001
+  IWPR  zosd_fleet
+  IWSV  zosd_fleet_srv                     0001
+  PROG  zosd_fleet_alv, zosd_fleet_balv, zosd_fleet_job, zosd_fleet_ready, zosd_fleet_voyage
+  SHLP  zosd_fleet_status_sh
+  SICF  zosg_demo      cd9e40a087f42f00d838becd9
+  TABL  zosd_fleet_ship, zosd_fleet_stat, zosd_fleet_stop, zosd_fleet_stop_d, zosd_fleet_voy, zosd_fleet_voyage, zosd_fleet_voyage_d
+  WAPA  zosg_demo
+  NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+  NOT carried: zosd_fleet_stat.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+  NOT carried: zosd_fleet_stop.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+  NOT carried: zosd_fleet_voy.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+  NOT carried: zosd_fleet_voyage.tabu.json has no .conf.json, so abapGit has rows and no instruction to take them
+
+Import it in abapGit: "New Online/Offline" -> Offline -> pick the zip,
+then give it the package. The zip does not name one, so nothing here
+decides where it lands.
 ```
 
-и такая же строка `NOT carried` для `zosd_fleet_stat` и `zosd_fleet_voy`. Если локальные объекты оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN`, `TRAN ZOSD_FLEET` и каждого объекта из `src/l3` и `src/iti` и не записывает zip; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
+Потом `unzip -Z1` перечисляет файлы архива, а последняя строка удаляет копию. Если локальные объекты оставить в копии, команда завершается с `not-in-manifest` для `CLAS ZCL_OSD_FLEET_DOCTOR`, `CLAS ZCL_OSD_FLEET_TPL`, `CLAS ZCL_OSD_FLEET_TRAN`, `TRAN ZOSD_FLEET`, `CLAS ZBP_OSD_FLEET_VOYAGE`, `CLAS ZCL_OSD_FLEET_VOYAGE_EML` и каждого объекта из `src/l3` и `src/iti`; для `BDEF ZI_OSD_FLEET_VOYAGE` и `SRVD ZUI_OSD_FLEET_VOY` она сообщает еще `not-an-object` (суффиксы `.asbdef` и `.srvdsrv` ей неизвестны) и `name-not-stated`. Zip она не записывает; более старый zip по тому же пути остается как был, поэтому удалите его перед повторной попыткой.
 
 ## Что переносится в систему, а что нет
 
@@ -57,6 +67,11 @@ NOT carried: zosd_fleet_ship.tabu.json has no .conf.json, so abapGit has rows an
 | Куб `ZC_OSD_FLEETCUBE` | да (DDLS) | Исходный код CDS; при активации система создает его SQL-представление `ZVOSDFLEETCUBE`, а из-за `@OData.publish: true` - сервис `ZC_OSD_FLEETCUBE_CDS`, который еще нужно активировать в хабе шлюза. Там его свойства сохраняют псевдонимы CDS (`VoyageId`, `ShipId`, ...), тогда как локальный движок отдает их в верхнем регистре (`VOYAGEID`, `SHIPID`, ...). |
 | Классы AMDP `ZCL_OSD_FLEET_FUEL`, `ZCL_OSD_FLEET_SUMMARY` | да | Настоящий AMDP в системе на базе HANA: исходный код не переписывается для локального движка. Чтобы показать ожидаемые итоги, classrun нужны начальные строки (seed). |
 | Узел ICF приложения | да, как SICF `/sap/bc/ui5_ui5/sap/zosg_demo` | Имя из пространства заказчика по пути, где система хранит свои приложения UI5. |
+| Таблицы RAP `ZOSD_FLEET_VOYAGE`, `_VOYAGE_D`, `ZOSD_FLEET_STOP`, `_STOP_D` (глава 21) | да, пустые | Активные и черновые таблицы бизнес-объекта рейсов. Черновые таблицы - обычные таблицы, в которых поля черновика перечислены явно; без определения поведения система не использует их как черновые. |
+| Представления `ZI_OSD_FLEET_VOYAGE`, `ZI_OSD_FLEET_STOP` | да (DDLS) | Корневая сущность представления с композицией и дочерняя сущность с ассоциацией к родителю, поверх активных таблиц. В системе не опробованы. |
+| Определение поведения `ZI_OSD_FLEET_VOYAGE` и определение службы `ZUI_OSD_FLEET_VOY` | нет | Инструмент упаковки на этом теге не знает их суффиксов файлов abapGit (`.asbdef`, `.srvdsrv`) и поэтому отвергает их. В системе службе понадобилась бы еще привязка службы (service binding), которой в этом репозитории нет. |
+| Пул поведения `ZBP_OSD_FLEET_VOYAGE` и `ZCL_OSD_FLEET_VOYAGE_EML` | нет | Оба опираются на определение поведения (`FOR BEHAVIOR OF`, `TYPE TABLE FOR CREATE` ...), поэтому в системе без него не активируются. |
+| Приложение Voyages (`voyage/`) и его плитка | нет | Движок собирает его как второе BSP-приложение пака, `ZOSD_VOYAGE4`, а zip его не сериализует; плитка, как и у приложения флота, записана в `osd-pack.json`. |
 | Плитка панели запуска | нет | Плитка - это `osd-pack.json`, который читает только панель запуска open-steamgate. В системе на inbound `AirshipFleet-display` в манифесте указывали бы каталог launchpad и целевое сопоставление; ни того, ни другого в zip нет. |
 | Начальные строки (`data/*.tabu.json`) | нет | Понадобились бы две вещи, и ни одной здесь нет: `.conf.json` рядом с каждым `.tabu.json` (инструкция abapGit: какая таблица, какое условие) и запись `TABU <table>` в модуле развертывания (без нее инструмент отвергает строки как `not-in-manifest`). При наличии обеих строки были бы записаны в мандант входа в систему, что бы ни стояло в их `MANDT`. |
 | `ZCL_OSD_FLEET_LIFT` и `ltcl_fleet_lift` | да | Обычный Open SQL над таблицами флота; после генерации поднятая область - обычный ABAP. Его HARMLESS-тесты читают начальные строки (seed), поэтому проходят только тогда, когда строки есть. `test/lift.mjs`, который заново генерирует область, требует open-steamgate и в систему не переносится. |

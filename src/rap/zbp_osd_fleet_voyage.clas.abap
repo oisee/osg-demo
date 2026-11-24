@@ -1,0 +1,6 @@
+CLASS zbp_osd_fleet_voyage DEFINITION PUBLIC ABSTRACT FINAL
+  FOR BEHAVIOR OF zi_osd_fleet_voyage.
+ENDCLASS.
+
+CLASS zbp_osd_fleet_voyage IMPLEMENTATION.
+ENDCLASS.

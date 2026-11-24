@@ -1,0 +1,5 @@
+@EndUserText.label: 'Airship fleet: voyage service'
+define service ZUI_OSD_FLEET_VOY {
+  expose ZI_OSD_FLEET_VOYAGE as Voyage;
+  expose ZI_OSD_FLEET_STOP as Stop;
+}

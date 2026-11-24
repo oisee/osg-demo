@@ -5,12 +5,24 @@
   "order": 100,
   "osd": ">=0.7.3140",
   "abap": "src",
+  "bsp": {
+    "ZOSD_VOYAGE4": "voyage"
+  },
+  "intents": {
+    "Voyage-manage": {"app": "ZOSD_VOYAGE4", "component": "osd.voyage", "title": "Voyages"}
+  },
   "tiles": [
     {
       "id": "osg-demo-fleet",
       "title": "Airship fleet",
       "subtitle": "osg-demo",
       "url": "/app/flp.html#AirshipFleet-display"
+    },
+    {
+      "id": "osg-demo-voyage",
+      "title": "Voyages",
+      "subtitle": "osg-demo",
+      "url": "/app/flp.html#Voyage-manage"
     }
   ]
 }

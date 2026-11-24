@@ -1,0 +1,144 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "osd.voyage",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "title": "Voyages",
+    "description": "osg-demo ch21: the fleet's RAP voyages over ZUI_OSD_FLEET_VOY, OData V4 with draft",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "../../../../opu/odata4/sap/ZUI_OSD_FLEET_VOY/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0",
+          "annotations": ["localAnnotations"]
+        }
+      },
+      "localAnnotations": {
+        "uri": "annotations/annotations.xml",
+        "type": "ODataAnnotation",
+        "settings": {
+          "localUri": "annotations/annotations.xml"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "Voyage-manage": {
+          "semanticObject": "Voyage",
+          "action": "manage",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "osd.voyage.i18n.i18n",
+          "supportedLocales": [""],
+          "fallbackLocale": ""
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "VoyageList",
+          "target": "VoyageList"
+        },
+        {
+          "pattern": "Voyage({key}):?query:",
+          "name": "VoyageObjectPage",
+          "target": "VoyageObjectPage"
+        }
+      ],
+      "targets": {
+        "VoyageList": {
+          "type": "Component",
+          "id": "VoyageList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Voyage",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Voyage": {
+                  "detail": {
+                    "route": "VoyageObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "creationMode": {
+                      "name": "NewPage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "VoyageObjectPage": {
+          "type": "Component",
+          "id": "VoyageObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Voyage",
+              "editableHeaderContent": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}
