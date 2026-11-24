@@ -17,7 +17,7 @@ etag master local_changed_at
   field ( mandatory ) route;
   association _Stops { create; with draft; }
   determination SetPlanned on modify { create; }
-  determination CalcSteam on modify { create; field route; }
+  determination CalcSteam on modify { create; }
   internal action RecalcSteam;
   validation CheckShip on save { create; field ship_id; }
   action Approve result [1] $self;

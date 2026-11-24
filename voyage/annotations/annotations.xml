@@ -29,8 +29,8 @@
             </PropertyValue>
           </Record>
         </Annotation>
-        <!-- the steam is the stops' (CalcSteam): a change below the voyage
-             makes sap.fe read it again, in the draft, when the field is left -->
+        <!-- the steam follows the stops (the stop's RecalcVoyageSteam): a change
+             below the voyage makes sap.fe read it again, in the draft, when the field is left -->
         <Annotation Term="Common.SideEffects" Qualifier="Stops">
           <Record Type="Common.SideEffectsType">
             <PropertyValue Property="SourceEntities"><Collection><NavigationPropertyPath>to_Stops</NavigationPropertyPath></Collection></PropertyValue>
