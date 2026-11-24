@@ -17,6 +17,9 @@ statuses.
 | `ZOSD_FLEET_VOY` | 20 | `VOYAGE_ID` | ship, ports, dates, passengers, fuel, distance |
 | `ZOSD_FLEET_STAT` | 3 | `STATUS` | `A` Aloft, `D` Docked, `M` Maintenance |
 
+Chapter 21 adds a RAP voyage object with tables of its own (`ZOSD_FLEET_VOYAGE`,
+`ZOSD_FLEET_STOP` and their draft tables): three voyages and six stops.
+
 `S006 Old Boiler` has no voyages, which several chapters use on purpose. The
 [fleet contract](../docs/fleet-contract.md) fixes names and shapes.
 
@@ -81,4 +84,5 @@ match for Activate.
 | Because we can | 18 JavaScript and C in ABAP | QuickJS running as ABAP on a real kernel (abapiti's result); in your sandbox, a C function compiled to WebAssembly and by abapiti to an ABAP class, drawing the Mandelbrot set in the classrun console, byte for byte as native C |
 | An agent at the keyboard | 19 An agent that writes ABAP from inside the system | PIA, a coding agent written in ABAP, reads, changes, activates and tests a class on the system it runs in: green, a deliberate break, red, fixed, green (shown on SAP A4H and on open-steamgate) |
 | The tools come home | 20 abaplint in ABAP | abapiti translates abaplint to Go and ABAP; all 11,060 active tests of abaplint pass on Go, on open-steamgate's Go runtime and on a real SAP kernel (abapiti's result), and the ABAP build checks the abapGit standalone report; in your terminal, the Go build of the same suite |
+| RAP | 21 Voyages as a business object | the fleet's voyages as a managed RAP object with draft: behavior definition, rules written with EML, a Fiori Elements V4 app; SAP's flight reference scenario on the same runtime |
 | Appendices | A Run the checks, B Take it to a system (what travels), C Limits and glossary | the automated checks, the transport list, the fine print |

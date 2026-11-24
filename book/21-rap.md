@@ -107,7 +107,8 @@ define root view entity ZI_OSD_FLEET_VOYAGE as select from zosd_fleet_voyage
 }
 ```
 
-The behavior definition is the whole object in one file:
+The behavior definition holds the whole object in one file. Its voyage
+part:
 
 <!-- code: src/rap/zi_osd_fleet_voyage.bdef.asbdef lines 1-36 -->
 ```
@@ -153,9 +154,9 @@ Read it from the top:
 
 - `managed`: the framework writes the tables; the pool only adds rules.
   `with draft` gives every voyage a draft table beside its active one, and
-  the draft actions (`Edit`, `Activate`, `Discard`, `Resume`, `Prepare`)
-  are what the app called in steps 3 to 5; `Discard` reaches the service as
-  a DELETE of the draft.
+  the draft actions are what the app called in steps 3 to 5: `Edit`,
+  `Prepare` and `Activate`, and `Discard`, which reaches the service as a
+  DELETE of the draft. `Resume` continues a draft left open earlier.
 - `numbering : managed`: the key is a UUID the framework draws.
 - `total etag` and `etag master`: optimistic locking, both for the draft
   and for the active voyage.
@@ -246,8 +247,7 @@ fields. A new voyage starts as planned:
 ```
 
 The steam rule lives in one place, the internal action `RecalcSteam`. The
-voyage's determination `CalcSteam` executes it when a voyage is created or
-its route changes. The stop's determination `RecalcVoyageSteam` executes it
+voyage's determination `CalcSteam` executes it when a voyage is created. The stop's determination `RecalcVoyageSteam` executes it
 for the voyage above whenever a stop is created or changed. That is how
 step 3's new port changed the draft's steam. The action counts the stops
 through the composition:
@@ -312,8 +312,8 @@ through the composition:
 One statement here is not EML as written: `READ ENTITIES ... BY \_Stops`.
 The transpiler at this tag does not lower an EML statement through an
 association yet, so it stands as the runtime call it would lower to, with
-the statement in a comment above it. It is the only such place in the
-chapter.
+the statement in a comment above it. The EML class below has the other
+such place, `CREATE BY \_Stops`.
 
 The validation runs on save and on `Prepare`. It marks the instance as
 failed and reports a message on the field:
@@ -378,7 +378,8 @@ JSON step 6 printed.
 ## EML from the outside
 
 The same object can be driven from any ABAP, not only from the app.
-`ZCL_OSD_FLEET_VOYAGE_EML` wraps one statement per method. A draft is
+`ZCL_OSD_FLEET_VOYAGE_EML` wraps one statement per method; `add_stop`'s
+`CREATE BY \_Stops` is written as its call, like the read above. A draft is
 created with the key drawn by managed numbering:
 
 <!-- code: src/rap/zcl_osd_fleet_voyage_eml.clas.abap method create_draft -->
@@ -568,15 +569,20 @@ along with the steam.
 - **EML through an association** (`CREATE BY \_Stops`, `READ ... BY
   \_Stops`) is not lowered by the transpiler at this tag. The pool and the
   EML class write those two statements as the calls they lower to.
-- **A service name longer than 18 characters** does not build at this tag,
-  so the service is `ZUI_OSD_FLEET_VOY` and not a longer name.
-- **Not everything travels to a system.** Appendix B's zip carries the
-  tables, the views, the pool and the EML class. The behavior definition,
-  the service definition and the Voyages app stay local: the packaging tool
-  at this tag does not know the abapGit file types of the first two, and it
-  does not serialize a pack's second app.
-
-All four were reported to open-steamgate.
+- **A service with annotations and a name longer than 18 characters** does
+  not build at this tag: one of its generated classes is not shortened. So
+  the service is `ZUI_OSD_FLEET_VOY` and not a longer name.
+- **Only the data model travels to a system.** Appendix B's zip carries
+  the four tables and the two views. The behavior definition, the service
+  definition and the Voyages app stay local: the packaging tool at this tag
+  does not know the abapGit file types of the first two, and it does not
+  serialize a pack's second app. The pool and the EML class stay local with
+  them, because on a system they cannot be activated without their
+  behavior definition.
+- **Activate and the validation.** On this runtime an EML `Activate` of a
+  draft goes through and the validation stops the `COMMIT ENTITIES` that
+  follows, which is what the unit test checks. Over OData the app's
+  `Prepare` refuses first, as step 5 showed.
 
 ## SAP's own flight scenario
 
@@ -587,6 +593,6 @@ open-steamgate fetches SAP's public RAP reference scenario,
 its bookings, the supplement and agency objects with draft, the agency's
 interface behavior definition and the carrier singleton all run: every
 flight behavior definition the pack takes. The scenario's separate draft,
-unmanaged and hierarchy variants are not fetched. The record lists what
+collaborative draft, unmanaged and hierarchy variants are not fetched. The record lists what
 runs and what is refused, construct by construct:
 [docs/rap-flight-pack.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/rap-flight-pack.md).
