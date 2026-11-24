@@ -71,7 +71,11 @@ settings:
 
 ![Состояние watch у GLASS: Doctor RUNNING, блокировка HELD, одно открытое сообщение](../img/vscode-watch-glass.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 ![После CONTINUE: Doctor STOPPED, блокировка RELEASED, обе проверки DONE и два открытых сообщения](../img/vscode-watch-final.png)
+
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Прогон останавливается у стекла
 
@@ -186,7 +190,7 @@ lv_ok = zcl_osd_fleet_watch=>continue_glass( iv_run = lv_run
 | `resilience.fuses.max_alerts` | каждую строку сообщений правила в прогоне | правило `FUSED` и перестает писать |
 
 Набор watch пользуется только стеклом. Два других предела описаны в
-[документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
+[документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/dsl-l3.md)
 open-steamgate (разделы «Governor: the manual-handling budget» и «Fuses») и
 здесь не выполняются.
 

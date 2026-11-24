@@ -8,7 +8,7 @@ This folder is an abapGit repository and an [open-steamgate](https://github.com/
 
 ## Quick start
 
-1. Install the **open-steamgate** extension, **0.7.1696 or later** (`oisee.open-steamgate`, stable channel): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
+1. Install the **open-steamgate** extension, **0.7.3140 or later** (`oisee.open-steamgate`, stable channel): search for it in the Extensions view, or take the `.vsix` from the latest [`vscode-stable-v*` release](https://github.com/oisee/open-steamgate/releases) and run **Extensions: Install from VSIX...**.
 2. Clone this repository and open the clone as a VS Code folder.
 3. Run **osd: Start (build + run this system)**. The bundled system starts, and this folder is layered on top as a pack in package `$ZOSD_DEMO`. It shows up under **Workspace layers** in the Testing view.
 4. Open [ZOSD_DEMO_HELLO](src/zosd_demo_hello.clas.abap) and press **F9**. Expected: `Hello from ZOSD_DEMO_HELLO.` in the **OSD: Console** output. Chapter 1 goes on from there.
@@ -57,7 +57,7 @@ Chapters 10 and 11 use open-steamgate's generation layers, in which a generated 
 
 ## Check it
 
-In an open-steamgate checkout, run `npm install && npm run bootstrap` once. Then:
+In an open-steamgate checkout, run `npm ci && npm run bootstrap` once (bootstrap builds and links the transpiler the checkout pins). Then:
 
 ```
 OSD_HOME=/path/to/open-steamgate SLICE_SKIP_UI=1 node test/slice.mjs            # 22 checks, SQLite; 21 run, the UI one is skipped

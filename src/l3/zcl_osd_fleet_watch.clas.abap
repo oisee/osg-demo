@@ -1474,6 +1474,7 @@ CLASS zcl_osd_fleet_watch IMPLEMENTATION.
     " holds the rows a real run would have written
     DATA lv_bind TYPE string.
     DATA ls_rule TYPE ty_rule.
+    DATA lt_dry TYPE tt_rule.
     zcl_l3_watch_alerts_capture=>reset( ).
     CONCATENATE iv_bind ',alerts=capture' INTO lv_bind.
     gv_dry = abap_true.
@@ -1486,10 +1487,17 @@ CLASS zcl_osd_fleet_watch IMPLEMENTATION.
     IF rs_result-status = 'DONE'.
       rs_result-status = 'DRY'.
     ENDIF.
-    LOOP AT rs_result-rules INTO ls_rule WHERE status = 'DONE'.
-      ls_rule-status = 'DRY'.
-      MODIFY rs_result-rules FROM ls_rule.
+    " the rows are rebuilt, not MODIFYed in the loop: the runtime (2.14.14+)
+    " searches the row by the default key, and status is part of that key once
+    " it says DRY, so the in-loop MODIFY finds nothing (ANOMALY-2026-11-09-
+    " modify-in-loop-by-key)
+    LOOP AT rs_result-rules INTO ls_rule.
+      IF ls_rule-status = 'DONE'.
+        ls_rule-status = 'DRY'.
+      ENDIF.
+      APPEND ls_rule TO lt_dry.
     ENDLOOP.
+    rs_result-rules = lt_dry.
   ENDMETHOD.
 
   METHOD resume.

@@ -22988,7 +22988,7 @@
           "path": "/",
           "source": {"file": "src/l3/fleet_night.l3.yaml", "node": "set/night", "selector": "/"},
           "template": "main",
-          "template_line": 3201
+          "template_line": 3209
         }
       ],
       "file": "zcl_osd_fleet_night.clas.abap",
@@ -22997,7 +22997,7 @@
       "path": "/",
       "set_line": 7,
       "template": "main",
-      "template_line": 3201
+      "template_line": 3209
     }
   ],
   "model": "sha256:52fff052183a14ad5362ee16832c7b33a89dedc5467d9e9f869ae99306842763",
@@ -23012,5 +23012,5 @@
   },
   "set": "src/l3/fleet_night.l3.yaml",
   "template": "recipes/l3-set/template.tpl",
-  "templates": {"recipes/l3-set/template.tpl": "sha256:c434a1d4f1812f34f1baffb44245d763ddcf391a60b5753c5c96998a6a054225"}
+  "templates": {"recipes/l3-set/template.tpl": "sha256:7d1eb6f74c504c3cce4ffaec7a2d284a7826bb3f7d938d4f8fbfe93ea8b3ed5e"}
 }

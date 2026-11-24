@@ -27,6 +27,8 @@ queue before and after each step.
 
 ![OSD jobs: a readable summary of the completed ZOSD_FLEET_AUDIT job](img/vscode-fleet-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 1. Start OSD with a file database, for example
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
    in the open-steamgate checkout.
@@ -82,7 +84,7 @@ Same setup as above: OSD on `STG_DB=file` and the engine's worker.
    `WAITING`: its event was never raised. Leave it there for the doctor below.
    The facade now supports `BP_JOB_DELETE` for a waiting job; this exercise
    does not call it. For a fresh exercise, use a new database directory.
-   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/job-standard-fms.md).
+   See the tag's [job API](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/job-standard-fms.md).
 3. Press **F9** on `ZCL_OSD_FLEET_BAL_VIEW`. Expected: `<A>-VOY` with
    `Voyage step OK: 20 voyages`, `<A>-READY` with
    `Fleet ready: 6 ships after a clean voyage step`, and `<B>-VOY` with

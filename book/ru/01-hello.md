@@ -6,6 +6,8 @@
 
 ![Open sample: встроенные блокноты и класс приветствия из рабочей папки](../img/vscode-open-sample.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 Строка состояния отдельно показывает **OSD running/stopped**, **OSD generation
 <id> · SQLite · warm** и **OSD jobs: …**. Щелчок по элементу системы
 открывает **What is running?** с действиями для системы, обработчика,
@@ -15,9 +17,13 @@
 
    ![F9 на ZOSD_DEMO_HELLO: приветствие в OSD: Console и OSD jobs idle](../img/vscode-classrun.png)
 
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 2. Откройте Testing, раскройте **Workspace layers > osg-demo > ZOSD_DEMO_HELLO** и запустите `known_line`; либо откройте тестовый include [zosd_demo_hello.clas.testclasses.abap](../../src/zosd_demo_hello.clas.testclasses.abap) и нажмите там **Ctrl+Shift+F10** или откройте сам класс и нажмите **Ctrl+Shift+F10** в нем. Ожидается: один зеленый тест ABAP Unit.
 
    ![Ctrl+Shift+F10: один зелёный тест ABAP Unit и простаивающий обработчик заданий](../img/vscode-testing.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 3. Измените текст, который возвращает `greeting( )`, нажмите **Ctrl+F2** для проверки, **Ctrl+F3** для сохранения и активации (или галочку и спичку в заголовке редактора; обе пишут результат в **OSD: Console**), затем снова **F9**. Ожидается: консоль показывает ваш новый текст. F9 выполняет активную версию. Предупреждение о неактивированных изменениях появляется, если редактор содержит несохранённые правки или непустой активный исходник отличается от текста редактора. Пустой ответ активного исходника (как у объектов пакета рабочей области) считается неизвестным, поэтому после сохранения без активации предупреждение не гарантировано. Верните исходный текст, активируйте и перезапустите тест, чтобы он остался зеленым.
 

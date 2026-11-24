@@ -67,7 +67,11 @@ These are local observations, not a test on a real system.
 
 ![Watch state at GLASS: Doctor RUNNING, lock HELD, one open alert](img/vscode-watch-glass.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 ![After CONTINUE: Doctor STOPPED, lock RELEASED, both checks DONE and two open alerts](img/vscode-watch-final.png)
+
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## The run stops at its glass
 
@@ -181,7 +185,7 @@ A governed set has three limits, and they answer different questions:
 
 The watch set uses only the glass. The other two are described in
 open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/dsl-l3.md)
 ("Governor: the manual-handling budget", "Fuses"), and are not run here.
 
 ## What this chapter does not show

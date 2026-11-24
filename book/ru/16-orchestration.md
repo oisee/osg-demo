@@ -144,6 +144,8 @@ SQLite и следит за обработчиком (`osd.jobs.worker=auto`); �
 
 ![OSD jobs: читаемая сводка завершённых заданий стопок ночного набора](../img/vscode-night-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 Чтобы увидеть очередь, как ниже, запустите OSD из checkout с `STG_DB=file`,
 `STG_DB_PATH` и `OSD_PACKS` и запускайте обработчик вручную.
 
@@ -237,7 +239,7 @@ ENDIF.
 ![Слева: условный UPDATE дает открыть этап 2 ровно одному из двух заданий. Справа: упавшая стопка оставляет этап 1 PARTIAL, а этап 2 NOT-RUN](../img/l3-gate.ru.png)
 
 Эти случаи в главе не выполняются. Так сгенерированный исполнитель
-описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
+описан в [документации DSL L3](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/dsl-l3.md)
 open-steamgate (раздел «The worklist and the gate»), и их проверяют ее
 собственные тесты.
 

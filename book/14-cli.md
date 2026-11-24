@@ -61,6 +61,8 @@ runs it the same way.
 
    ![The selection screen becomes the command's options](img/cli-help.png)
 
+   <!-- shot: 0.7.3140's -help adds -no-default-reads and an unindented "default read parameters: ; list parameters:" line (OSG #705); hold the reshoot until OSG decides on that line, see phase1-report -->
+
 2. `./fleet --status A`. Expected: refused with exit code 1, `keeps its rows
    in tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE`. A
    report with tables never gets a silent in-memory database.
@@ -159,17 +161,14 @@ keeps two CSV files in `/tmp/fleet-cli/data`.
 
    ![The CSV as a list](img/csv-list.png)
 
+   <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
+
 4. Without a screen, from that folder:
    `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
    prints the same list. Without `-allow-read` it prints `osabap: permission
    denied` on stderr and exits with 1: the file dialog and `GUI_UPLOAD` use the
    same sandbox as `DATASET`, so a file outside the grant can be neither listed
    nor read.
-
-At this book's tag the list has an empty line after each of the first two
-rules and the count is indented by four spaces. open-steamgate removed both
-after the tag, in
-[PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
 ## The same steps on a Z80
 
@@ -252,8 +251,8 @@ layer in 4.6 (p. 104–106).
   the report does it with `TRANSLATE`.
 
 The specification is open-steamgate's
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md), and F4 has its own,
-[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-native.md), and F4 has its own,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-f4.md).
 
 ## Under the hood
 
@@ -364,7 +363,7 @@ instead of boxed ABAP values, synchronous calls instead of an `await` on
 each one, the calculation type decided at compile time. Its README at this
 book's tag compares three programs: the transpiler's JavaScript, JavaScript
 from the IR, and Go from the IR
-([tools/gogen/README.md, "Language or model?"](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+([tools/gogen/README.md, "Language or model?"](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
 
 | work | transpiler JS | JS from the IR | Go |
 | --- | ---: | ---: | ---: |

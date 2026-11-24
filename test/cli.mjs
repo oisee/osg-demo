@@ -134,8 +134,9 @@ for (const file of ["fleet.csv", "ships.csv"]) copyFileSync(join(repo, "cli", "d
 const checkCsv = (name, args, want) => check(name, args, want, undefined, csv, data);
 checkCsv("CSV -help has the file field and read grant", ["-help"], (out, rc) =>
   rc !== 0 ? `rc ${rc}` : has(out, "--file", "Fleet CSV file (P_FILE, value)", "--p-name", "-allow-read DIR"));
-// the tag leaves empty lines after ULINE and indents the count; main does not
-const lines = (out) => out.split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
+// exactly the list, line for line: since open-steamgate #809 no empty line
+// follows a rule and the count is not indented
+const lines = (out) => out.replace(/\n$/, "");
 const rule = "-".repeat(72);
 const list = [
   "fleet.csv",

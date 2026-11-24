@@ -140,6 +140,8 @@ switches the **OSD: Jobs** output to the worker JSON when needed.
 
 ![OSD jobs: a readable summary of completed night-set pile jobs](img/vscode-night-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 For the queue snapshots below, use the checkout route with `STG_DB=file`,
 `STG_DB_PATH` and `OSD_PACKS`, and drive the worker yourself.
 
@@ -229,7 +231,7 @@ the next night's run is let in.
 ![Left: the conditional UPDATE lets exactly one of two jobs open stage 2. Right: a failed pile leaves stage 1 PARTIAL and stage 2 NOT-RUN](img/l3-gate.png)
 
 These cases are not run in this chapter. They are how open-steamgate's
-[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/dsl-l3.md)
+[DSL L3 documentation](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/dsl-l3.md)
 ("The worklist and the gate") describes the generated runner, and its own
 tests check them.
 

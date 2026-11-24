@@ -60,6 +60,8 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 
    ![Экран выбора становится опциями команды](../img/cli-help.png)
 
+   <!-- shot: 0.7.3140's -help adds -no-default-reads and an unindented "default read parameters: ; list parameters:" line (OSG #705); hold the reshoot until OSG decides on that line, see phase1-report -->
+
 2. `./fleet --status A`. Ожидается: отказ с кодом выхода 1, `keeps its rows in
    tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE`. Отчет с
    таблицами никогда не получает молча базу в памяти.
@@ -160,17 +162,14 @@ START-OF-SELECTION.
 
    ![CSV в виде списка](../img/csv-list.png)
 
+   <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
+
 4. Без экрана, из той же папки:
    `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
    печатает тот же список. Без `-allow-read` программа пишет `osabap:
    permission denied` в stderr и выходит с кодом 1: файловый диалог и
    `GUI_UPLOAD` живут в той же песочнице, что и `DATASET`, поэтому файл за
    пределами разрешенной папки нельзя ни увидеть в списке, ни прочитать.
-
-На теге этой книги в списке есть пустая строка после каждой из двух первых
-черт, а итог сдвинут на четыре пробела. open-steamgate убрал и то и другое
-уже после тега, в
-[PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
 ## Те же шаги на Z80
 
@@ -253,8 +252,8 @@ IBM по CICS описывает псевдодиалоговую обработ
   командная строка нет, поэтому отчет делает это сам через `TRANSLATE`.
 
 Спецификация - в
-[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-native.md) open-steamgate, у F4 своя,
-[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/osabap-f4.md).
+[docs/osabap-native.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-native.md) open-steamgate, у F4 своя,
+[docs/osabap-f4.md](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/osabap-f4.md).
 
 ## Под капотом
 
@@ -364,7 +363,7 @@ ENDFORM.
 вместо упакованных значений ABAP, синхронные вызовы вместо `await` на
 каждом, тип вычисления решен при компиляции. README на теге этой книги
 сравнивает три программы: JavaScript транспилера, JavaScript из IR и Go из IR
-([tools/gogen/README.md, «Language or model?»](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
+([tools/gogen/README.md, «Language or model?»](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/tools/gogen/README.md#language-or-model-the-same-ir-emitted-as-js)):
 
 | работа | JS транспилера | JS из IR | Go |
 | --- | ---: | ---: | ---: |

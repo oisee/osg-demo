@@ -300,7 +300,7 @@ The steps below replay the model's answers, so you need no key and no
 network once things are installed. PIA's own tools still run for real:
 they read, write, activate and test the class in your system.
 
-You need git, Node 22 or newer, and room for a second open-steamgate tree
+You need git, Node 22.18 or newer, and room for a second open-steamgate tree
 just for PIA. In this book's run it took about 0.8 GB, and the pinned
 transpiler's cache about 0.5 GB more.
 

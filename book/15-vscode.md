@@ -20,14 +20,16 @@ are changed to integers to demonstrate the diagnostic.
 
 ![Problems: OSD kernel rejects BIT-AND on integers; the diagnostic links to its support explanation](img/vscode-kernel-diagnostic.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 The debugger and worker behavior is described in the tag's
-[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/README.md);
+[extension guide](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/editors/vscode/README.md);
 `osg.kernelStrict` is declared in its
-[settings](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/package.json).
+[settings](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/editors/vscode/package.json).
 
 ## From a service to its code
 
-1. Open the OSD view: the airship in the activity bar. Expected: a row
+1. Open the OSD view: the gear-and-gate logo in the activity bar. Expected: a row
    `Running on …` with the database and the generation, then **Open Fiori
    Launchpad**, **System**, **TRAN**, **Layers** and **Services**.
 2. Expand **Services > OData** and then **ZOSD_FLEET_SRV**. Expected: the
@@ -41,6 +43,8 @@ The debugger and worker behavior is described in the tag's
    (generic)".
 
    ![ZOSD_FLEET_SRV: classes and entity-set methods in System, service and model details beside them](img/vscode-services.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 3. Click **ShipSet get_entityset**. Expected:
    [zcl_zosd_fleet_dpc_ext.clas.abap](../src/zcl_zosd_fleet_dpc_ext.clas.abap)
@@ -62,6 +66,8 @@ Client, httpYac and JetBrains also read.
    `unresolved: query options are unsupported`.
 
    ![Static CodeLens routes above the three plain GETs; the $filter request remains unresolved](img/vscode-http-lens.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 5. Click the line above the `GET` of **All ships**. Expected: the DPC class
    opens at line 112, `shipset_get_entityset`.
@@ -86,6 +92,8 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
 
    ![Stopped in shipset_get_entityset: request variables displayed as ABAP values](img/vscode-debug-entityset.png)
 
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 7. Above the same method, click **▶ Call ShipSet**. Expected: beside the code,
    the request it sent,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, then
@@ -93,6 +101,8 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    `StatusText` filled by the method. **raw JSON** shows the answer as it came.
 
    ![Call ShipSet: DPC code beside HTTP 200 and six ship rows with StatusText](img/vscode-call-entityset.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Who uses this class
 
@@ -104,6 +114,8 @@ enters `shipset_get_entityset` too, which reads the filter into ranges. With
    include and is not listed.
 
    ![Readers of ZCL_OSD_FLEET_REPORT: the picker lists ZCL_OSD_FLEET_TRAN](img/vscode-readers.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Send the requests yourself
 

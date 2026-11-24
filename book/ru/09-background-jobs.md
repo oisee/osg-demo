@@ -27,6 +27,8 @@
 
 ![OSD jobs: читаемая сводка завершённого задания ZOSD_FLEET_AUDIT](../img/vscode-fleet-jobs.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 1. Запустите OSD с файловой базой данных, например
    `STG_DB=file STG_DB_PATH=/tmp/fleet.sqlite OSD_PACKS=/path/to/osg-demo npm start`
    в checkout open-steamgate.
@@ -82,7 +84,7 @@ open-steamgate игнорируют вызов события, пришедши�
    `WAITING`: ее событие так и не было вызвано. Оставьте ее для доктора ниже.
    Фасад теперь поддерживает `BP_JOB_DELETE` для ждущего задания; в этом
    упражнении он не вызывается. Для нового упражнения возьмите новый каталог
-   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/docs/job-standard-fms.md).
+   базы данных. См. [API заданий на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/docs/job-standard-fms.md).
 3. Нажмите **F9** на `ZCL_OSD_FLEET_BAL_VIEW`. Ожидается: `<A>-VOY` с
    `Voyage step OK: 20 voyages`, `<A>-READY` с
    `Fleet ready: 6 ships after a clean voyage step` и `<B>-VOY` с

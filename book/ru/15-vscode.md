@@ -21,14 +21,16 @@
 
 ![Problems: OSD kernel отклоняет BIT-AND для целых чисел; ссылка ведёт к объяснению поддержки](../img/vscode-kernel-diagnostic.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 Поведение отладчика и обработчика описано в
-[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/README.md);
+[руководстве расширения на теге](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/editors/vscode/README.md);
 `osg.kernelStrict` задан в его
-[настройках](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.1696/editors/vscode/package.json).
+[настройках](https://github.com/oisee/open-steamgate/blob/vscode-stable-v0.7.3140/editors/vscode/package.json).
 
 ## От службы к коду
 
-1. Откройте представление OSD: дирижабль на панели действий. Ожидается: строка
+1. Откройте представление OSD: логотип с шестернёй и воротами на панели действий. Ожидается: строка
    `Running on …` с базой данных и поколением, затем **Open Fiori Launchpad**,
    **System**, **TRAN**, **Layers** и **Services**.
 2. Раскройте **Services > OData**, затем **ZOSD_FLEET_SRV**. Ожидается: классы
@@ -42,6 +44,8 @@
    (generic)».
 
    ![ZOSD_FLEET_SRV: классы и методы entity set в System, рядом сведения о сервисе и модели](../img/vscode-services.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 3. Щелкните **ShipSet get_entityset**. Ожидается: открывается
    [zcl_zosd_fleet_dpc_ext.clas.abap](../../src/zcl_zosd_fleet_dpc_ext.clas.abap)
@@ -63,6 +67,8 @@
    `unresolved: query options are unsupported`.
 
    ![Статические маршруты CodeLens над тремя обычными GET; запрос с $filter остаётся unresolved](../img/vscode-http-lens.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 5. Щелкните строку над `GET` запроса **All ships**. Ожидается: класс DPC
    открывается на строке 112, `shipset_get_entityset`.
@@ -87,6 +93,8 @@
 
    ![Остановка в shipset_get_entityset: переменные запроса показаны как значения ABAP](../img/vscode-debug-entityset.png)
 
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 7. Над тем же методом щелкните **▶ Call ShipSet**. Ожидается: рядом с кодом
    отправленный запрос,
    `/sap/opu/odata/sap/ZOSD_FLEET_SRV/ShipSet?$top=20&$format=json`, затем
@@ -95,6 +103,8 @@
    есть.
 
    ![Call ShipSet: код DPC рядом с HTTP 200 и шестью строками кораблей с StatusText](../img/vscode-call-entityset.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Кто использует этот класс
 
@@ -106,6 +116,8 @@
    в списке не появляется.
 
    ![Readers для ZCL_OSD_FLEET_REPORT: список показывает ZCL_OSD_FLEET_TRAN](../img/vscode-readers.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 ## Отправить запросы самому
 

@@ -6,6 +6,8 @@ If OSD is stopped, the command offers **Start system**.
 
 ![Open sample: bundled notebooks and the workspace hello class](img/vscode-open-sample.png)
 
+<!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 The status bar separates **OSD running/stopped**, **OSD generation <id> ·
 SQLite · warm**, and **OSD jobs: …**. Click the system item to open
 **What is running?**, with system, worker, sample and overview actions; the
@@ -15,9 +17,13 @@ jobs item opens the **OSD Jobs** view.
 
    ![F9 on ZOSD_DEMO_HELLO: the greeting in OSD: Console and OSD jobs idle](img/vscode-classrun.png)
 
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
+
 2. Open Testing, expand **Workspace layers > osg-demo > ZOSD_DEMO_HELLO**, and run `known_line`; alternatively open the test include [zosd_demo_hello.clas.testclasses.abap](../src/zosd_demo_hello.clas.testclasses.abap) and press **Ctrl+Shift+F10** there, or in the class itself. Expected: one green ABAP Unit test.
 
    ![Ctrl+Shift+F10: one green ABAP Unit test and the supervised jobs worker idle](img/vscode-testing.png)
+
+   <!-- shot: activity-bar glyph is the old airship; 0.7.3140 has the gear-gate logo (OSG 4f4d45ab) -->
 
 3. Change the text returned by `greeting( )`, press **Ctrl+F2** to check, **Ctrl+F3** to save and activate (or use the check mark and the match in the editor's title bar; both report in **OSD: Console**), then **F9** again. Expected: the console shows your new text. F9 runs the active version. It warns about unactivated changes when the editor is dirty or a nonempty active source differs from the editor. An empty active-source response (as for workspace-pack objects) is treated as unknown, so saving without activation does not guarantee a warning. Restore the original text, activate, and rerun the test to leave it green.
 
