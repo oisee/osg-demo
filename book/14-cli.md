@@ -158,6 +158,7 @@ keeps two CSV files in `/tmp/fleet-cli/data`.
    ships, `6 rows, 5 columns`.
 
    ![The CSV as a list](img/csv-list.png)
+   <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
 
 4. Without a screen, from that folder:
    `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
@@ -165,11 +166,6 @@ keeps two CSV files in `/tmp/fleet-cli/data`.
    denied` on stderr and exits with 1: the file dialog and `GUI_UPLOAD` use the
    same sandbox as `DATASET`, so a file outside the grant can be neither listed
    nor read.
-
-At this book's tag the list has an empty line after each of the first two
-rules and the count is indented by four spaces. open-steamgate removed both
-after the tag, in
-[PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
 ## The same steps on a Z80
 

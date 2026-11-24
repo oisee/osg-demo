@@ -159,6 +159,7 @@ START-OF-SELECTION.
    кораблей, `6 rows, 5 columns`.
 
    ![CSV в виде списка](../img/csv-list.png)
+   <!-- shot: OSG #809 (0.7.3140) removed the empty lines after the first two rules and the count's four-space indent; the picture still shows them -->
 
 4. Без экрана, из той же папки:
    `../run/fleet-csv --p-file fleet.csv -allow-read /tmp/fleet-cli/data`
@@ -166,11 +167,6 @@ START-OF-SELECTION.
    permission denied` в stderr и выходит с кодом 1: файловый диалог и
    `GUI_UPLOAD` живут в той же песочнице, что и `DATASET`, поэтому файл за
    пределами разрешенной папки нельзя ни увидеть в списке, ни прочитать.
-
-На теге этой книги в списке есть пустая строка после каждой из двух первых
-черт, а итог сдвинут на четыре пробела. open-steamgate убрал и то и другое
-уже после тега, в
-[PR #809](https://github.com/oisee/open-steamgate/pull/809).
 
 ## Те же шаги на Z80
 
