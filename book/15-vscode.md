@@ -29,7 +29,7 @@ The debugger and worker behavior is described in the tag's
 
 ## From a service to its code
 
-1. Open the OSD view: the airship in the activity bar. Expected: a row
+1. Open the OSD view: the gear-and-gate logo in the activity bar. Expected: a row
    `Running on …` with the database and the generation, then **Open Fiori
    Launchpad**, **System**, **TRAN**, **Layers** and **Services**.
 2. Expand **Services > OData** and then **ZOSD_FLEET_SRV**. Expected: the
