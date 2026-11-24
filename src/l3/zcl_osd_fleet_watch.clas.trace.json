@@ -3719,8 +3719,7 @@
         {
           "line": 1477,
           "sources": [
-            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/"},
-            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/capture"}
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/"}
           ],
           "locations": [
             {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 8}
@@ -3728,6 +3727,16 @@
         },
         {
           "line": 1478,
+          "sources": [
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/"},
+            {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/capture"}
+          ],
+          "locations": [
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 9}
+          ]
+        },
+        {
+          "line": 1479,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/port/alerts", "selector": "/name"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
@@ -3738,7 +3747,7 @@
           ]
         },
         {
-          "line": 1479,
+          "line": 1480,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -3747,7 +3756,7 @@
           ]
         },
         {
-          "lines": [1480, 1484],
+          "lines": [1481, 1485],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
@@ -3756,17 +3765,17 @@
           ]
         },
         {
-          "line": 1485,
+          "line": 1486,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/dry_run", "selector": "/capture"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 9}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 10}
           ]
         },
         {
-          "lines": [1486, 1500],
+          "lines": [1487, 1508],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
@@ -3775,7 +3784,7 @@
           ]
         },
         {
-          "lines": [1501, 1505],
+          "lines": [1509, 1513],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3784,7 +3793,7 @@
           ]
         },
         {
-          "line": 1506,
+          "line": 1514,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -3794,7 +3803,7 @@
           ]
         },
         {
-          "line": 1507,
+          "line": 1515,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -3803,16 +3812,16 @@
           ]
         },
         {
-          "lines": [1508, 1532],
+          "lines": [1516, 1540],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 125}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 132}
           ]
         },
         {
-          "line": 1533,
+          "line": 1541,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -3821,16 +3830,16 @@
           ]
         },
         {
-          "lines": [1534, 1557],
+          "lines": [1542, 1565],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 150}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 157}
           ]
         },
         {
-          "lines": [1558, 1560],
+          "lines": [1566, 1568],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3839,7 +3848,7 @@
           ]
         },
         {
-          "line": 1561,
+          "line": 1569,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -3849,7 +3858,7 @@
           ]
         },
         {
-          "line": 1562,
+          "line": 1570,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -3858,16 +3867,16 @@
           ]
         },
         {
-          "lines": [1563, 1572],
+          "lines": [1571, 1580],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 174}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 181}
           ]
         },
         {
-          "lines": [1573, 1580],
+          "lines": [1581, 1588],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3876,16 +3885,16 @@
           ]
         },
         {
-          "lines": [1581, 1585],
+          "lines": [1589, 1593],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 184}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 191}
           ]
         },
         {
-          "lines": [1586, 1591],
+          "lines": [1594, 1599],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3894,16 +3903,16 @@
           ]
         },
         {
-          "lines": [1592, 1604],
+          "lines": [1600, 1612],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 189}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 196}
           ]
         },
         {
-          "line": 1605,
+          "line": 1613,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3912,16 +3921,16 @@
           ]
         },
         {
-          "lines": [1606, 1660],
+          "lines": [1614, 1668],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 202}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 209}
           ]
         },
         {
-          "line": 1661,
+          "line": 1669,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -3930,16 +3939,16 @@
           ]
         },
         {
-          "line": 1662,
+          "line": 1670,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 257}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 264}
           ]
         },
         {
-          "line": 1663,
+          "line": 1671,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -3948,16 +3957,16 @@
           ]
         },
         {
-          "lines": [1664, 1683],
+          "lines": [1672, 1691],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 258}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 265}
           ]
         },
         {
-          "lines": [1684, 1686],
+          "lines": [1692, 1694],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -3966,16 +3975,16 @@
           ]
         },
         {
-          "lines": [1687, 1696],
+          "lines": [1695, 1704],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 278}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 285}
           ]
         },
         {
-          "line": 1697,
+          "line": 1705,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -3985,7 +3994,7 @@
           ]
         },
         {
-          "lines": [1698, 1702],
+          "lines": [1706, 1710],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -3994,7 +4003,7 @@
           ]
         },
         {
-          "line": 1703,
+          "line": 1711,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -4004,16 +4013,16 @@
           ]
         },
         {
-          "lines": [1704, 1713],
+          "lines": [1712, 1721],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 288}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 295}
           ]
         },
         {
-          "lines": [1714, 1715],
+          "lines": [1722, 1723],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4022,7 +4031,7 @@
           ]
         },
         {
-          "lines": [1716, 1717],
+          "lines": [1724, 1725],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4031,7 +4040,7 @@
           ]
         },
         {
-          "lines": [1718, 1719],
+          "lines": [1726, 1727],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4040,16 +4049,16 @@
           ]
         },
         {
-          "lines": [1720, 1743],
+          "lines": [1728, 1751],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 298}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 305}
           ]
         },
         {
-          "lines": [1744, 1753],
+          "lines": [1752, 1761],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4058,16 +4067,16 @@
           ]
         },
         {
-          "lines": [1754, 1801],
+          "lines": [1762, 1809],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 322}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 329}
           ]
         },
         {
-          "lines": [1802, 1812],
+          "lines": [1810, 1820],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4076,16 +4085,16 @@
           ]
         },
         {
-          "lines": [1813, 1834],
+          "lines": [1821, 1842],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 370}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 377}
           ]
         },
         {
-          "lines": [1835, 1842],
+          "lines": [1843, 1850],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4094,16 +4103,16 @@
           ]
         },
         {
-          "lines": [1843, 1858],
+          "lines": [1851, 1866],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 392}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 399}
           ]
         },
         {
-          "lines": [1859, 1860],
+          "lines": [1867, 1868],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4112,7 +4121,7 @@
           ]
         },
         {
-          "lines": [1861, 1862],
+          "lines": [1869, 1870],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4121,7 +4130,7 @@
           ]
         },
         {
-          "lines": [1863, 1864],
+          "lines": [1871, 1872],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4130,16 +4139,16 @@
           ]
         },
         {
-          "lines": [1865, 1941],
+          "lines": [1873, 1949],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 408}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 415}
           ]
         },
         {
-          "lines": [1942, 1943],
+          "lines": [1950, 1951],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4148,7 +4157,7 @@
           ]
         },
         {
-          "lines": [1944, 1945],
+          "lines": [1952, 1953],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4157,7 +4166,7 @@
           ]
         },
         {
-          "lines": [1946, 1947],
+          "lines": [1954, 1955],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4166,16 +4175,16 @@
           ]
         },
         {
-          "lines": [1948, 1965],
+          "lines": [1956, 1973],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 485}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 492}
           ]
         },
         {
-          "lines": [1966, 1968],
+          "lines": [1974, 1976],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4184,7 +4193,7 @@
           ]
         },
         {
-          "lines": [1969, 1970],
+          "lines": [1977, 1978],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4193,16 +4202,16 @@
           ]
         },
         {
-          "lines": [1971, 2011],
+          "lines": [1979, 2019],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 503}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 510}
           ]
         },
         {
-          "line": 2012,
+          "line": 2020,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4211,7 +4220,7 @@
           ]
         },
         {
-          "line": 2013,
+          "line": 2021,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -4221,7 +4230,7 @@
           ]
         },
         {
-          "lines": [2014, 2015],
+          "lines": [2022, 2023],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4230,16 +4239,16 @@
           ]
         },
         {
-          "lines": [2016, 2051],
+          "lines": [2024, 2059],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 544}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 551}
           ]
         },
         {
-          "lines": [2052, 2054],
+          "lines": [2060, 2062],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4248,16 +4257,16 @@
           ]
         },
         {
-          "lines": [2055, 2137],
+          "lines": [2063, 2145],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience", "selector": "/"}
           ],
           "locations": [
-            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 580}
+            {"recipe": "recipes/l3-set/template.tpl", "anchor": "<partial>", "offset": 587}
           ]
         },
         {
-          "lines": [2138, 2143],
+          "lines": [2146, 2151],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4266,7 +4275,7 @@
           ]
         },
         {
-          "line": 2144,
+          "line": 2152,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4275,7 +4284,7 @@
           ]
         },
         {
-          "lines": [2145, 2146],
+          "lines": [2153, 2154],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/class"}
@@ -4285,7 +4294,7 @@
           ]
         },
         {
-          "lines": [2147, 2148],
+          "lines": [2155, 2156],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/"}
           ],
@@ -4294,7 +4303,7 @@
           ]
         },
         {
-          "lines": [2149, 2151],
+          "lines": [2157, 2159],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4303,7 +4312,7 @@
           ]
         },
         {
-          "line": 2152,
+          "line": 2160,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/settings", "selector": "/budget_glass"}
@@ -4314,7 +4323,7 @@
           ]
         },
         {
-          "line": 2153,
+          "line": 2161,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/warn"}
@@ -4324,7 +4333,7 @@
           ]
         },
         {
-          "line": 2154,
+          "line": 2162,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/narrow_at"}
@@ -4334,7 +4343,7 @@
           ]
         },
         {
-          "line": 2155,
+          "line": 2163,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/per_pile"}
@@ -4344,7 +4353,7 @@
           ]
         },
         {
-          "lines": [2156, 2164],
+          "lines": [2164, 2172],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4353,7 +4362,7 @@
           ]
         },
         {
-          "lines": [2165, 2168],
+          "lines": [2173, 2176],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/rule_no"}
@@ -4363,7 +4372,7 @@
           ]
         },
         {
-          "lines": [2169, 2216],
+          "lines": [2177, 2224],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4372,7 +4381,7 @@
           ]
         },
         {
-          "line": 2217,
+          "line": 2225,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/exception"}
@@ -4382,7 +4391,7 @@
           ]
         },
         {
-          "lines": [2218, 2382],
+          "lines": [2226, 2390],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4391,7 +4400,7 @@
           ]
         },
         {
-          "line": 2383,
+          "line": 2391,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4400,7 +4409,7 @@
           ]
         },
         {
-          "lines": [2384, 2385],
+          "lines": [2392, 2393],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4409,7 +4418,7 @@
           ]
         },
         {
-          "lines": [2386, 2427],
+          "lines": [2394, 2435],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4418,7 +4427,7 @@
           ]
         },
         {
-          "lines": [2428, 2430],
+          "lines": [2436, 2438],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/governor", "selector": "/"}
           ],
@@ -4427,7 +4436,7 @@
           ]
         },
         {
-          "lines": [2431, 2435],
+          "lines": [2439, 2443],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4436,7 +4445,7 @@
           ]
         },
         {
-          "line": 2436,
+          "line": 2444,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/set_upper"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
@@ -4447,7 +4456,7 @@
           ]
         },
         {
-          "lines": [2437, 2452],
+          "lines": [2445, 2460],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4456,7 +4465,7 @@
           ]
         },
         {
-          "line": 2453,
+          "line": 2461,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/doctor_report_upper"}
@@ -4466,7 +4475,7 @@
           ]
         },
         {
-          "lines": [2454, 2524],
+          "lines": [2462, 2532],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4475,7 +4484,7 @@
           ]
         },
         {
-          "line": 2525,
+          "line": 2533,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/tick"}
@@ -4485,7 +4494,7 @@
           ]
         },
         {
-          "lines": [2526, 2536],
+          "lines": [2534, 2544],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4494,7 +4503,7 @@
           ]
         },
         {
-          "line": 2537,
+          "line": 2545,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class_upper"}
@@ -4504,7 +4513,7 @@
           ]
         },
         {
-          "line": 2538,
+          "line": 2546,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/name"}
@@ -4514,7 +4523,7 @@
           ]
         },
         {
-          "lines": [2539, 2541],
+          "lines": [2547, 2549],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4523,7 +4532,7 @@
           ]
         },
         {
-          "line": 2542,
+          "line": 2550,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class_upper"},
@@ -4534,7 +4543,7 @@
           ]
         },
         {
-          "lines": [2543, 2558],
+          "lines": [2551, 2566],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4543,7 +4552,7 @@
           ]
         },
         {
-          "line": 2559,
+          "line": 2567,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class_upper"}
@@ -4553,7 +4562,7 @@
           ]
         },
         {
-          "line": 2560,
+          "line": 2568,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/name"}
@@ -4563,7 +4572,7 @@
           ]
         },
         {
-          "lines": [2561, 2580],
+          "lines": [2569, 2588],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4572,7 +4581,7 @@
           ]
         },
         {
-          "line": 2581,
+          "line": 2589,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/daemon_class_upper"}
@@ -4582,7 +4591,7 @@
           ]
         },
         {
-          "lines": [2582, 2585],
+          "lines": [2590, 2593],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4591,7 +4600,7 @@
           ]
         },
         {
-          "line": 2586,
+          "line": 2594,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"},
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/name"}
@@ -4601,7 +4610,7 @@
           ]
         },
         {
-          "lines": [2587, 2593],
+          "lines": [2595, 2601],
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch/resilience/doctor", "selector": "/"}
           ],
@@ -4610,7 +4619,7 @@
           ]
         },
         {
-          "line": 2594,
+          "line": 2602,
           "sources": [
             {"file": "src/l3/fleet_watch.l3.yaml", "node": "set/watch", "selector": "/"}
           ],
