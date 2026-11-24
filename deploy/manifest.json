@@ -4,7 +4,7 @@
   "customerNamespaces": [],
   "units": {
     "osg-demo": {
-      "description": "The hello class and the Airship fleet: its tables, search help, report, audit, BAL, job and job-chain classes, the job reports, the business-log ALV, OData service, Fiori app, cube and AMDP classes, the lift example, the L2 rule's check class, and the RAP voyage business object (tables, views, behavior pool, EML class; the behavior definition and the service stay local: the packaging tool does not know their abapGit file suffixes). Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have. ZCL_OSD_FLEET_TPL stays local too: it needs ZCL_OSD_TPL and ZCL_AJSON, which are not in this unit. So does ZCL_OSD_FLEET_DOCTOR, which asks the engine's job doctor ZCL_OSD_JOB_DOCTOR, and the night set in src/l3, which needs open-steamgate's generic ZOSD_L3_* tables. The voyage Fiori Elements V4 app stays local too: the engine builds it as the pack's own BSP application, which this zip does not serialize.",
+      "description": "The hello class and the Airship fleet: its tables, search help, report, audit, BAL, job and job-chain classes, the job reports, the business-log ALV, OData service, Fiori app, cube and AMDP classes, the lift example, the L2 rule's check class, and the data model of the RAP voyage business object (its four tables and its two views). Transaction ZOSD_FLEET and ZCL_OSD_FLEET_TRAN stay local: the class implements the engine's ZIF_OSD_TRANSACTION, which a system does not have. ZCL_OSD_FLEET_TPL stays local too: it needs ZCL_OSD_TPL and ZCL_AJSON, which are not in this unit. So does ZCL_OSD_FLEET_DOCTOR, which asks the engine's job doctor ZCL_OSD_JOB_DOCTOR, and the night set in src/l3, which needs open-steamgate's generic ZOSD_L3_* tables. The rest of the voyage business object stays local: its behavior definition ZI_OSD_FLEET_VOYAGE and service definition ZUI_OSD_FLEET_VOY, because the packaging tool at this tag does not know their abapGit file suffixes (.asbdef, .srvdsrv); the behavior pool ZBP_OSD_FLEET_VOYAGE and the EML class ZCL_OSD_FLEET_VOYAGE_EML, because on a system neither activates without that behavior definition; and the voyage Fiori Elements V4 app, because the engine builds it as the pack's second BSP application, which this zip does not serialize.",
       "sources": ["src"],
       "objects": [
         "CLAS ZOSD_DEMO_HELLO",
@@ -43,9 +43,7 @@
         "TABL ZOSD_FLEET_STOP",
         "TABL ZOSD_FLEET_STOP_D",
         "DDLS ZI_OSD_FLEET_VOYAGE",
-        "DDLS ZI_OSD_FLEET_STOP",
-        "CLAS ZBP_OSD_FLEET_VOYAGE",
-        "CLAS ZCL_OSD_FLEET_VOYAGE_EML"
+        "DDLS ZI_OSD_FLEET_STOP"
       ]
     }
   }

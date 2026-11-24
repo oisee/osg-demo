@@ -467,14 +467,16 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // the night and watch sets (chapters 16, 17) stay local too: they need
     // open-steamgate's generic ZOSD_L3_* tables, which the unit does not
     // carry; so does chapter 18's C-in-ABAP toy in src/iti
-    // chapter 21's behavior definition and service definition stay local as
-    // well: the packaging tool's suffix table knows DDLS (asddls) but not
-    // BDEF (asbdef) or SRVD (srvdsrv), both of which abapGit itself writes,
-    // so their sources are refused rather than carried (reported upstream)
+    // of chapter 21's voyage object only the data model travels (its tables
+    // and views): the packaging tool's suffix table knows DDLS (asddls) but
+    // not BDEF (asbdef) or SRVD (srvdsrv), both of which abapGit itself
+    // writes, so their sources are refused; the behavior pool and the EML
+    // class are left out of the unit, since on a system neither activates
+    // without the behavior definition
     const night = ["l3", "iti"].flatMap((d) => readdirSync(join(repo, "src", d))).map((f) => /^(\w+)\.(clas|intf|prog)\.xml$/.exec(f)).filter(Boolean)
       .map(([, name, type]) => `${type.toUpperCase()} ${name.toUpperCase()}`);
     const local = ["CLAS ZCL_OSD_FLEET_DOCTOR", "CLAS ZCL_OSD_FLEET_TPL", "CLAS ZCL_OSD_FLEET_TRAN", "TRAN ZOSD_FLEET",
-      "BDEF ZI_OSD_FLEET_VOYAGE", "SRVD ZUI_OSD_FLEET_VOY", ...night];
+      "BDEF ZI_OSD_FLEET_VOYAGE", "SRVD ZUI_OSD_FLEET_VOY", "CLAS ZBP_OSD_FLEET_VOYAGE", "CLAS ZCL_OSD_FLEET_VOYAGE_EML", ...night];
     const sidecars = ["CLAS ZCL_OSD_FLEET_L2_MAINT", "L2 MAINTENANCE_NO_VOYAGE"];
     const refusedSet = new Set(keys);
     expect(local.every((k) => refusedSet.has(k)) && [...refusedSet].every((k) => local.includes(k) || sidecars.includes(k)),
@@ -484,7 +486,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
     // must not carry them; an older one refuses only them
     const sidecarStage = join(work, "with-sidecars", "osg-demo");
     cpSync(repo, sidecarStage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
-      && !/[\\/]src[\\/]rap[\\/].*\.(?:bdef|srvd)\./.test(p)
+      && !/[\\/]src[\\/]rap[\\/](?:.*\.(?:bdef|srvd)\.|zbp_osd_fleet_voyage\.clas\.|zcl_osd_fleet_voyage_eml\.clas\.)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$/.test(p)});
     const withSidecars = zip(sidecarStage, join(work, "with-sidecars.zip"));
     if (withSidecars.status === 0) {
@@ -499,7 +501,7 @@ await check("10 ch7 segw:zip carries the unit, not the local objects", async () 
 
     const stage = join(work, "osg-demo");
     cpSync(repo, stage, {recursive: true, filter: (p) => !/[\\/]\.git([\\/]|$)/.test(p) && !/[\\/]src[\\/](l3|iti)([\\/]|$)/.test(p)
-      && !/[\\/]src[\\/]rap[\\/].*\.(?:bdef|srvd)\./.test(p)
+      && !/[\\/]src[\\/]rap[\\/](?:.*\.(?:bdef|srvd)\.|zbp_osd_fleet_voyage\.clas\.|zcl_osd_fleet_voyage_eml\.clas\.)/.test(p)
       && !/zcl_osd_fleet_tran\.clas\.|zcl_osd_fleet_tpl\.clas\.|zcl_osd_fleet_doctor\.clas\.|zosd_fleet\.tran\.xml$|\.l2\.yaml$|\.trace(?:\.meta)?\.json$/.test(p)});
     const made = zip(stage, join(work, "osg-demo.zip"));
     expect(made.status === 0, `staged zip failed: ${(made.stdout + made.stderr).slice(0, 300)}`);
