@@ -61,6 +61,8 @@ runs it the same way.
 
    ![The selection screen becomes the command's options](img/cli-help.png)
 
+   <!-- shot: 0.7.3140's -help adds -no-default-reads and an unindented "default read parameters: ; list parameters:" line (OSG #705); hold the reshoot until OSG decides on that line, see phase1-report -->
+
 2. `./fleet --status A`. Expected: refused with exit code 1, `keeps its rows
    in tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE`. A
    report with tables never gets a silent in-memory database.

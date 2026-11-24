@@ -60,6 +60,8 @@ OSD_HOME=/path/to/open-steamgate node test/cli.mjs --keep /tmp/fleet-cli
 
    ![Экран выбора становится опциями команды](../img/cli-help.png)
 
+   <!-- shot: 0.7.3140's -help adds -no-default-reads and an unindented "default read parameters: ; list parameters:" line (OSG #705); hold the reshoot until OSG decides on that line, see phase1-report -->
+
 2. `./fleet --status A`. Ожидается: отказ с кодом выхода 1, `keeps its rows in
    tables (ZOSD_FLEET_SHIP, ZOSD_FLEET_STAT): run it with -db FILE`. Отчет с
    таблицами никогда не получает молча базу в памяти.
