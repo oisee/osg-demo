@@ -28,4 +28,6 @@ system's `osg-demo` layer, and the first line names its digest.
 | `test/l3-diagrams.mjs` | redraws the diagrams of chapters 16 and 17, English and Russian | none needed (Chromium from the checkout) | no, run by hand |
 | `test/iti-diagram.mjs` | redraws chapter 18's picture, English and Russian | none needed (Chromium from the checkout) | no, run by hand |
 | `test/vscode-shots.mjs` | retakes the VS Code pictures of chapters 1, 2 and 15: VS Code and the released extension under Xvfb, each picture taken once its state is on screen | SQLite | no, run by hand |
+| `test/web-shots.mjs` | chapter 23 in `@vscode/test-web` (steps 6 to 9) with its pictures: the worker's first `$metadata`, the OSD view, F8, a notebook cell, the launchpad's content packs, the Airship fleet list, a write that survives a reload, the greyed tiles; the V4 steps are known failures of the tag, and one that starts to pass fails the run so the chapter is corrected; needs a web bundle built with this pack | sql.js in the browser | no, run by hand |
+| `test/web-vscodedev.mjs` | chapter 23 in the real vscode.dev, no account: `marketplace` (steps 1 to 4) or `location https://localhost:5000` (step 11) | sql.js in the browser | no, run by hand |
 

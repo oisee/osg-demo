@@ -42,6 +42,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 20 | [The tools come home: abaplint in ABAP](book/20-abaplint.md) | [Инструменты возвращаются домой: abaplint на ABAP](book/ru/20-abaplint.md) | abapiti translates abaplint to Go and ABAP; all 11,060 active tests of abaplint pass on Go, on open-steamgate's Go runtime and on a real SAP kernel (abapiti's result), and the ABAP build checks the abapGit standalone report; the Go build runs on your machine | — (abapiti's own repository) |
 | 21 | [Voyages as a business object: RAP](book/21-rap.md) | [Рейсы как бизнес-объект: RAP](book/ru/21-rap.md) | the fleet's voyages as a managed RAP object with draft: CDS views, a behavior definition, a pool with determinations, a validation and actions written with EML, a Fiori Elements V4 app with no draft code of its own; SAP's flight reference scenario runs too | `src/rap/`, `voyage/`, `test/rap.mjs` |
 | 22 | [The fleet pinned by digest: OCI layers](book/22-layers.md) | [Флот, закреплённый дайджестом: слои OCI](book/ru/22-layers.md) | the fleet as an OCI layer with fixed bytes; a system of open-steamgate's layers and the fleet written as a local OCI layout, installed by digest into a checkout without sources; the book's checks run there; what a pinned system refuses | `tools/fleet-system.mjs`, `test/layer.mjs` |
+| 23 | [The fleet in a browser tab: vscode.dev](book/23-web.md) | [Флот во вкладке браузера: vscode.dev](book/ru/23-web.md) | open-steamgate from the Marketplace in vscode.dev with no install; the fleet built into a web bundle and opened in VS Code for the Web and in vscode.dev: OSD view, F8, a SQL notebook, the Airship fleet app; where the browser stops (OData V4, chapter 21's voyages) | `test/web-shots.mjs`, `test/web-vscodedev.mjs` |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -76,6 +77,8 @@ node test/book-snippets.mjs                                                     
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
 OSD_HOME=/path/to/open-steamgate node test/cli-shots.mjs /tmp/fleet-cli         # chapter 14's pictures, after cli.mjs --keep /tmp/fleet-cli
+OSD_HOME=/path/to/open-steamgate node test/web-shots.mjs                        # chapter 23 in VS Code for the Web, after web:vscode with this pack; V4 steps are KNOWN
+OSD_HOME=/path/to/open-steamgate node test/web-vscodedev.mjs marketplace       # chapter 23 in the real vscode.dev, no account (or: location https://localhost:5000)
 ```
 
 `test/vscode-shots.mjs` retakes the VS Code pictures of chapters 1, 2, 9 and 15–17; its header says what it needs (VS Code, the extension's VSIX, Xvfb).

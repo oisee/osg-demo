@@ -87,8 +87,8 @@ The rest happens in the open-steamgate checkout at the book's tag, with
    Expected: VS Code for the Web is downloaded into `.vscode-test-web/` in
    the checkout (delete the folder afterwards), then a Chromium window
    with VS Code, the repository's files in the Explorer under the label
-   `[Test Files]` (test-web names every folder so), and the OSD icon. Open the OSD view: OData (31) and Apps (16)
-   now, with `ZOSD_FLEET_SRV` and `ZUI_OSD_FLEET_VOY` among the OData
+   `[Test Files]` (test-web names every folder so), and the OSD icon. Open
+   the OSD view: OData (31) and Apps (16) now, with `ZOSD_FLEET_SRV` and `ZUI_OSD_FLEET_VOY` among the OData
    services. A click on `ZOSD_FLEET_SRV` shows its kind and URL.
 
    ![The OSD view in the browser with the fleet's service selected](img/web-osd-view.png)
