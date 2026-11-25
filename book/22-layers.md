@@ -37,7 +37,9 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
 
    Expected, after a few lines `osd-layer: skipping .git` (one per library,
    whose folders are git clones) and about ten seconds: a table of 17
-   layers and two lines about the system.
+   layers, two lines about the fleet and the system, and two from the
+   installation. The digests are shortened here to their first 12 hex
+   digits; the script prints all 64.
 
    ```text
    order  kind  name              files     bytes  manifest digest
@@ -60,13 +62,16 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
       16  pack  osg-demo            238   8443894  sha256:…
    fleet  treeDigest sha256:…  source https://github.com/oisee/osg-demo@<your commit>
    system sha256:…  17 layers, 93371725 bytes  /tmp/fleet-sys/index.json
+   system sha256:…: 17 layers
+   installed in /tmp/fleet-osg; next: cd /tmp/fleet-osg && npm start (builds, then serves)
    ```
 
    The first sixteen rows are open-steamgate's own layers, built from the
    tag and the libraries it pins; written with the tag, they had the
    digests shown. The last row is the fleet, and its digests are yours:
    they name the commit you have checked out (step 3 shows why). The last
-   lines say the system was installed in `/tmp/fleet-osg`.
+   two lines come from `osd-fetch --system`, which installed the system in
+   `/tmp/fleet-osg`.
 
 2. Look at what was installed:
 
@@ -79,8 +84,9 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
    Expected: an open-steamgate checkout *without* `src`, `packs`, `data`
    or `webapp`. Its content is in `.local/system/`: `libs/`, `inputs/`
    (`src` and `test`) and `packs/`, where `osg-demo` holds only
-   `osd-pack.json`, `src`, `data`, `webapp` and `voyage`. The book and its
-   pictures did not come along. `.local/system/.osd-system.json` records
+   `osd-pack.json`, `src`, `data`, `webapp` and `voyage` (`ls -A` also
+   shows `.abapgit.xml` and `.osd-layer.json`, the layer's identity that
+   the installation wrote). The book and its pictures did not come along. `.local/system/.osd-system.json` records
    the system digest and, for every layer, its order, kind, name, manifest
    digest and tree digest.
 
@@ -90,7 +96,9 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
    say ship S002's `steam_pct` in `data/zosd_fleet_ship.tabu.json`, and run
    it a third time (`--out /tmp/fleet-sys3`). Expected: *still* the same
    digest. The layer is made from the commit, `git archive HEAD`, not from
-   the files in your editor. Commit the change and run it once more: now the
+   the files in your editor. Commit the change and run it once more
+   (`--out /tmp/fleet-sys4`; the script refuses a folder that is not
+   empty): now the
    fleet's tree digest, its manifest digest and the system digest all move,
    and the sixteen rows above them stay. Undo the commit
    (`git reset --hard HEAD~1`) when you have seen it.
@@ -133,7 +141,9 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
    `.local/system/packs/osg-demo/data/zosd_fleet_ship.tabu.json`, and run
    `npm run transpile` again. Expected: `osd-build: SYSTEM_MODIFIED: system
    layer osg-demo (pack) was modified or is unreadable; run osd-fetch
-   --system again`. Put the byte back and the build runs again.
+   --system again` and, again, `live generation untouched`. Put the byte
+   back and run it once more: the layers are verified and the build finds
+   its generation already built.
 
 When you are done, remove `/tmp/fleet-sys*` and `/tmp/fleet-osg`.
 
@@ -182,8 +192,8 @@ export function fleetLayer(osg, dir) {
   digests. The manifest's own digest is the layer's name: the pin.
 
 Each digest covers the one below it. That is why step 3 behaved as it did.
-A changed seed byte changed the ZIP, so the tree digest, so the config, so
-the manifest. A commit that touches only `book/` leaves the ZIP and the
+A changed seed byte changed the files, so both the ZIP and the tree
+digest, so the config, so the manifest. A commit that touches only `book/` leaves the ZIP and the
 tree digest alone, but the config names the commit, so the manifest moves.
 The tree digest says *same fleet*; the manifest digest says *this fleet,
 from this commit*.
@@ -264,10 +274,10 @@ registry listed in `OSD_PRIVATE_REGISTRIES`, and never to `ghcr.io` or a
 GitHub Pages host, listed or not. In the open-steamgate checkout:
 
 ```sh
-node tools/osd-layer.mjs push ghcr.io/example/osd/osg-demo:try ../osg-demo --name osg-demo --kind pack --private
+node tools/osd-layer.mjs push ghcr.io/example/osd/osg-demo:try /path/to/osg-demo --name osg-demo --kind pack --private
 ```
 
-Expected: `osd-layer: PRIVATE_LAYER: private layer osg-demo cannot be
+Expected, after `osd-layer: skipping .git`: `osd-layer: PRIVATE_LAYER: private layer osg-demo cannot be
 published to ghcr.io`, exit code 2. The check is a comparison of names,
 made after the local build and before any connection is opened.
 
@@ -301,7 +311,7 @@ it writes its refusals to standard output.
   digest neither takes nor restores them.
 - **No registry here.** This chapter writes the layout to disk. Pushing
   it is `osd-layer push` and `osd-layer system push` from the open-steamgate
-  checkout. Every push runs a leak gate first, which needs an identifier
+  checkout. Every push runs a leak gate before it uploads, which needs an identifier
   list in `.local/leak-identifiers.json` and refuses without one. The
   tag's own release workflow publishes open-steamgate's layers and a
   system to `ghcr.io/oisee/open-steamgate`; for `vscode-stable-v0.7.3140`
@@ -313,8 +323,10 @@ it writes its refusals to standard output.
   open-steamgate's own `build()` and the recipe of its
   `scripts/system-roundtrip.mjs`.
 - **A system is not a snapshot of a running server.** It pins what the
-  build reads. The open-steamgate commit that runs it is recorded in the
-  annotations; a different one prints a warning and is allowed.
+  build reads. The open-steamgate commit it was built with is recorded in
+  the annotations. In a git checkout of a different commit the build
+  prints a warning and goes on; `/tmp/fleet-osg` came from `git archive`
+  and has no `.git`, so there the comparison is skipped.
 
 `test/layer.mjs` repeats this chapter in about a minute and a half: the
 fleet's layer built twice to the same digests, the layout written, the

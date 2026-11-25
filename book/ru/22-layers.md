@@ -37,7 +37,8 @@ open-steamgate отвечает на этот вопрос так же, как �
 
    Ожидается: несколько строк `osd-layer: skipping .git` (по одной на
    библиотеку, их папки — клоны git), а секунд через десять — таблица из
-   17 слоёв и две строки о системе.
+   17 слоёв, две строки о флоте и системе и две от установки. Дайджесты
+   здесь сокращены до первых 12 шестнадцатеричных цифр; скрипт печатает все 64.
 
    ```text
    order  kind  name              files     bytes  manifest digest
@@ -60,13 +61,16 @@ open-steamgate отвечает на этот вопрос так же, как �
       16  pack  osg-demo            238   8443894  sha256:…
    fleet  treeDigest sha256:…  source https://github.com/oisee/osg-demo@<your commit>
    system sha256:…  17 layers, 93371725 bytes  /tmp/fleet-sys/index.json
+   system sha256:…: 17 layers
+   installed in /tmp/fleet-osg; next: cd /tmp/fleet-osg && npm start (builds, then serves)
    ```
 
    Первые шестнадцать строк — собственные слои open-steamgate, собранные из
    тега и закреплённых им библиотек; когда писалась глава, у них были
    показанные дайджесты. Последняя строка — флот, и дайджесты в ней ваши:
    они называют коммит, который у вас извлечён (почему — покажет шаг 3).
-   Последние строки говорят, что система установлена в `/tmp/fleet-osg`.
+   Последние две строки печатает `osd-fetch --system`, который установил
+   систему в `/tmp/fleet-osg`.
 
 2. Посмотрите, что установилось:
 
@@ -79,7 +83,9 @@ open-steamgate отвечает на этот вопрос так же, как �
    Ожидается: checkout open-steamgate *без* `src`, `packs`, `data` и
    `webapp`. Содержимое лежит в `.local/system/`: `libs/`, `inputs/`
    (`src` и `test`) и `packs/`, где в `osg-demo` только `osd-pack.json`,
-   `src`, `data`, `webapp` и `voyage`. Книга и её картинки не приехали.
+   `src`, `data`, `webapp` и `voyage` (`ls -A` покажет ещё `.abapgit.xml` и
+   `.osd-layer.json`, удостоверение слоя, которое записала установка). Книга
+   и её картинки не приехали.
    `.local/system/.osd-system.json` хранит дайджест системы и для каждого
    слоя его порядок, вид, имя, дайджест манифеста и дайджест дерева.
 
@@ -90,7 +96,8 @@ open-steamgate отвечает на этот вопрос так же, как �
    `data/zosd_fleet_ship.tabu.json`, и запустите команду в третий раз
    (`--out /tmp/fleet-sys3`). Ожидается: дайджест *всё ещё* тот же. Слой
    делается из коммита, `git archive HEAD`, а не из файлов в редакторе.
-   Закоммитьте изменение и запустите ещё раз: теперь сдвигаются дайджест
+   Закоммитьте изменение и запустите ещё раз (`--out /tmp/fleet-sys4`;
+   в непустую папку скрипт писать отказывается): теперь сдвигаются дайджест
    дерева флота, дайджест его манифеста и дайджест системы, а шестнадцать
    строк над ними остаются прежними. Посмотрев, отмените коммит
    (`git reset --hard HEAD~1`).
@@ -133,7 +140,9 @@ open-steamgate отвечает на этот вопрос так же, как �
    `.local/system/packs/osg-demo/data/zosd_fleet_ship.tabu.json`, и снова
    выполните `npm run transpile`. Ожидается: `osd-build: SYSTEM_MODIFIED:
    system layer osg-demo (pack) was modified or is unreadable; run osd-fetch
-   --system again`. Верните байт на место, и сборка снова пойдёт.
+   --system again` и снова `live generation untouched`. Верните байт на
+   место и запустите ещё раз: слои сверены, и сборка находит своё поколение
+   уже собранным.
 
 В конце удалите `/tmp/fleet-sys*` и `/tmp/fleet-osg`.
 
@@ -182,8 +191,8 @@ export function fleetLayer(osg, dir) {
   дайджестами. Собственный дайджест манифеста и есть имя слоя: закрепление.
 
 Каждый дайджест покрывает тот, что под ним. Поэтому шаг 3 и вёл себя так.
-Изменённый байт seed-данных изменил ZIP, значит, дайджест дерева, значит,
-конфигурацию, значит, манифест. Коммит, который трогает только `book/`, не
+Изменённый байт seed-данных изменил файлы, значит, и ZIP, и дайджест
+дерева, значит, конфигурацию, значит, манифест. Коммит, который трогает только `book/`, не
 меняет ни ZIP, ни дайджест дерева, но конфигурация называет коммит, и манифест
 сдвигается. Дайджест дерева говорит *тот же флот*; дайджест манифеста —
 *этот флот, из этого коммита*.
@@ -262,10 +271,10 @@ open-steamgate:
 на хост GitHub Pages, есть они в списке или нет. В checkout open-steamgate:
 
 ```sh
-node tools/osd-layer.mjs push ghcr.io/example/osd/osg-demo:try ../osg-demo --name osg-demo --kind pack --private
+node tools/osd-layer.mjs push ghcr.io/example/osd/osg-demo:try /path/to/osg-demo --name osg-demo --kind pack --private
 ```
 
-Ожидается: `osd-layer: PRIVATE_LAYER: private layer osg-demo cannot be
+Ожидается, после `osd-layer: skipping .git`: `osd-layer: PRIVATE_LAYER: private layer osg-demo cannot be
 published to ghcr.io`, код выхода 2. Проверка — сравнение имён, сделанное
 после локальной сборки и до того, как открыто хоть одно соединение.
 
@@ -299,7 +308,7 @@ export function engineEnv(home, repo, extra = {}) {
   нового дайджеста их не забирает и не восстанавливает.
 - **Реестра здесь нет.** Эта глава пишет layout на диск. Отправка — это
   `osd-layer push` и `osd-layer system push` из checkout open-steamgate.
-  Каждая отправка сначала проходит проверку на утечки, которой нужен список
+  Каждая отправка перед выгрузкой проходит проверку на утечки, которой нужен список
   идентификаторов в `.local/leak-identifiers.json`; без него она отказывает.
   Релизный workflow тега сам публикует слои open-steamgate и систему в
   `ghcr.io/oisee/open-steamgate`; для `vscode-stable-v0.7.3140` эта проверка
@@ -311,8 +320,10 @@ export function engineEnv(home, repo, extra = {}) {
   собственным `build()` open-steamgate и рецептом его
   `scripts/system-roundtrip.mjs`.
 - **Система — не снимок работающего сервера.** Она закрепляет то, что читает
-  сборка. Коммит open-steamgate, который её исполняет, записан в аннотациях;
-  другой коммит выдаёт предупреждение, но работает.
+  сборка. Коммит open-steamgate, с которым она собрана, записан в
+  аннотациях. В git-checkout другого коммита сборка выдаёт предупреждение и
+  продолжает; `/tmp/fleet-osg` сделан через `git archive` и `.git` не имеет,
+  так что там сравнение пропускается.
 
 `test/layer.mjs` повторяет эту главу примерно за полторы минуты: слой флота
 собирается дважды с одинаковыми дайджестами, пишется layout, система
