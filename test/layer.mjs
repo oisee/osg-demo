@@ -6,13 +6,13 @@
 // The engine checkout needs `npm ci && npm run bootstrap` done once (its packs
 // fetched). Heavy: a full system build, about the cost of `npm run bootstrap`
 // plus the size of every layer; not wired into CI. What it does, all on disk
-// and on loopback, never against a network registry:
-//  1. stages the pack's files twice from `git archive HEAD` (tracked files
-//     only, so no build output or editor state ends up in a layer; and only
-//     osd-pack.json, .abapgit.xml, src, data, voyage, webapp) and builds
-//     each with open-steamgate's osd-layer as `--kind pack --name osg-demo`,
-//     with --source https://github.com/oisee/osg-demo@<HEAD>:.; the two tree
-//     and manifest digests must be equal;
+// and on loopback, never against a network registry. Steps 1-3 are the ones
+// tools/fleet-system.mjs takes (the script a reader runs), imported from it:
+//  1. builds the fleet layer twice from the pack's committed files
+//     (`git archive HEAD osd-pack.json .abapgit.xml src data voyage webapp`)
+//     as `--kind pack --name osg-demo` with
+//     --source https://github.com/oisee/osg-demo@<HEAD>:.; the two tree and
+//     manifest digests and the two ZIPs must be equal;
 //  2. stages open-steamgate's own layers the way scripts/system-roundtrip.mjs
 //     does (the locked libraries, src with its seeds and pages, test, every
 //     pack of the checkout), appends the fleet pack last, and writes the
@@ -38,13 +38,12 @@
 // The scratch checkout links OSD_HOME's node_modules; OSD_HOME itself is read,
 // never written (no .local/system appears there).
 import {spawn, spawnSync} from "node:child_process";
-import {cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync} from "node:fs";
+import {mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {createServer} from "node:net";
-import {dirname, join, resolve} from "node:path";
-import {fileURLToPath, pathToFileURL} from "node:url";
+import {join, resolve} from "node:path";
+import {fleetLayer, install, openSteamgate, repo, systemEnv, systemLayers, writeLayout} from "../tools/fleet-system.mjs";
 
-const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const home = process.env.OSD_HOME ? resolve(process.env.OSD_HOME) : "";
 if (home === "") {
   console.error("layer: set OSD_HOME to an open-steamgate checkout");
@@ -56,12 +55,9 @@ const started = Date.now();
 const seconds = (since) => `${((Date.now() - since) / 1000).toFixed(1)} s`;
 const ships = JSON.parse(readFileSync(join(repo, "data", "zosd_fleet_ship.tabu.json"), "utf8"));
 
-// open-steamgate's own modules, from the checkout under test
-const osg = (path) => import(pathToFileURL(join(home, path)).href);
-const {build} = await osg("tools/osd-layer.mjs");
-const {MEDIA, sha256} = await osg("tools/osd-oci.mjs");
-const {stageSystem} = await osg("scripts/system-stage.mjs");
-const {readLock} = await osg("tools/osd-lock.mjs");
+// open-steamgate's own modules, from the checkout under test; the steps
+// are tools/fleet-system.mjs's, the script a reader runs
+const osg = await openSteamgate(home);
 
 if (keep) mkdirSync(keep, {recursive: true});
 const temp = mkdtempSync(join(keep ?? tmpdir(), "osg-layer-"));
@@ -110,37 +106,21 @@ function finish() {
 
 // the scratch checkout runs with none of the development overrides a system refuses
 const scratch = join(temp, "scratch");
-const baseEnv = Object.fromEntries(Object.entries(process.env)
-  .filter(([k]) => !["OSD_PACKS", "OSD_WEB_PACKS", "OSD_LAYERS", "OSD_ROOT"].includes(k) && !k.startsWith("OSD_LIB_")));
-const scratchEnv = {...baseEnv, OSD_ROOT: scratch};
+const scratchEnv = systemEnv(scratch);
 const node = (args, extra = {}) => spawnSync(process.execPath, args,
   {cwd: scratch, env: {...scratchEnv, ...extra}, encoding: "utf8", maxBuffer: 64 * 1024 * 1024});
 const tail = (r) => (r.stdout + r.stderr).trim().split("\n").slice(-6).join(" | ");
 
-// 1. the fleet as a layer, twice from tracked files
+// 1. the fleet as a layer, twice from the committed pack files
 const commit = spawnSync("git", ["rev-parse", "HEAD"], {cwd: repo, encoding: "utf8"}).stdout.trim();
-const source = `https://github.com/oisee/osg-demo@${commit}:.`;
-// what the pack needs and nothing else (not the book, not the articles):
-// open-steamgate's pack discovery (tools/osd-packs.mjs, packAt) reads
-// osd-pack.json and the folders it names or defaults to -- the ABAP in src
-// (with src/ddic and src/cds), the seeds in data, the app in webapp and the
-// BSP folder voyage; .abapgit.xml keeps STARTING_FOLDER /src/
-const PACK_FILES = ["osd-pack.json", ".abapgit.xml", "src", "data", "voyage", "webapp"];
-function stageFleet(name) {
-  const dir = join(temp, name);
-  mkdirSync(dir);
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir]);
-  expect(tar.status === 0, `git archive: ${tar.stderr}`);
-  return build(dir, {name: "osg-demo", kind: "pack", source});
-}
 let fleet;
 await check("1 the fleet layer builds twice to the same digests", async () => {
-  const a = stageFleet("fleet-a"), b = stageFleet("fleet-b");
+  const a = fleetLayer(osg, join(temp, "fleet-a")), b = fleetLayer(osg, join(temp, "fleet-b"));
   expect(a.config.treeDigest === b.config.treeDigest, `treeDigest ${a.config.treeDigest} != ${b.config.treeDigest}`);
   expect(a.digest === b.digest, `manifest ${a.digest} != ${b.digest}`);
   expect(a.zip.equals(b.zip), "the two ZIPs differ");
   fleet = a;
-  console.log(`      treeDigest ${a.config.treeDigest}\n      manifest   ${a.digest}\n      ${a.files.length} files, ${a.zip.length} bytes, source ${source}`);
+  console.log(`      treeDigest ${a.config.treeDigest}\n      manifest   ${a.digest}\n      ${a.files.length} files, ${a.zip.length} bytes, source ${a.config.source.repo}@${a.config.source.commit}`);
   return `${commit.slice(0, 7)}: ${a.digest}`;
 });
 if (!fleet) finish();
@@ -150,36 +130,9 @@ const layout = join(temp, "layout");
 let systemDigest;
 await check("2 a system of open-steamgate's layers and the fleet, as an OCI layout", async () => {
   const t = Date.now();
-  mkdirSync(join(layout, "blobs", "sha256"), {recursive: true});
-  const blob = (bytes) => {
-    const d = sha256(bytes);
-    writeFileSync(join(layout, "blobs", "sha256", d.slice(7)), bytes);
-    return {digest: d, size: bytes.length};
-  };
-  const layers = [];
-  for (const staged of stageSystem(home, join(temp, "stage"))) {
-    if (staged.name === "osg-demo") throw new Error("open-steamgate already has a pack called osg-demo");
-    layers.push(build(staged.folder, {name: staged.name, kind: staged.kind}));
-  }
-  layers.push(fleet);
-  let bytes = 0;
-  for (const l of layers) {
-    blob(l.configBytes);
-    blob(l.zip);
-    blob(l.manifestBytes);
-    bytes += l.zip.length;
-  }
-  const lock = readLock(home);
-  const osgCommit = spawnSync("git", ["rev-parse", "HEAD"], {cwd: home, encoding: "utf8"}).stdout.trim();
-  const index = {schemaVersion: 2, mediaType: MEDIA.index, artifactType: "application/vnd.osd.system.v1",
-    manifests: layers.map((l, order) => ({mediaType: MEDIA.manifest, digest: l.digest, size: l.manifestBytes.length,
-      annotations: {"org.osd.layer.name": l.config.name, "org.osd.layer.kind": l.config.kind, "org.osd.layer.order": String(order)}})),
-    annotations: {"org.osd.osg.commit": osgCommit, "org.osd.transpiler": `${lock.transpiler.repo}@${lock.transpiler.ref}`}};
-  const system = blob(Buffer.from(JSON.stringify(index)));
-  systemDigest = system.digest;
-  writeFileSync(join(layout, "oci-layout"), JSON.stringify({imageLayoutVersion: "1.0.0"}));
-  writeFileSync(join(layout, "index.json"), JSON.stringify({schemaVersion: 2, mediaType: MEDIA.index,
-    manifests: [{mediaType: MEDIA.index, ...system, annotations: {"org.opencontainers.image.ref.name": "osg-demo"}}]}));
+  const layers = systemLayers(osg, join(temp, "stage"), fleet);
+  systemDigest = writeLayout(osg, layers, layout);
+  const bytes = layers.reduce((n, l) => n + l.zip.length, 0);
   for (const l of layers) console.log(`      ${l.config.kind.padEnd(5)} ${l.config.name.padEnd(20)} ${String(l.files.length).padStart(5)} files ${String(l.zip.length).padStart(10)} bytes ${l.digest}`);
   return `${systemDigest}, ${layers.length} layers, ${bytes} bytes of ZIP, in ${seconds(t)}`;
 });
@@ -188,19 +141,11 @@ if (!systemDigest) finish();
 // 3. a scratch checkout without src, packs, data, webapp, gen; install; build
 let built = false;
 await check("3 install by digest into a scratch checkout and build", async () => {
-  mkdirSync(scratch);
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD | tar -x -C "$2" --exclude=src --exclude=packs --exclude=data --exclude=webapp --exclude=gen`, "sh", home, scratch]);
-  expect(tar.status === 0, `git archive: ${tar.stderr}`);
-  symlinkSync(join(home, "node_modules"), join(scratch, "node_modules"), "dir");
-  if (existsSync(join(home, ".local/transpiler.json"))) {
-    mkdirSync(join(scratch, ".local"), {recursive: true});
-    cpSync(join(home, ".local/transpiler.json"), join(scratch, ".local/transpiler.json"));
-  }
   let t = Date.now();
-  const fetched = node(["tools/osd-fetch.mjs", "--system", join(layout, "index.json")]);
+  const fetched = install(home, layout, scratch);
   expect(fetched.status === 0, `osd-fetch --system: ${tail(fetched)}`);
   expect(fetched.stdout.includes(`system ${systemDigest}:`), `installed something else: ${tail(fetched)}`);
-  const install = seconds(t);
+  const installed = seconds(t);
   t = Date.now();
   const b = node(["tools/osd-build.mjs"]);
   writeFileSync(join(temp, "build.log"), b.stdout + b.stderr);
@@ -209,7 +154,7 @@ await check("3 install by digest into a scratch checkout and build", async () =>
   expect(verified, "the build did not report the installed layers' verification");
   const objects = /built \w+ in \d+ ms, (\d+) objects/.exec(b.stdout + b.stderr)?.[1];
   built = true;
-  return `installed in ${install}, built in ${seconds(t)} (${objects} objects); verified ${verified[1]} layers, ${verified[2]} files, ${verified[3]} bytes in ${verified[4]} ms`;
+  return `installed in ${installed}, built in ${seconds(t)} (${objects} objects); verified ${verified[1]} layers, ${verified[2]} files, ${verified[3]} bytes in ${verified[4]} ms`;
 });
 if (!built) finish();
 
