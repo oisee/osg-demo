@@ -95,7 +95,7 @@ The rest happens in the open-steamgate checkout at the book's tag, with
 
 7. Open `src/ddic/zosd_fleet_ship.tabl.xml` and press F8. Expected: *Data
    Preview ZOSD_FLEET_SHIP*, six rows, from Albatross to Old Boiler, as in
-   chapter 1. Press **Open in SQL notebook** and answer the question whether
+   chapter 2. Press **Open in SQL notebook** and answer the question whether
    you trust the notebook's authors with **Open Notebook**: a new notebook
    with `SELECT * FROM ZOSD_FLEET_SHIP WHERE MANDT = '123'` in a cell. Run
    it with the cell's Run button or Shift+Enter, and the table appears under
@@ -153,7 +153,7 @@ an arbitrary web server, so open-steamgate serves the bundle locally:
     ![vscode.dev with the fleet's bundle installed from localhost: the OSD view and the Airship fleet app](img/web-vscodedev-fleet.png)
 
 When you are done, stop the server with Ctrl+C. The extension stays in
-vscode.dev, but without the server it can no longer load; uninstall it
+vscode.dev, but its pages load their files from that server; uninstall it
 from the Extensions view.
 
 ## How a request gets there
@@ -193,7 +193,8 @@ reseeded on every reload.
 ## Where the browser stops
 
 Chapter 21's voyages do not open, for two reasons, both in
-open-steamgate's web entry at this tag:
+open-steamgate's web extension at this tag, one in how it routes, one in
+how it is built:
 
 - **OData V4 is not bridged.** The page's runtime sends only
   `/sap/opu/odata/` and `/sap/bc/` to the gateway; a Fiori Elements V4 app
@@ -206,8 +207,10 @@ open-steamgate's web entry at this tag:
   the error of step 9.
 
 The voyages themselves are there: `ZUI_OSD_FLEET_VOY` is in the OSD view,
-and its V2 binding answers with the three seeded voyages. But the draft
-round trip of chapter 21 needs the V4 app, and so the desktop.
+and its V2 binding answers with the three seeded voyages. Its draft
+actions over V2 do not help: at this tag Prepare and Activate answer `400`
+there, on the desktop as well. The draft round trip of chapter 21 needs
+the V4 app, and so the desktop.
 
 Two more things to know at this tag:
 
@@ -224,8 +227,8 @@ Two more things to know at this tag:
 Playwright and takes this chapter's pictures: activation and the worker's
 first `$metadata`, the OSD view, F8, a notebook cell, the launchpad tiles,
 the Airship fleet list, a write through `ZOSD_FLEET_SRV` that survives a
-reload, the greyed tiles, Zork and the WEBGUI. It records the V4 steps as
-known failures of this tag. `test/web-vscodedev.mjs` installs into the real
+reload, the greyed tiles, Zork and the WEBGUI. It records the V4 steps and
+the V2 draft actions as known failures of this tag. `test/web-vscodedev.mjs` installs into the real
 vscode.dev, from the Marketplace or from a `https://localhost` address,
 without an account, and checks the OSD view, the probe and the launchpad.
 `test/web-shots.mjs` and the `location` route need a web bundle built as
