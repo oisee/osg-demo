@@ -41,6 +41,7 @@ From an open-steamgate checkout the same pack runs in a terminal: `OSD_PACKS=/pa
 | 19 | [An agent that writes ABAP from inside the system](book/19-pia.md) | [Агент, который пишет ABAP изнутри системы](book/ru/19-pia.md) | PIA, an ABAP coding agent written in ABAP: green, break, red, fix, green on SAP A4H and on open-steamgate; a recorded run replays without a model key | — (PIA's own repository) |
 | 20 | [The tools come home: abaplint in ABAP](book/20-abaplint.md) | [Инструменты возвращаются домой: abaplint на ABAP](book/ru/20-abaplint.md) | abapiti translates abaplint to Go and ABAP; all 11,060 active tests of abaplint pass on Go, on open-steamgate's Go runtime and on a real SAP kernel (abapiti's result), and the ABAP build checks the abapGit standalone report; the Go build runs on your machine | — (abapiti's own repository) |
 | 21 | [Voyages as a business object: RAP](book/21-rap.md) | [Рейсы как бизнес-объект: RAP](book/ru/21-rap.md) | the fleet's voyages as a managed RAP object with draft: CDS views, a behavior definition, a pool with determinations, a validation and actions written with EML, a Fiori Elements V4 app with no draft code of its own; SAP's flight reference scenario runs too | `src/rap/`, `voyage/`, `test/rap.mjs` |
+| 22 | [The fleet pinned by digest: OCI layers](book/22-layers.md) | [Флот, закреплённый дайджестом: слои OCI](book/ru/22-layers.md) | the fleet as an OCI layer with fixed bytes; a system of open-steamgate's layers and the fleet written as a local OCI layout, installed by digest into a checkout without sources; the book's checks run there; what a pinned system refuses | `tools/fleet-system.mjs`, `test/layer.mjs` |
 | A | [Run the checks](book/90-run-the-checks.md) | [Проверки](book/ru/90-run-the-checks.md) | the automated end-to-end checks | `test/` |
 | B | [Take it to a system](docs/take-to-system.md) | [Перенос](book/ru/91-take-to-system.md) | what travels, what stays, how to import | |
 | C | [Limits and glossary](book/92-limits-glossary.md) | [Ограничения](book/ru/92-limits-glossary.md) | the fine print, the terms | |
@@ -69,6 +70,8 @@ OSD_HOME=/path/to/open-steamgate node test/iti.mjs                             #
 OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             # lifted region in step
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 OSD_HOME=/path/to/open-steamgate node test/rap.mjs                               # chapter 21: the RAP voyage object, EML, V4 draft, 9 checks
+OSD_HOME=/path/to/open-steamgate node test/layer.mjs                             # chapter 22: the fleet as an OCI layer, a system by digest, 8 checks (heavy, ~1.5 min, not in CI)
+OSD_HOME=/path/to/open-steamgate node tools/fleet-system.mjs --out /tmp/sys [--install /tmp/sys-osg]   # chapter 22: open-steamgate + the fleet as a local OCI system; --install makes a system checkout slice.mjs and rap.mjs run against
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots

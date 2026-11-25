@@ -7,6 +7,9 @@
 // does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
 //     `npm run transpile` in OSD_HOME), so no check runs against a stale build;
+//     if OSD_HOME is an installed system (chapter 22, tools/fleet-system.mjs
+//     --install), without OSD_PACKS: the system's digest supplies the fleet
+//     (test/engine.mjs);
 //  2. runs the ABAP Unit of ZCL_OSD_FLEET_VOYAGE_EML (node tools/osd-unit.mjs),
 //     the EML statements of chapter 21 against the managed runtime;
 //  3. starts the engine on a throwaway database (STG_DB_PATH under the system
@@ -39,6 +42,7 @@ import {createServer} from "node:net";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
+import {describeEngine, engineEnv, transpile} from "./engine.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const home = process.env.OSD_HOME;
@@ -60,7 +64,7 @@ const port = Number(process.env.STG_PORT || await freePort());
 const base = `http://localhost:${port}`;
 const v4 = `${base}/sap/opu/odata4/sap/ZUI_OSD_FLEET_VOY`;
 const v2 = `${base}/sap/opu/odata/sap/ZUI_OSD_FLEET_VOY`;
-const env = {...process.env, OSD_PACKS: repo, STG_PORT: String(port)};
+const env = engineEnv(home, repo, {STG_PORT: String(port)});
 const write = {"content-type": "application/json", "x-csrf-token": "open-steamgate", accept: "application/json"};
 
 const results = [];
@@ -118,12 +122,8 @@ const act = (id, active, action, body = "{}") => call(`${v4}/Voyage${key(id, act
   {method: "POST", headers: {...write, "if-match": "*"}, body});
 
 // 1. build: the pack is compiled into a fresh generation
-console.log(`rap: building ${home} with OSD_PACKS=${repo}`);
-const build = spawnSync("npm", ["run", "-s", "transpile"], {cwd: home, env, stdio: ["ignore", "ignore", "inherit"]});
-if (build.status !== 0) {
-  console.error(`rap: npm run transpile failed (${build.status})`);
-  process.exit(1);
-}
+describeEngine("rap", home, repo);
+transpile("rap", home, env);
 
 // 2. ABAP Unit of the EML class: the chapter's statements against the runtime
 await check("1 ABAP Unit of ZCL_OSD_FLEET_VOYAGE_EML", async () => {
