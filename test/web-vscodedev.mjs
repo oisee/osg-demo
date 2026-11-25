@@ -1,4 +1,4 @@
-// Chapter 22: open-steamgate in the real https://vscode.dev, in headless
+// Chapter 23: open-steamgate in the real https://vscode.dev, in headless
 // Chromium, without an account. Two ways in:
 //
 //   marketplace  the Extensions view: search, Install (and trust the publisher)
@@ -8,6 +8,12 @@
 //
 //   OSD_HOME=<open-steamgate checkout> node test/web-vscodedev.mjs marketplace
 //   OSD_HOME=<...> node test/web-vscodedev.mjs location https://localhost:5000
+//
+// After the install it walks chapter 23's steps 2 to 4: the OSD view; the
+// launchpad (Workbench and AMDP sandbox grey, Travels with rows); osd: Web
+// probe, Developer: Reload Window, osd: Web verify last Travel (the probe's
+// Travel read back after the reload, from IndexedDB). The probe's and the
+// verify's output lines are printed as they are.
 //
 // Each step is printed as PASS or FAIL, with a picture under OUT_DIR
 // (default a temporary folder). Nothing is signed in; the browser profile is
@@ -60,6 +66,30 @@ async function palette(title, pick = title) {
   await choice.waitFor({timeout: 30000});
   await choice.click();
 }
+// the last `<marker> {...}` line of the Output view, as printed
+async function outputLine(marker, timeout = 120000) {
+  await page.waitForFunction((name) => {
+    const text = (document.querySelector(".output-view .view-lines")?.textContent ?? "").replaceAll("\u00a0", " ");
+    return text.includes(`${name} {`) || text.includes(`${name}_ERROR`);
+  }, marker, {timeout});
+  const lines = await page.locator(".output-view .view-lines .view-line").allTextContents();
+  const text = lines.map((line) => line.replaceAll("\u00a0", " ")).join("\n");
+  const start = Math.max(text.lastIndexOf(`${marker} {`), text.lastIndexOf(`${marker}_ERROR`));
+  // a long line wraps into several view lines: up to the end of the JSON
+  const rest = text.slice(start).replace(/\n/g, "");
+  for (let end = rest.indexOf("{") + 1; end <= rest.length; end++) {
+    if (rest[end - 1] !== "}") continue;
+    try { JSON.parse(rest.slice(rest.indexOf("{"), end)); return rest.slice(0, end); } catch { /* go on */ }
+  }
+  return rest.slice(0, 600);
+}
+const launchpadFrame = async () => {
+  for (const frame of page.frames()) {
+    if (await frame.evaluate(() => !!window["sap-ushell-config"] && document.querySelectorAll(".sapUshellTile").length > 0).catch(() => false)) return frame;
+  }
+  return undefined;
+};
+
 // Install's dialogs (the publisher's trust, "limited functionality in VS Code
 // for the Web"), answered as they come, until the OSD view is in the Activity
 // Bar; returns the dialogs' texts
@@ -106,11 +136,11 @@ try {
   // failed and refused requests, by URL (the webviews' frames included)
   context.on("requestfailed", (request) => log.push(`error: request failed ${request.url().slice(0, 160)} ${request.failure()?.errorText}`));
   context.on("response", (response) => { if (response.status() >= 400) log.push(`error: HTTP ${response.status()} ${response.url().slice(0, 160)}`); });
-  const opened = Date.now();
+  const openedAt = Date.now();
   const ready = await step("open https://vscode.dev", async () => {
     await page.goto("https://vscode.dev/", {waitUntil: "domcontentloaded", timeout: 120000});
     await page.locator(".monaco-workbench").waitFor({timeout: 120000});
-    timings.workbenchMs = Date.now() - opened;
+    timings.workbenchMs = Date.now() - openedAt;
     return `workbench in ${timings.workbenchMs} ms`;
   });
   if (!ready) throw new Error("vscode.dev did not open");
@@ -157,36 +187,86 @@ try {
     return rows.join(" / ").slice(0, 400);
   });
 
-  await step("osd: Web probe (activation to the first $metadata)", async () => {
-    await palette("osd: Web probe", /^osd: Web probe$/);
-    await page.waitForFunction(() => (document.querySelector(".output-view .view-lines")?.textContent ?? "").replaceAll("\u00a0", " ").includes("OSD_WEB_PROBE {"), undefined, {timeout: 120000});
-    const text = (await page.locator(".output-view .view-lines").textContent()).replaceAll(" ", " ");
-    const ms = /"activationToMetadataMs":(\d+)/.exec(text)?.[1];
-    timings.activationToMetadataMs = Number(ms);
-    return `activation to $metadata ${ms} ms; ${/"metadata":\d+,"post":\d+,"get":\d+/.exec(text)?.[0]}`;
+  await step("what opened after the install (editor tabs)", async () => {
+    const tabs = (await page.locator(".tabs-container .tab").allInnerTexts()).map((one) => one.replace(/\s+/g, " ").trim());
+    const defaults = await page.getByText("Start with the defaults").first().isVisible().catch(() => false);
+    return `tabs: ${tabs.join(" | ")}; "Start with the defaults" in sight: ${defaults}`;
   });
 
+  // step 3: the launchpad
   await step("Fiori launchpad", async () => {
     await palette("osd: Open Fiori Launchpad", "osd: Open Fiori Launchpad");
     const until = Date.now() + 180000;
-    for (;;) {
-      let titles;
-      for (const frame of page.frames()) {
-        titles = await frame.evaluate(() => window["sap-ushell-config"] &&
-          [...document.querySelectorAll(".sapUshellTile")].map((tile) => tile.innerText.split("\n")[0].trim())).catch(() => undefined);
-        if (titles?.length) break;
-      }
-      if (titles?.length) {
-        await shot(`vscodedev-${mode}-launchpad.png`);
-        return `${titles.length} tiles: ${titles.join(", ")}`;
-      }
+    let frame;
+    while (!(frame = await launchpadFrame())) {
       if (Date.now() > until) throw new Error("no launchpad tiles");
       await sleep(1000);
     }
+    await sleep(1500);
+    const tiles = await frame.evaluate(() => [...document.querySelectorAll(".sapUshellTile")].map((tile) => tile.innerText.replace(/\s+/g, " ").trim()));
+    await shot(`vscodedev-${mode}-launchpad-home.png`);
+    return `${tiles.length} tiles: ${tiles.map((tile) => tile.slice(0, 60)).join(" | ")}`;
   });
+  if (mode === "marketplace") {
+    await step("launchpad: Workbench and AMDP sandbox grey", async () => {
+      const frame = await launchpadFrame();
+      const grey = await frame.evaluate(() => Object.fromEntries([...document.querySelectorAll(".sapUshellTile")]
+        .filter((tile) => /^(Workbench|AMDP sandbox)/.test(tile.innerText.trim()))
+        .map((tile) => [tile.innerText.split("\n")[0].trim(), {text: tile.innerText.replace(/\s+/g, " ").trim(), link: !!tile.querySelector("a[href]")}])));
+      const workbench = grey.Workbench?.text ?? "";
+      const amdp = grey["AMDP sandbox"]?.text ?? "";
+      if (!/needs the ADT facade/.test(workbench) || !/SQLScript engine here|speaks it/.test(amdp)) throw new Error(JSON.stringify(grey));
+      return `Workbench: "${workbench}"; AMDP sandbox: "${amdp}"`;
+    });
+    await step("Travels tile: a list report with rows", async () => {
+      const frame = await launchpadFrame();
+      await frame.locator(".sapUshellTile").filter({hasText: /^Travels/}).first().click();
+      const rows = () => frame.waitForFunction(() => [...document.querySelectorAll(".sapMListTblRow, tr")].some((row) => /T0001/.test(row.textContent)), undefined, {timeout: 60000});
+      await rows().catch(async () => {
+        await frame.locator("button").filter({hasText: /^Go$/}).first().click();
+        await rows();
+      });
+      const count = await frame.evaluate(() => /\w+ \((\d+)\)/.exec(document.body.innerText)?.[0]);
+      await shot(`vscodedev-${mode}-travels.png`);
+      await frame.evaluate(() => { window.location.hash = "#Shell-home"; });
+      return `rows with T0001; header "${count}"`;
+    });
+  }
+
+  // step 4: probe, reload, verify
+  await step("osd: Web probe (activation to the first $metadata)", async () => {
+    await palette("osd: Web probe", /^osd: Web probe$/);
+    const line = await outputLine("OSD_WEB_PROBE");
+    const ms = /"activationToMetadataMs":(\d+)/.exec(line)?.[1];
+    timings.activationToMetadataMs = Number(ms);
+    console.log(`  output: ${line}`);
+    if (!/"metadata":200,"post":201,"get":200/.test(line)) throw new Error(line);
+    await shot(`vscodedev-${mode}-probe.png`);
+    return `activation to $metadata ${ms} ms; ${/"metadata":\d+,"post":\d+,"get":\d+/.exec(line)?.[0]}`;
+  });
+  if (mode === "marketplace") {
+    await step("Developer: Reload Window, then osd: Web verify last Travel", async () => {
+      await palette("Developer: Reload Window", /^Developer: Reload Window$/);
+      await sleep(3000);
+      await page.locator(".monaco-workbench").waitFor({timeout: 120000});
+      await page.locator(".activitybar .action-label[aria-label*='OSD']").first().waitFor({timeout: 120000});
+      await sleep(2000);
+      await palette("osd: Web verify last Travel", "osd: Web verify last Travel");
+      const line = await outputLine("OSD_WEB_VERIFY");
+      console.log(`  output: ${line}`);
+      await shot(`vscodedev-${mode}-verify.png`);
+      if (!/^OSD_WEB_VERIFY \{"get":200/.test(line)) throw new Error(line);
+      return line;
+    });
+  }
 
   // the book's fleet, when the installed bundle carries osg-demo
   let launchpad;
+  if (mode === "location") {
+    // back to the launchpad's tab, after the probe's Output
+    await page.locator(".tabs-container .tab").filter({hasText: "Fiori Launchpad"}).first().click().catch(() => undefined);
+    await sleep(1000);
+  }
   for (const frame of page.frames()) {
     if (await frame.evaluate(() => [...document.querySelectorAll(".sapUshellTile")].some((tile) => tile.innerText.includes("Airship fleet"))).catch(() => false)) launchpad = frame;
   }

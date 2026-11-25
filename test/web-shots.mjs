@@ -1,7 +1,8 @@
-// Chapter 22: the fleet in VS Code for the Web. @vscode/test-web serves VS Code
+// Chapter 23: the fleet in VS Code for the Web. @vscode/test-web serves VS Code
 // in headless Chromium with open-steamgate's browser entry (the gateway runs in
-// the extension's web worker, sql.js + IndexedDB); Playwright walks what a
-// reader does and takes the chapter's pictures. Modelled on open-steamgate's
+// the extension's web worker, sql.js + IndexedDB), with this repository as its
+// folder; Playwright walks chapter 23's steps 6 to 9 the way a person clicks
+// them and takes the chapter's pictures. Modelled on open-steamgate's
 // scripts/test-web-probe.mjs and scripts/test-web-tiles.mjs (whose fioriTiles
 // this script calls for the greyed tiles, Zork and the WEBGUI).
 //
@@ -11,18 +12,31 @@
 //   OSD_PACKS=/path/to/osg-demo OSD_WEB_PACKS=all npm run web:vscode
 //   OSD_HOME=$OSD_HOME node /path/to/osg-demo/test/web-shots.mjs
 //
+// The folder is this repository, as the chapter's
+// `npx @vscode/test-web ... --extensionDevelopmentPath ./editors/vscode ../osg-demo`
+// opens it. test-web serves a folder read-only (GET only; what VS Code saves
+// stays in the browser), and the walk saves nothing: the notebook is the
+// untitled one the Data Preview's "Open in SQL notebook" makes. The script
+// checks that `git status` of the repository is the same after the walk.
+// WEB_SHOTS_FOLDER names another folder.
+//
 // OSD_WEB_EXT names another extension folder (default $OSD_HOME/editors/vscode),
 // OUT_DIR the pictures' folder (default a temporary one, printed at the end).
 // WEB_SHOTS_FLEET=0 walks an extension without the fleet (e.g. the Marketplace
-// package unzipped, OSD_WEB_EXT=<dir>/extension): OSG's own table, notebook
-// and tiles. Each step is recorded as PASS or FAIL and the walk goes on; the
-// exit code is 1 when any step failed. At open-steamgate 0.7.3140 four fail by
-// design of the web entry, not of this pack: the OData V4 service is not
-// bridged (/sap/opu/odata4/ is outside the webview bridge's paths), so the
-// Voyages app and OSG's own V4 tiles do not open, and the V2 binding's draft
-// Prepare/Activate answer 400 (on the desktop engine too).
+// package unzipped, OSD_WEB_EXT=<dir>/extension) over $OSD_HOME as the folder:
+// OSG's own table, notebook and tiles.
+//
+// Each step is PASS, FAIL or KNOWN, and the walk goes on. KNOWN is a failure
+// chapter 23 describes at open-steamgate 0.7.3140, in the web entry and not in
+// this pack: the OData V4 service is not bridged (/sap/opu/odata4/ is outside
+// the webview bridge's paths) and a pack's BSP folder is not bundled, so the
+// Voyages app and OSG's own V4 tiles do not open; the V2 binding's draft
+// Prepare/Activate answer 400 (on the desktop engine too). A KNOWN step that
+// passes is reported as `FAIL ... now works: update chapter 23`. The exit code
+// is 1 when any step is FAIL, 0 when all are PASS or KNOWN.
 import {spawn} from "node:child_process";
-import {copyFile, mkdir, mkdtemp, rm, writeFile} from "node:fs/promises";
+import {mkdir, mkdtemp, rm} from "node:fs/promises";
+import {execFileSync} from "node:child_process";
 import {createServer} from "node:net";
 import {tmpdir} from "node:os";
 import {createRequire} from "node:module";
@@ -45,31 +59,29 @@ const {fioriTiles} = await import(pathToFileURL(join(home, "scripts/test-web-til
 const temp = await mkdtemp(join(tmpdir(), "osd-web-shots-"));
 const shots = resolve(process.env.OUT_DIR ?? join(temp, "shots"));
 await mkdir(shots, {recursive: true});
-const workspace = join(temp, "workspace");
-await mkdir(workspace, {recursive: true});
-await copyFile(join(repo, "src/ddic/zosd_fleet_ship.tabl.xml"), join(workspace, "zosd_fleet_ship.tabl.xml"));
-await copyFile(join(home, "src/ddic/zstg_demo.tabl.xml"), join(workspace, "zstg_demo.tabl.xml"));
-await writeFile(join(workspace, "fleet.osdnb"), JSON.stringify({cells: [
-  {kind: "markdown", value: "# The fleet in the browser\n\nOpen SQL over the fleet's tables, answered by the gateway in the extension's web worker."},
-  {kind: "code", language: "sql", value: "SELECT ship_id, name, status, steam_pct, home_port FROM zosd_fleet_ship ORDER BY ship_id"},
-]}, undefined, 2) + "\n");
-await writeFile(join(workspace, "travels.osdnb"), JSON.stringify({cells: [
-  {kind: "code", language: "sql", value: "SELECT travel_id, description, status, seats FROM zstg_demo ORDER BY travel_id"},
-]}, undefined, 2) + "\n");
+// the folder VS Code opens: this repository (or OSG's checkout without the fleet)
+const workspace = resolve(process.env.WEB_SHOTS_FOLDER ?? (fleet ? repo : home));
+const gitStatus = () => { try { return execFileSync("git", ["status", "--porcelain"], {cwd: workspace, encoding: "utf8"}); } catch { return undefined; } };
+const statusBefore = gitStatus();
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 const results = [];
-async function step(name, work) {
+// known: a failure chapter 23 describes; it is KNOWN while it fails, and a
+// FAIL that asks for the chapter to be corrected once it passes
+async function step(name, work, known = false) {
   const started = Date.now();
   try {
     const note = await work();
-    results.push({name, ok: true, note: note ?? "", ms: Date.now() - started});
-    console.log(`PASS ${name}${note ? `: ${note}` : ""}`);
+    const verdict = known ? "FAIL" : "PASS";
+    const said = known ? `now works: update chapter 23 (${note ?? ""})` : note ?? "";
+    results.push({name, verdict, note: said, ms: Date.now() - started});
+    console.log(`${verdict} ${name}${said ? `: ${said}` : ""}`);
   } catch (error) {
     const note = String(error?.message ?? error).split("\n").slice(0, 3).join(" | ").slice(0, 600);
-    results.push({name, ok: false, note, ms: Date.now() - started});
-    console.log(`FAIL ${name}: ${note}`);
-    await page?.screenshot({path: join(shots, `fail-${name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.png`)}).catch(() => undefined);
+    const verdict = known ? "KNOWN" : "FAIL";
+    results.push({name, verdict, note, ms: Date.now() - started});
+    console.log(`${verdict} ${name}: ${note}`);
+    await page?.screenshot({path: join(shots, `${verdict.toLowerCase()}-${name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.png`)}).catch(() => undefined);
     await page?.keyboard.press("Escape").catch(() => undefined);
   }
 }
@@ -141,19 +153,34 @@ async function frameWhere(test, arg, what, timeout = 180000) {
 }
 const frameWithText = (text, what = text, timeout) => frameWhere((wanted) => (document.body?.innerText ?? "").includes(wanted), text, what, timeout);
 
-async function openFile(name) {
-  const row = page.locator(".explorer-folders-view .monaco-list-row").filter({hasText: name}).first();
-  await row.waitFor({timeout: 30000});
-  await row.dblclick();
+// a file by its path, the way a person finds it: the folders in the
+// Explorer, one click each, then a double click on the file
+async function openPath(path) {
+  await page.locator(".activitybar .action-label[aria-label*='Explorer']").first().click();
+  const parts = path.split("/");
+  for (const [index, name] of parts.entries()) {
+    const row = page.locator(".explorer-folders-view .monaco-list-row").filter({has: page.locator(".label-name", {hasText: new RegExp(`^${name.replace(/[.]/g, "\\.")}$`)})}).first();
+    await row.waitFor({timeout: 30000});
+    await row.scrollIntoViewIfNeeded();
+    const last = index === parts.length - 1;
+    if (last) await row.dblclick();
+    else if (await row.getAttribute("aria-expanded") !== "true") await row.click();
+  }
   await page.locator(".editor-instance .monaco-editor").first().waitFor({timeout: 30000});
 }
 
+// the untitled notebook asks whether to save it: no
+async function closeAll() {
+  await palette("View: Close All Editors");
+  const dont = page.locator(".monaco-dialog-box .monaco-button").filter({hasText: /Don.t Save/}).first();
+  if (await dont.waitFor({timeout: 3000}).then(() => true, () => false)) await dont.click();
+}
 const isLaunchpad = () => !!window.osdBridge && !!window["sap-ushell-config"];
 async function launchpad() {
   const tab = page.locator(".tabs-container .tab").filter({hasText: "Fiori Launchpad"}).first();
   if (await tab.count()) await tab.click();
   else {
-    await palette("View: Close All Editors");
+    await closeAll();
     await palette("osd: Open Fiori Launchpad");
   }
   const frame = await frameWhere(isLaunchpad, undefined, "Fiori launchpad");
@@ -250,48 +277,104 @@ try {
     await tree.filter({hasText: /^Apps \([1-9]/}).first().click();
     await tree.filter({hasText: fleet ? "osd.fleet" : "stg.travel"}).first().waitFor({timeout: 30000});
     const apps = (await tree.allTextContents()).map((one) => one.trim().split("/")[0]).filter((one) => /^[a-z0-9]+\.[a-z0-9.]+$/.test(one));
-    await shot("web-osd-view-apps.png");
+    await shot("check-osd-view-apps.png");
     return `${generation}; groups ${groups.join(", ")}; ${fleet ? `fleet services ${services.join(" / ")}; ` : ""}apps ${apps.join(", ")}`;
   });
 
-  const table = fleet ? {file: "zosd_fleet_ship.tabl.xml", texts: ["SHIP_ID", "Albatross"]} : {file: "zstg_demo.tabl.xml", texts: ["TRAVEL_ID", "T0001"]};
-  await step(`F8 Data Preview on ${table.file}`, async () => {
-    await page.locator(".activitybar .action-label[aria-label*='Explorer']").first().click();
-    await openFile(table.file);
-    await palette("osd: Data Preview (F8)");
-    const frame = await frameWithText("Open in SQL notebook", "F8 Data Preview");
-    await bodyHas(frame, table.texts, 30000);
-    const status = (await frame.locator("body").innerText()).match(/-- \d+ rows? --/)?.[0];
+  // step 7: the ship table, F8, the Data Preview's "Open in SQL notebook"
+  const table = fleet ? {path: "src/ddic/zosd_fleet_ship.tabl.xml", name: "ZOSD_FLEET_SHIP", texts: ["SHIP_ID", "Albatross", "Old Boiler"]}
+    : {path: "src/ddic/zstg_demo.tabl.xml", name: "ZSTG_DEMO", texts: ["TRAVEL_ID", "T0001"]};
+  let preview;
+  await step(`F8 Data Preview on ${table.path}`, async () => {
+    // the probe's Output panel is not part of step 7: closed, for room
+    await palette("View: Hide Panel").catch(() => undefined);
+    await openPath(table.path);
+    await page.locator(".editor-instance .monaco-editor .view-lines").first().click();
+    await page.keyboard.press("F8");
+    preview = await frameWithText("Open in SQL notebook", "F8 Data Preview", 60000);
+    await bodyHas(preview, table.texts, 30000);
+    const title = (await page.locator(".tabs-container .tab").filter({hasText: "Data Preview"}).first().innerText()).trim();
+    const status = (await preview.locator("body").innerText()).match(/-- \d+ rows? --/)?.[0];
     await shot("web-data-preview.png");
-    return `${table.texts.join(", ")}; ${status}`;
+    if (!title.includes(`Data Preview ${table.name}`)) throw new Error(`tab "${title}"`);
+    return `tab "${title}"; ${table.texts.join(", ")}; ${status}`;
   });
 
-  const notebook = fleet ? {file: "fleet.osdnb", cell: "FROM zosd_fleet_ship ORDER BY ship_id", texts: ["SHIP_ID", "Albatross", "Brass Heron"]}
-    : {file: "travels.osdnb", cell: "FROM zstg_demo ORDER BY travel_id", texts: ["TRAVEL_ID", "T0001"]};
-  await step(`SQL notebook cell (${notebook.file})`, async () => {
-    await openFile(notebook.file);
-    const trust = page.locator(".monaco-text-button").filter({hasText: "Open Notebook"}).first();
-    await trust.waitFor({state: "visible", timeout: 5000}).catch(() => undefined);
-    if (await trust.isVisible()) await trust.click();
-    await page.locator(".notebook-editor").getByText(notebook.cell).first().waitFor({timeout: 30000});
-    await page.locator(".notebook-toolbar-container").getByText("Run All").first().click();
-    const frame = await frameWithText("raw JSON", "notebook output");
-    await bodyHas(frame, notebook.texts, 30000);
+  const rows = fleet ? ["SHIP_ID", "Albatross", "Brass Heron", "Old Boiler"] : ["TRAVEL_ID", "T0001"];
+  let statement;
+  await step("Open in SQL notebook: the SELECT in a cell, run", async () => {
+    if (!preview) throw new Error("no Data Preview to press the button in");
+    await preview.locator("button#notebook").click();
+    // VS Code asks before it renders a notebook's outputs: "Open Notebook"
+    const dialog = page.locator(".monaco-dialog-box").filter({hasText: /notebook/i}).first();
+    let asked = "no dialog";
+    if (await dialog.waitFor({timeout: 10000}).then(() => true, () => false)) {
+      asked = `dialog "${(await dialog.innerText()).replace(/\s+/g, " ").trim()}"`;
+      await shot("check-notebook-trust.png");
+      await dialog.locator(".monaco-button").filter({hasText: "Open Notebook"}).first().click();
+    }
+    const editor = page.locator(".notebookOverlay").first();
+    await editor.waitFor({timeout: 60000});
+    const cell = editor.locator(".monaco-list-row").filter({hasText: /SELECT\s+\*\s+FROM/}).first();
+    await cell.waitFor({timeout: 30000});
+    statement = (await cell.locator(".view-lines").first().innerText()).replace(/\s+/g, " ").trim();
+    const tab = (await page.locator(".tabs-container .tab").filter({hasText: ".osdnb"}).first().innerText()).trim();
+    // the cell's own Run button (the starter's text: "the cell's Run button or Shift+Enter")
+    await cell.hover();
+    const run = cell.locator(".run-button-container .action-label, .codicon-notebook-execute").first();
+    if (await run.isVisible().catch(() => false)) await run.click();
+    else { await cell.locator(".view-lines").click(); await page.keyboard.press("Control+Enter"); }
+    const frame = await frameWithText("raw JSON", "the cell's table", 120000);
+    await bodyHas(frame, rows, 30000);
+    await page.mouse.move(700, 880); // no hover toolbar or tooltip in the picture
     await shot("web-notebook.png");
-    return `${notebook.texts.join(", ")} in the cell's table`;
+    return `${asked} -> Open Notebook; tab "${tab}"; cell "${statement}"; ${rows.join(", ")} in the table under the cell`;
   });
 
-  await step("launchpad tiles", async () => {
+  await step("an ABAP cell in the browser", async () => {
+    const editor = page.locator(".notebookOverlay").first();
+    if (!await editor.count()) throw new Error("no notebook open");
+    await editor.locator(".monaco-list-row").filter({hasText: /SELECT\s+\*\s+FROM/}).first().locator(".view-lines").click();
+    await palette("Notebook: Insert Code Cell Below");
+    await page.keyboard.type("WRITE 'hello'.");
+    await palette("Notebook: Change Cell Language");
+    const abap = page.locator(".quick-input-list .monaco-list-row").filter({hasText: /^ABAP|\(abap\)/}).first();
+    await abap.waitFor({timeout: 30000});
+    await abap.click();
+    const cell = page.locator(".notebookOverlay .monaco-list-row").filter({hasText: /WRITE/}).first();
+    await cell.hover();
+    await cell.locator(".run-button-container .action-label").first().click();
+    const wanted = "notebook cells are not available in the browser";
+    const until = Date.now() + 60000;
+    for (;;) {
+      const outputs = await page.locator(".notebookOverlay").first().innerText().catch(() => "");
+      if (outputs.includes(wanted)) break;
+      const frame = await frameWithText(wanted, "the ABAP cell's answer", 2000).catch(() => undefined);
+      if (frame) break;
+      if (Date.now() > until) throw new Error(`no "${wanted}"`);
+    }
+    await shot("check-notebook-abap-cell.png");
+    return `"abap ${wanted}"`;
+  });
+
+  // step 8: the launchpad's Content packs
+  await step("launchpad: Content packs", async () => {
     const frame = await launchpad();
     const titles = await frame.evaluate(() => [...document.querySelectorAll(".sapUshellTile")]
       .map((tile) => tile.innerText.split("\n")[0].trim()).filter(Boolean));
-    await shot("web-launchpad.png");
-    if (fleet) {
-      const tile = frame.locator(".sapUshellTile").filter({hasText: "Airship fleet"}).first();
-      await tile.scrollIntoViewIfNeeded();
-      await shot("web-launchpad-fleet.png");
+    if (!fleet) return `${titles.length} tiles: ${titles.join(", ")}`;
+    const tab = frame.locator(".sapUshellAnchorItem, [role=tab], .sapMITBFilter").filter({hasText: "Content packs"}).first();
+    await tab.waitFor({timeout: 30000});
+    await tab.click();
+    await sleep(1500);
+    const packs = await frame.evaluate(() => [...document.querySelectorAll(".sapUshellTile")]
+      .filter((tile) => /Airship fleet|Voyages/.test(tile.innerText) && tile.getBoundingClientRect().top < window.innerHeight && tile.getBoundingClientRect().bottom > 0)
+      .map((tile) => tile.innerText.replace(/\s+/g, " ").trim()));
+    await shot("web-launchpad-fleet.png");
+    for (const name of ["Airship fleet", "Voyages"]) {
+      if (!packs.some((one) => one.startsWith(name) && one.includes("osg-demo"))) throw new Error(`in sight: ${packs.join(" | ")}`);
     }
-    return `${titles.length} tiles: ${titles.join(", ")}`;
+    return `in sight after "Content packs": ${packs.join(" | ")}; all ${titles.length} tiles: ${titles.join(", ")}`;
   });
 
   if (fleet) {
@@ -321,7 +404,7 @@ try {
       const list = await odataCall(frame, `${v4}/Voyage?$count=true`);
       if (list.status !== 200) throw new Error(`GET ${v4}/Voyage: HTTP ${list.status} ${JSON.stringify(list.body).slice(0, 200)}`);
       return `$count ${list.body["@odata.count"]}`;
-    });
+    }, true);
     await step("Voyage V2 binding over the bridge: the seeded voyages", async () => {
       const frame = await launchpad();
       const list = await odataCall(frame, `${v2}/Voyage?$filter=IsActiveEntity%20eq%20true&$orderby=voyage_uuid&$format=json`);
@@ -350,7 +433,7 @@ try {
         throw new Error(`Edit ${edit.status}, PATCH ${merge.status}, Prepare ${prepare.status}, Activate ${activate.status} ${JSON.stringify(activate.body).slice(0, 200)}; active route ${after.body?.d?.route}`);
       }
       return `Edit ${edit.status}, PATCH ${merge.status}, Prepare ${prepare.status}, Activate ${activate.status}: route "${after.body.d.route}"`;
-    });
+    }, true);
     await step("ZOSD_FLEET_SRV write over the bridge: a ship's steam", async () => {
       const frame = await launchpad();
       const before = await odataCall(frame, `${v2fleet}/ShipSet('S004')?$format=json`);
@@ -362,7 +445,7 @@ try {
       return `S004 ${before.body.d.Name}: SteamPct ${before.body.d.SteamPct} -> PUT ${put.status}`;
     });
     await step("reload: the ship's steam is kept (IndexedDB)", async () => {
-      await palette("View: Close All Editors");
+      await closeAll();
       await page.reload({waitUntil: "domcontentloaded"});
       await page.locator(".monaco-workbench").waitFor({timeout: 120000});
       const frame = await launchpad();
@@ -373,10 +456,10 @@ try {
         await frame.locator("button").filter({hasText: /^Go$/}).first().click();
         await bodyHas(frame, ["Cumulus", String(steam)], 60000);
       });
-      await shot("web-fleet-reloaded.png");
+      await shot("check-fleet-reloaded.png");
       if (ship.body?.d?.SteamPct !== steam) throw new Error(`S004 SteamPct ${ship.body?.d?.SteamPct}, wrote ${steam}`);
       // the route counts only when the draft step above saved it
-      const saved = results.find((one) => one.name.startsWith("Voyage V2 draft"))?.ok;
+      const saved = results.find((one) => one.name.startsWith("Voyage V2 draft"))?.note?.startsWith("now works");
       if (saved && voyage.body?.d?.route !== route) throw new Error(`voyage route ${voyage.body?.d?.route}, saved ${route}`);
       return `after a reload: S004 SteamPct ${steam} (shown in the Airship fleet list); voyage route "${voyage.body?.d?.route}"${saved ? "" : " (no draft was saved to keep)"}`;
     });
@@ -386,10 +469,10 @@ try {
       await frame.locator(".sapUshellTile").filter({hasText: "Voyages"}).first().click();
       await frame.waitForFunction(() => window.location.hash.startsWith("#Voyage-manage"), undefined, {timeout: 60000});
       const outcome = await appOutcome(frame, "Port Aurel - Cloudhaven");
-      await shot("web-voyages.png");
+      await shot("web-voyages-error.png");
       if (outcome !== "rows") throw new Error(`${outcome}; console: ${browserLog.filter((line) => /voyage|odata4/i.test(line)).slice(-3).join(" | ").slice(0, 500)}`);
       return "the seeded voyages in the list";
-    });
+    }, true);
   }
 
   for (const [tile, text] of [["OData V4 Travels", "T0001"], ["Draft Trips", "Trip"]]) {
@@ -397,10 +480,10 @@ try {
       const frame = await launchpad();
       await frame.locator(".sapUshellTile").filter({hasText: tile}).first().click();
       const outcome = await appOutcome(frame, text);
-      await shot(`web-osg-${tile.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`);
+      await shot(`check-osg-${tile.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`);
       if (outcome !== "rows") throw new Error(`${outcome}; console: ${browserLog.filter((line) => /odata4/i.test(line)).slice(-2).join(" | ").slice(0, 400)}`);
       return `rows with ${text}`;
-    });
+    }, true);
   }
 
   await step("OSG tiles: Workbench and AMDP greyed, Zork, WEBGUI", async () => {
@@ -413,7 +496,7 @@ try {
     return note;
   });
 } catch (error) {
-  results.push({name: "harness", ok: false, note: String(error?.stack ?? error).slice(0, 1500)});
+  results.push({name: "harness", verdict: "FAIL", note: String(error?.stack ?? error).slice(0, 1500)});
   console.error(error);
 } finally {
   await context?.close().catch(() => undefined);
@@ -422,13 +505,22 @@ try {
     await sleep(500);
   }
   // everything but the pictures (which are in temp when OUT_DIR is unset)
-  for (const part of ["profile", "vscode", "workspace", "npm-cache"]) await rm(join(temp, part), {recursive: true, force: true});
+  for (const part of ["profile", "vscode", "npm-cache"]) await rm(join(temp, part), {recursive: true, force: true});
   if (process.env.OUT_DIR) await rm(temp, {recursive: true, force: true});
+}
+// the folder was VS Code's workspace: nothing of the walk may have landed in it
+if (statusBefore !== undefined) {
+  const after = gitStatus();
+  const same = after === statusBefore;
+  results.push({name: "the folder is unchanged (git status)", verdict: same ? "PASS" : "FAIL",
+    note: same ? `${workspace.split("/").pop()}: ${statusBefore.trim().split("\n").filter(Boolean).length} entries before and after` : `before:\n${statusBefore}after:\n${after}`});
 }
 console.log(`\ntimings: ${JSON.stringify(timings)}`);
 console.log(`pictures: ${shots}`);
-for (const one of results) console.log(`${one.ok ? "PASS" : "FAIL"} ${one.name} (${one.ms ?? 0} ms)${one.note ? ` -- ${one.note}` : ""}`);
-if (results.some((one) => !one.ok)) {
+for (const one of results) console.log(`${one.verdict} ${one.name} (${one.ms ?? 0} ms)${one.note ? ` -- ${one.note}` : ""}`);
+const count = (verdict) => results.filter((one) => one.verdict === verdict).length;
+console.log(`\n${count("PASS")} PASS, ${count("KNOWN")} KNOWN, ${count("FAIL")} FAIL`);
+if (count("FAIL")) {
   console.log(`browser log (last 25):\n${browserLog.slice(-25).join("\n")}`);
   process.exitCode = 1;
 }
