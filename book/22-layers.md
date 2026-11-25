@@ -70,7 +70,7 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
    tag and the libraries it pins; written with the tag, they had the
    digests shown. The last row is the fleet, and its digests are yours:
    they name the commit you have checked out (step 3 shows why). The last
-   two lines come from `osd-fetch --system`, which installed the system in
+   two lines say that `osd-fetch --system` installed the system in
    `/tmp/fleet-osg`.
 
 2. Look at what was installed:
@@ -85,8 +85,8 @@ otherwise; `$OSD_HOME` is the open-steamgate checkout.
    or `webapp`. Its content is in `.local/system/`: `libs/`, `inputs/`
    (`src` and `test`) and `packs/`, where `osg-demo` holds only
    `osd-pack.json`, `src`, `data`, `webapp` and `voyage` (`ls -A` also
-   shows `.abapgit.xml` and `.osd-layer.json`, the layer's identity that
-   the installation wrote). The book and its pictures did not come along. `.local/system/.osd-system.json` records
+   shows the pack's `.abapgit.xml` and `.osd-layer.json`, the layer's
+   identity, which the installation wrote). The book and its pictures did not come along. `.local/system/.osd-system.json` records
    the system digest and, for every layer, its order, kind, name, manifest
    digest and tree digest.
 
