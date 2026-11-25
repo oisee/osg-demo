@@ -66,9 +66,10 @@ const statusBefore = gitStatus();
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 const results = [];
-// known: a failure chapter 23 describes; it is KNOWN while it fails, and a
-// FAIL that asks for the chapter to be corrected once it passes
-async function step(name, work, known = false) {
+// known: the way a failure chapter 23 describes shows itself (a RegExp over
+// the error). It is KNOWN while it fails exactly so; it fails in any other
+// way, and asks for the chapter to be corrected once it passes.
+async function step(name, work, known = undefined) {
   const started = Date.now();
   try {
     const note = await work();
@@ -77,8 +78,10 @@ async function step(name, work, known = false) {
     results.push({name, verdict, note: said, ms: Date.now() - started});
     console.log(`${verdict} ${name}${said ? `: ${said}` : ""}`);
   } catch (error) {
-    const note = String(error?.message ?? error).split("\n").slice(0, 3).join(" | ").slice(0, 600);
-    const verdict = known ? "KNOWN" : "FAIL";
+    const message = String(error?.message ?? error);
+    let note = message.split("\n").slice(0, 3).join(" | ").slice(0, 600);
+    const verdict = known && known.test(message) ? "KNOWN" : "FAIL";
+    if (known && verdict === "FAIL") note = `not the known failure (${known}): ${note}`;
     results.push({name, verdict, note, ms: Date.now() - started});
     console.log(`${verdict} ${name}: ${note}`);
     await page?.screenshot({path: join(shots, `${verdict.toLowerCase()}-${name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.png`)}).catch(() => undefined);
@@ -404,7 +407,7 @@ try {
       const list = await odataCall(frame, `${v4}/Voyage?$count=true`);
       if (list.status !== 200) throw new Error(`GET ${v4}/Voyage: HTTP ${list.status} ${JSON.stringify(list.body).slice(0, 200)}`);
       return `$count ${list.body["@odata.count"]}`;
-    }, true);
+    }, /: HTTP 404\b/);
     await step("Voyage V2 binding over the bridge: the seeded voyages", async () => {
       const frame = await launchpad();
       const list = await odataCall(frame, `${v2}/Voyage?$filter=IsActiveEntity%20eq%20true&$orderby=voyage_uuid&$format=json`);
@@ -433,7 +436,7 @@ try {
         throw new Error(`Edit ${edit.status}, PATCH ${merge.status}, Prepare ${prepare.status}, Activate ${activate.status} ${JSON.stringify(activate.body).slice(0, 200)}; active route ${after.body?.d?.route}`);
       }
       return `Edit ${edit.status}, PATCH ${merge.status}, Prepare ${prepare.status}, Activate ${activate.status}: route "${after.body.d.route}"`;
-    }, true);
+    }, /^Edit 200, PATCH 204, Prepare 400, Activate 400 /);
     await step("ZOSD_FLEET_SRV write over the bridge: a ship's steam", async () => {
       const frame = await launchpad();
       const before = await odataCall(frame, `${v2fleet}/ShipSet('S004')?$format=json`);
@@ -472,10 +475,10 @@ try {
       await shot("web-voyages-error.png");
       if (outcome !== "rows") throw new Error(`${outcome}; console: ${browserLog.filter((line) => /voyage|odata4/i.test(line)).slice(-3).join(" | ").slice(0, 500)}`);
       return "the seeded voyages in the list";
-    }, true);
+    }, /SAP UI5 component of the application could not be loaded/);
   }
 
-  for (const [tile, text] of [["OData V4 Travels", "T0001"], ["Draft Trips", "Trip"]]) {
+  for (const [tile, text, service] of [["OData V4 Travels", "T0001", "ZSTG_DEMO_SRV"], ["Draft Trips", "Trip", "ZUI_RAP_DTRIP"]]) {
     await step(`OSG's own V4 tile: ${tile}`, async () => {
       const frame = await launchpad();
       await frame.locator(".sapUshellTile").filter({hasText: tile}).first().click();
@@ -483,7 +486,7 @@ try {
       await shot(`check-osg-${tile.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`);
       if (outcome !== "rows") throw new Error(`${outcome}; console: ${browserLog.filter((line) => /odata4/i.test(line)).slice(-2).join(" | ").slice(0, 400)}`);
       return `rows with ${text}`;
-    }, true);
+    }, new RegExp(`odata4/sap/${service}/\\$metadata - Not Found`));
   }
 
   await step("OSG tiles: Workbench and AMDP greyed, Zork, WEBGUI", async () => {

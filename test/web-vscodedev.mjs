@@ -260,7 +260,8 @@ try {
     });
   }
 
-  // the book's fleet, when the installed bundle carries osg-demo
+  // the book's fleet: the location route installs the bundle of chapter 23's
+  // step 5, which must carry it; the Marketplace package does not
   let launchpad;
   if (mode === "location") {
     // back to the launchpad's tab, after the probe's Output
@@ -270,8 +271,9 @@ try {
   for (const frame of page.frames()) {
     if (await frame.evaluate(() => [...document.querySelectorAll(".sapUshellTile")].some((tile) => tile.innerText.includes("Airship fleet"))).catch(() => false)) launchpad = frame;
   }
-  if (launchpad) {
+  if (mode === "location") {
     await step("Airship fleet tile", async () => {
+      if (!launchpad) throw new Error("no Airship fleet tile: the bundle at the location was not built with this pack (chapter 23, step 5)");
       await launchpad.locator(".sapUshellTile").filter({hasText: "Airship fleet"}).first().click();
       const rows = () => launchpad.waitForFunction(() => document.body.innerText.includes("Albatross") && document.body.innerText.includes("Brass Heron"), undefined, {timeout: 60000});
       await rows().catch(async () => {
@@ -286,7 +288,8 @@ try {
   results.push({name: "harness", ok: false, note: String(error?.message ?? error)});
 } finally {
   await context.close().catch(() => undefined);
-  await rm(join(temp, "profile"), {recursive: true, force: true});
+  // keep the pictures when they are in the temporary folder, else remove it all
+  await rm(process.env.OUT_DIR ? temp : join(temp, "profile"), {recursive: true, force: true});
 }
 console.log(`\ntimings: ${JSON.stringify(timings)}\npictures: ${shots}`);
 if (results.some((one) => !one.ok)) {

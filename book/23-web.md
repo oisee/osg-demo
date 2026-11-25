@@ -17,7 +17,7 @@ built before it got there. This chapter first opens open-steamgate's own
 system in vscode.dev, then builds one with the fleet in it and brings that
 in, and ends where the browser stops.
 
-## Try it without installing anything
+## Try it with nothing on your machine
 
 You need a Chromium-based browser; this chapter was walked in Chromium.
 
@@ -148,7 +148,8 @@ an arbitrary web server, so open-steamgate serves the bundle locally:
     view the same generation as in step 6. The launchpad and the Airship
     fleet app work as they did there. vscode.dev has no folder open now, so
     there is no table file for F8; step 7 is the place for that. (If the
-    Marketplace extension from step 1 is installed, uninstall it first.)
+    Marketplace extension from step 1 is installed, uninstall it first, so
+    that only one copy of the extension is active.)
 
     ![vscode.dev with the fleet's bundle installed from localhost: the OSD view and the Airship fleet app](img/web-vscodedev-fleet.png)
 
