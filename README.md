@@ -70,6 +70,7 @@ OSD_HOME=/path/to/open-steamgate node test/lift.mjs                             
 OSD_HOME=/path/to/open-steamgate node test/l2.mjs                               # the L2 rule's class in step (--write rebuilds)
 OSD_HOME=/path/to/open-steamgate node test/rap.mjs                               # chapter 21: the RAP voyage object, EML, V4 draft, 9 checks
 OSD_HOME=/path/to/open-steamgate node test/layer.mjs                             # chapter 24: the fleet as an OCI layer, a system by digest, 8 checks (heavy, ~1.5 min, not in CI)
+OSD_HOME=/path/to/open-steamgate node tools/fleet-system.mjs --out /tmp/sys [--install /tmp/sys-osg]   # chapter 24: open-steamgate + the fleet as a local OCI system; --install makes a system checkout slice.mjs and rap.mjs run against
 node test/book-snippets.mjs                                                      # the book's code excerpts match src/
 OSD_HOME=/path/to/open-steamgate node test/cli.mjs                              # build the fleet CLI (Go 1.26) and run chapter 14
 OSD_HOME=/path/to/open-steamgate node test/book-shots.mjs                       # retake the book's screenshots
