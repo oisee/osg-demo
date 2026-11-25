@@ -84,7 +84,7 @@ open-steamgate отвечает на этот вопрос так же, как �
    `webapp`. Содержимое лежит в `.local/system/`: `libs/`, `inputs/`
    (`src` и `test`) и `packs/`, где в `osg-demo` только `osd-pack.json`,
    `src`, `data`, `webapp` и `voyage` (`ls -A` покажет ещё `.abapgit.xml` и
-   `.osd-layer.json`, удостоверение слоя, которое записала установка). Книга
+   `.osd-layer.json`, сведения о слое, которые записала установка). Книга
    и её картинки не приехали.
    `.local/system/.osd-system.json` хранит дайджест системы и для каждого
    слоя его порядок, вид, имя, дайджест манифеста и дайджест дерева.
@@ -92,7 +92,7 @@ open-steamgate отвечает на этот вопрос так же, как �
 3. Те же файлы — тот же дайджест. Вернитесь в этот репозиторий и выполните
    команду шага 1 ещё раз, с `--out /tmp/fleet-sys2` и без `--install`.
    Ожидается: та же таблица и тот же дайджест системы. Теперь измените один
-   байт в seed-данных, скажем `steam_pct` корабля S002 в
+   байт в начальных данных, скажем `steam_pct` корабля S002 в
    `data/zosd_fleet_ship.tabu.json`, и запустите команду в третий раз
    (`--out /tmp/fleet-sys3`). Ожидается: дайджест *всё ещё* тот же. Слой
    делается из коммита, `git archive HEAD`, а не из файлов в редакторе.
@@ -163,12 +163,12 @@ open-steamgate отвечает на этот вопрос так же, как �
 export const PACK_FILES = ["osd-pack.json", ".abapgit.xml", "src", "data", "voyage", "webapp"];
 ```
 
-<!-- code: tools/fleet-system.mjs lines 42-49 -->
+<!-- code: tools/fleet-system.mjs lines 46-53 -->
 ```js
 /** The fleet as a pack layer: the committed pack files of HEAD, named by the commit they came from. */
 export function fleetLayer(osg, dir) {
   mkdirSync(dir, {recursive: true});
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
+  const tar = spawnSync("bash", ["-o", "pipefail", "-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
   if (tar.status !== 0) throw new Error(`git archive: ${tar.stderr}`);
   const source = `https://github.com/oisee/osg-demo@${git(repo, "rev-parse", "HEAD")}:.`;
   return osg.build(dir, {name: "osg-demo", kind: "pack", source});
@@ -191,14 +191,14 @@ export function fleetLayer(osg, dir) {
   дайджестами. Собственный дайджест манифеста и есть имя слоя: закрепление.
 
 Каждый дайджест покрывает тот, что под ним. Поэтому шаг 3 и вёл себя так.
-Изменённый байт seed-данных изменил файлы, значит, и ZIP, и дайджест
+Изменённый байт начальных данных изменил файлы, значит, и ZIP, и дайджест
 дерева, значит, конфигурацию, значит, манифест. Коммит, который трогает только `book/`, не
 меняет ни ZIP, ни дайджест дерева, но конфигурация называет коммит, и манифест
 сдвигается. Дайджест дерева говорит *тот же флот*; дайджест манифеста —
 *этот флот, из этого коммита*.
 
 Виды слоёв — `lib`, `input`, `pack` и `customer`. Флот — пак: он приносит
-ABAP, seed-строки, плитки и приложения, ровно то, что раньше `OSD_PACKS`
+ABAP, начальные данные, плитки и приложения, ровно то, что раньше `OSD_PACKS`
 приносил из папки.
 
 ## Система
@@ -208,7 +208,7 @@ ABAP, seed-строки, плитки и приложения, ровно то, 
 вид и порядок в аннотациях, и две аннотации на всю систему — коммит
 open-steamgate и закреплённая версия транспайлера, с которыми она собрана:
 
-<!-- code: tools/fleet-system.mjs lines 73-79 -->
+<!-- code: tools/fleet-system.mjs lines 77-83 -->
 ```js
 const lock = osg.readLock(osg.home);
 const system = blob(Buffer.from(JSON.stringify({
@@ -259,11 +259,11 @@ open-steamgate:
 Обхода для разработки нет: чтобы изменить код, измените репозиторий,
 закоммитьте и установите новый дайджест.
 
-Рабочему месту говорится то же самое. По ADT блокировка установленного класса
-отвечает пустым дескриптором блокировки, который клиент понимает как «не
-изменяемо», а сохранение отвечает `405` с текстом
+Среда разработки получает тот же ответ. По ADT блокировка установленного класса
+отвечает пустым дескриптором блокировки, который клиент понимает как «изменять
+нельзя», а сохранение отвечает `405` с текстом
 `CLAS ZCL_OSD_FLEET_REPORT is a library object and cannot be changed here`.
-Создать объект в `$TMP` тоже нельзя: в режиме системы `$TMP` некуда писать.
+Создать объект в `$TMP` тоже нельзя: в режиме системы писать в `$TMP` некуда.
 
 Ещё один запрет охраняет обратное направление. Слой, собранный с
 `--private` (код, который не должен покидать компанию), можно отправить
@@ -284,13 +284,14 @@ published to ghcr.io`, код выхода 2. Проверка — сравне�
 checkout, поэтому checkout системы их отвергал. Теперь они спрашивают
 маленький модуль, в каком режиме `OSD_HOME`:
 
-<!-- code: test/engine.mjs lines 20-26 -->
+<!-- code: test/engine.mjs lines 20-27 -->
 ```js
 /** The environment to build and serve with: this repository as a pack, or the system as it is installed. */
 export function engineEnv(home, repo, extra = {}) {
   const env = {...process.env, ...extra};
-  if (installedSystem(home)) delete env.OSD_PACKS;
-  else env.OSD_PACKS = repo;
+  if (!installedSystem(home)) return {...env, OSD_PACKS: repo};
+  // a system refuses every development override: its digest supplies the layers
+  for (const k of Object.keys(env)) if (["OSD_PACKS", "OSD_WEB_PACKS", "OSD_LAYERS"].includes(k) || k.startsWith("OSD_LIB_")) delete env[k];
   return env;
 }
 ```
@@ -301,9 +302,9 @@ export function engineEnv(home, repo, extra = {}) {
 зелёным. Если сборка падает, проверки печатают то, что напечатал
 `osd-build`: свои отказы он пишет в стандартный вывод.
 
-## Чего это не делает
+## Чего здесь нет
 
-- **Живых данных нет.** Система — это код, seed-строки и страницы. Строки,
+- **Живых данных нет.** Система — это код, начальные данные и страницы. Строки,
   которые записали ваши пользователи, лежат в базе, а не в слое, и установка
   нового дайджеста их не забирает и не восстанавливает.
 - **Реестра здесь нет.** Эта глава пишет layout на диск. Отправка — это

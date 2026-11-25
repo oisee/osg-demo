@@ -37,12 +37,16 @@ export async function openSteamgate(home) {
   return {home, build, MEDIA, sha256, stageSystem, readLock};
 }
 
-const git = (cwd, ...args) => spawnSync("git", args, {cwd, encoding: "utf8"}).stdout.trim();
+const git = (cwd, ...args) => {
+  const r = spawnSync("git", args, {cwd, encoding: "utf8"});
+  if (r.status !== 0) throw new Error(`git ${args.join(" ")}: ${r.stderr}`);
+  return r.stdout.trim();
+};
 
 /** The fleet as a pack layer: the committed pack files of HEAD, named by the commit they came from. */
 export function fleetLayer(osg, dir) {
   mkdirSync(dir, {recursive: true});
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
+  const tar = spawnSync("bash", ["-o", "pipefail", "-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
   if (tar.status !== 0) throw new Error(`git archive: ${tar.stderr}`);
   const source = `https://github.com/oisee/osg-demo@${git(repo, "rev-parse", "HEAD")}:.`;
   return osg.build(dir, {name: "osg-demo", kind: "pack", source});
@@ -95,7 +99,7 @@ export function install(home, layout, scratch) {
   mkdirSync(scratch, {recursive: true});
   // the recipe of open-steamgate's scripts/system-roundtrip.mjs: no src,
   // packs, data, webapp or gen -- the system supplies them
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD | tar -x -C "$2" --exclude=src --exclude=packs --exclude=data --exclude=webapp --exclude=gen`,
+  const tar = spawnSync("bash", ["-o", "pipefail", "-c", `git -C "$1" archive HEAD | tar -x -C "$2" --exclude=src --exclude=packs --exclude=data --exclude=webapp --exclude=gen`,
     "sh", home, scratch], {encoding: "utf8"});
   if (tar.status !== 0) throw new Error(`git archive: ${tar.stderr}`);
   symlinkSync(join(home, "node_modules"), join(scratch, "node_modules"), "dir");

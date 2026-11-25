@@ -20,8 +20,9 @@ export function installedSystem(home) {
 /** The environment to build and serve with: this repository as a pack, or the system as it is installed. */
 export function engineEnv(home, repo, extra = {}) {
   const env = {...process.env, ...extra};
-  if (installedSystem(home)) delete env.OSD_PACKS;
-  else env.OSD_PACKS = repo;
+  if (!installedSystem(home)) return {...env, OSD_PACKS: repo};
+  // a system refuses every development override: its digest supplies the layers
+  for (const k of Object.keys(env)) if (["OSD_PACKS", "OSD_WEB_PACKS", "OSD_LAYERS"].includes(k) || k.startsWith("OSD_LIB_")) delete env[k];
   return env;
 }
 

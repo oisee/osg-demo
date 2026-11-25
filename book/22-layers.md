@@ -164,12 +164,12 @@ committed pack files and nothing else:
 export const PACK_FILES = ["osd-pack.json", ".abapgit.xml", "src", "data", "voyage", "webapp"];
 ```
 
-<!-- code: tools/fleet-system.mjs lines 42-49 -->
+<!-- code: tools/fleet-system.mjs lines 46-53 -->
 ```js
 /** The fleet as a pack layer: the committed pack files of HEAD, named by the commit they came from. */
 export function fleetLayer(osg, dir) {
   mkdirSync(dir, {recursive: true});
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
+  const tar = spawnSync("bash", ["-o", "pipefail", "-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir], {encoding: "utf8"});
   if (tar.status !== 0) throw new Error(`git archive: ${tar.stderr}`);
   const source = `https://github.com/oisee/osg-demo@${git(repo, "rev-parse", "HEAD")}:.`;
   return osg.build(dir, {name: "osg-demo", kind: "pack", source});
@@ -209,7 +209,7 @@ The system is an OCI image index of artifact type
 its name, kind and order as annotations, and two annotations for the whole,
 the open-steamgate commit and the transpiler pin it was built with:
 
-<!-- code: tools/fleet-system.mjs lines 73-79 -->
+<!-- code: tools/fleet-system.mjs lines 77-83 -->
 ```js
 const lock = osg.readLock(osg.home);
 const system = blob(Buffer.from(JSON.stringify({
@@ -287,13 +287,14 @@ made after the local build and before any connection is opened.
 checkout, so a system checkout refused them. They now ask one small module
 which mode `OSD_HOME` is in:
 
-<!-- code: test/engine.mjs lines 20-26 -->
+<!-- code: test/engine.mjs lines 20-27 -->
 ```js
 /** The environment to build and serve with: this repository as a pack, or the system as it is installed. */
 export function engineEnv(home, repo, extra = {}) {
   const env = {...process.env, ...extra};
-  if (installedSystem(home)) delete env.OSD_PACKS;
-  else env.OSD_PACKS = repo;
+  if (!installedSystem(home)) return {...env, OSD_PACKS: repo};
+  // a system refuses every development override: its digest supplies the layers
+  for (const k of Object.keys(env)) if (["OSD_PACKS", "OSD_WEB_PACKS", "OSD_LAYERS"].includes(k) || k.startsWith("OSD_LIB_")) delete env[k];
   return env;
 }
 ```
