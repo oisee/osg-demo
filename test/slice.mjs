@@ -13,7 +13,7 @@
 // What it does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
 //     `npm run transpile` in OSD_HOME), so no check runs against a stale build;
-//     if OSD_HOME is an installed system (chapter 24, tools/fleet-system.mjs
+//     if OSD_HOME is an installed system (chapter 22, tools/fleet-system.mjs
 //     --install), without OSD_PACKS: the system's digest supplies the fleet
 //     (test/engine.mjs);
 //  2. starts the engine on STG_PORT (default: a free port), keeps its PID and

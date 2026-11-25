@@ -3,7 +3,7 @@
 // OSD_HOME is one of two things:
 //  - a development checkout: this repository joins it as a pack, through
 //    OSD_PACKS=<this repository>;
-//  - an installed system (chapter 24; `.local/system/.osd-system.json` is
+//  - an installed system (chapter 22; `.local/system/.osd-system.json` is
 //    there, e.g. made by tools/fleet-system.mjs --install): the system's
 //    digest supplies every layer, the fleet included, and the build refuses
 //    OSD_PACKS.

@@ -7,7 +7,7 @@
 // does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
 //     `npm run transpile` in OSD_HOME), so no check runs against a stale build;
-//     if OSD_HOME is an installed system (chapter 24, tools/fleet-system.mjs
+//     if OSD_HOME is an installed system (chapter 22, tools/fleet-system.mjs
 //     --install), without OSD_PACKS: the system's digest supplies the fleet
 //     (test/engine.mjs);
 //  2. runs the ABAP Unit of ZCL_OSD_FLEET_VOYAGE_EML (node tools/osd-unit.mjs),

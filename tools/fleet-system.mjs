@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The fleet in a system pinned by digest (book chapter 24).
+// The fleet in a system pinned by digest (book chapter 22).
 //
 //   OSD_HOME=<open-steamgate checkout> node tools/fleet-system.mjs --out <dir> [--install <scratch>]
 //

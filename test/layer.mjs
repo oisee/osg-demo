@@ -1,4 +1,4 @@
-// The fleet as an OCI layer, and a system pinned by digest (book chapter 24),
+// The fleet as an OCI layer, and a system pinned by digest (book chapter 22),
 // in the style of test/slice.mjs, against an open-steamgate checkout.
 //
 //   OSD_HOME=<open-steamgate checkout> node test/layer.mjs [--keep DIR]
