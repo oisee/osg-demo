@@ -7,8 +7,9 @@
 // fetched). Heavy: a full system build, about the cost of `npm run bootstrap`
 // plus the size of every layer; not wired into CI. What it does, all on disk
 // and on loopback, never against a network registry:
-//  1. stages this repository twice from `git archive HEAD` (tracked files
-//     only, so no build output or editor state ends up in a layer) and builds
+//  1. stages the pack's files twice from `git archive HEAD` (tracked files
+//     only, so no build output or editor state ends up in a layer; and only
+//     osd-pack.json, .abapgit.xml, src, data, voyage, webapp) and builds
 //     each with open-steamgate's osd-layer as `--kind pack --name osg-demo`,
 //     with --source https://github.com/oisee/osg-demo@<HEAD>:.; the two tree
 //     and manifest digests must be equal;
@@ -119,10 +120,16 @@ const tail = (r) => (r.stdout + r.stderr).trim().split("\n").slice(-6).join(" | 
 // 1. the fleet as a layer, twice from tracked files
 const commit = spawnSync("git", ["rev-parse", "HEAD"], {cwd: repo, encoding: "utf8"}).stdout.trim();
 const source = `https://github.com/oisee/osg-demo@${commit}:.`;
+// what the pack needs and nothing else (not the book, not the articles):
+// open-steamgate's pack discovery (tools/osd-packs.mjs, packAt) reads
+// osd-pack.json and the folders it names or defaults to -- the ABAP in src
+// (with src/ddic and src/cds), the seeds in data, the app in webapp and the
+// BSP folder voyage; .abapgit.xml keeps STARTING_FOLDER /src/
+const PACK_FILES = ["osd-pack.json", ".abapgit.xml", "src", "data", "voyage", "webapp"];
 function stageFleet(name) {
   const dir = join(temp, name);
   mkdirSync(dir);
-  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD | tar -x -C "$2"`, "sh", repo, dir]);
+  const tar = spawnSync("sh", ["-c", `git -C "$1" archive HEAD ${PACK_FILES.join(" ")} | tar -x -C "$2"`, "sh", repo, dir]);
   expect(tar.status === 0, `git archive: ${tar.stderr}`);
   return build(dir, {name: "osg-demo", kind: "pack", source});
 }
