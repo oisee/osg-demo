@@ -76,14 +76,18 @@ The rest happens in the open-steamgate checkout at the book's tag, with
    adds as well.
 
 6. Open it in a local VS Code for the Web first, with this repository as
-   its folder:
+   its folder. `@vscode/test-web` drives its own Chromium, which its
+   Playwright fetches once:
 
    ```sh
-   npx -y @vscode/test-web --browser chromium --extensionDevelopmentPath ./editors/vscode ../osg-demo
+   npx -y playwright@1.65.1 install chromium
+   npx -y @vscode/test-web --quality stable --browser chromium --extensionDevelopmentPath ./editors/vscode ../osg-demo
    ```
 
-   Expected: a Chromium window with VS Code, the repository in the
-   Explorer, and the OSD icon. Open the OSD view: OData (31) and Apps (16)
+   Expected: VS Code for the Web is downloaded into `.vscode-test-web/` in
+   the checkout (delete the folder afterwards), then a Chromium window
+   with VS Code, the repository's files in the Explorer under the label
+   `[Test Files]` (test-web names every folder so), and the OSD icon. Open the OSD view: OData (31) and Apps (16)
    now, with `ZOSD_FLEET_SRV` and `ZUI_OSD_FLEET_VOY` among the OData
    services. A click on `ZOSD_FLEET_SRV` shows its kind and URL.
 
@@ -91,8 +95,11 @@ The rest happens in the open-steamgate checkout at the book's tag, with
 
 7. Open `src/ddic/zosd_fleet_ship.tabl.xml` and press F8. Expected: *Data
    Preview ZOSD_FLEET_SHIP*, six rows, from Albatross to Old Boiler, as in
-   chapter 1. Press **Open in SQL notebook**: a notebook with the same
-   `SELECT` in a cell; run it and the table appears under the cell. An
+   chapter 1. Press **Open in SQL notebook** and answer the question whether
+   you trust the notebook's authors with **Open Notebook**: a new notebook
+   with `SELECT * FROM ZOSD_FLEET_SHIP WHERE MANDT = '123'` in a cell. Run
+   it with the cell's Run button or Shift+Enter, and the table appears under
+   the cell, with the client column `MANDT` that the preview leaves out. An
    ABAP cell would say that it is not available in the browser.
 
    ![F8 on the fleet's ship table, answered in the browser](img/web-data-preview.png)
@@ -135,10 +142,12 @@ an arbitrary web server, so open-steamgate serves the bundle locally:
     `OSD_WEB_CERT` and `OSD_WEB_KEY`).
 
 11. In vscode.dev, F1, **Developer: Install Extension From Location...**,
-    `https://localhost:5000`. The browser asks once whether vscode.dev may
-    reach the local network: allow it. Expected: the OSD icon, and in the
-    OSD view the same generation as in step 6. The launchpad, the Airship
-    fleet app, F8 and the notebook work as they did there. (If the
+    `https://localhost:5000`. The browser asks whether vscode.dev may reach
+    the local network; the launchpad's tab, a page of its own, needs the
+    same, so allow each time it asks. Expected: the OSD icon, and in the OSD
+    view the same generation as in step 6. The launchpad and the Airship
+    fleet app work as they did there. vscode.dev has no folder open now, so
+    there is no table file for F8; step 7 is the place for that. (If the
     Marketplace extension from step 1 is installed, uninstall it first.)
 
     ![vscode.dev with the fleet's bundle installed from localhost: the OSD view and the Airship fleet app](img/web-vscodedev-fleet.png)
@@ -156,7 +165,9 @@ script that replaces `XMLHttpRequest` and `fetch` with versions that look
 at the address. A request to `…/sap/opu/odata/…` or `…/sap/bc/…` goes by
 `postMessage` to the extension, which hands it to the gateway in the worker
 and posts the answer back: status, headers and body, as an HTTP client
-expects them. Every other address is the browser's own request.
+expects them. Every other address is the browser's own request, except
+two small ones the page answers itself: the sandbox's configuration, and
+the launchpad's question whether ADT is there (no, see below).
 
 The gateway is the same ABAP as on the desktop, transpiled when the bundle
 was built: the fleet's `ZCL_ZOSD_FLEET_DPC_EXT` answers chapter 4's list in
@@ -173,7 +184,8 @@ Testing view, the debugger, F9, Check and Activate, `.http` CodeLens, jobs,
 and the HANA extract. ABAP and SQLScript notebook cells answer that they
 are not available in the browser. The Workbench tile is grey because the
 Workbench needs the Node host's ADT facade. The AMDP sandbox is grey
-because sql.js does not speak SQLScript. With the setting
+because it runs its bodies on HANA only; in the browser it is grey on
+either database. With the setting
 `osd.web.database` set to `duckdb`, a SQLScript notebook cell runs through
 Portable AMDP on DuckDB-Wasm, but the database is then kept in memory and
 reseeded on every reload.
@@ -216,4 +228,6 @@ reload, the greyed tiles, Zork and the WEBGUI. It records the V4 steps as
 known failures of this tag. `test/web-vscodedev.mjs` installs into the real
 vscode.dev, from the Marketplace or from a `https://localhost` address,
 without an account, and checks the OSD view, the probe and the launchpad.
-Both need a built web bundle and a network; neither is part of CI.
+`test/web-shots.mjs` and the `location` route need a web bundle built as
+in step 5; the `marketplace` route needs only an open-steamgate checkout
+for its Playwright. All need a network; none is part of CI.
