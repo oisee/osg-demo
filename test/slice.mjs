@@ -13,6 +13,9 @@
 // What it does:
 //  1. builds the engine with this repository as a pack (OSD_PACKS=<this repo>,
 //     `npm run transpile` in OSD_HOME), so no check runs against a stale build;
+//     if OSD_HOME is an installed system (chapter 24, tools/fleet-system.mjs
+//     --install), without OSD_PACKS: the system's digest supplies the fleet
+//     (test/engine.mjs);
 //  2. starts the engine on STG_PORT (default: a free port), keeps its PID and
 //     stops only that PID at the end, also when a check fails;
 //  3. makes one assertion per item of the slice:
@@ -70,6 +73,7 @@ import {createServer} from "node:net";
 import {createRequire} from "node:module";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
+import {describeEngine, engineEnv, transpile} from "./engine.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const home = process.env.OSD_HOME;
@@ -89,7 +93,7 @@ const freePort = () => new Promise((ok, fail) => {
 const port = Number(process.env.STG_PORT || await freePort());
 const base = `http://localhost:${port}`;
 const odata = `${base}/sap/opu/odata/sap/ZOSD_FLEET_SRV`;
-const env = {...process.env, OSD_PACKS: repo, STG_PORT: String(port)};
+const env = engineEnv(home, repo, {STG_PORT: String(port)});
 
 const results = [];
 let server;
@@ -143,12 +147,8 @@ async function csrf(url) {
 }
 
 // 1. build: the pack is compiled into a fresh generation
-console.log(`slice: building ${home} with OSD_PACKS=${repo}`);
-const build = spawnSync("npm", ["run", "-s", "transpile"], {cwd: home, env, stdio: ["ignore", "ignore", "inherit"]});
-if (build.status !== 0) {
-  console.error(`slice: npm run transpile failed (${build.status})`);
-  process.exit(1);
-}
+describeEngine("slice", home, repo);
+transpile("slice", home, env);
 
 // 2. start the engine and wait for the service
 server = spawn(process.execPath, ["test/run.mjs"], {cwd: home, env, stdio: ["ignore", "ignore", "inherit"]});

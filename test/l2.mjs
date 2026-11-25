@@ -12,6 +12,7 @@ import {readFileSync} from "node:fs";
 import {spawnSync} from "node:child_process";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
+import {libraryDir} from "./engine.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // The book navigates with metadata, so missing companions must fail even
@@ -62,7 +63,7 @@ if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   const rule = join(repo, "src", "l2", "maintenance_no_voyage.l2.yaml");
   const command = process.argv.includes("--write") ? "build" : "check";
   const run = spawnSync(process.execPath, ["tools/dsl-l2.mjs", command, rule, "--out", join(repo, "src", "l2"),
-    "--ddic", join(repo, "src", "ddic"), "--ddic", join(home, ".local/lars/open-abap-core/src")],
+    "--ddic", join(repo, "src", "ddic"), "--ddic", join(libraryDir(home, "open-abap-core"), "src")],
   {cwd: home, encoding: "utf8"});
   const said = `${run.stdout}${run.stderr}`.split("\n")
     .filter((l) => l && !/^(ICF registry|cross-reference|demo data):/.test(l)).join("\n");

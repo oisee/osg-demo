@@ -30,8 +30,9 @@
 //     OSD_PACKS set is refused, and a build after one installed file changed
 //     is refused with `run osd-fetch --system again`.
 //
-// test/slice.mjs and test/rap.mjs cannot point at this scratch checkout as
-// they are: they set OSD_PACKS, which system mode refuses.
+// test/slice.mjs and test/rap.mjs run against such a scratch checkout too
+// (tools/fleet-system.mjs --install makes one to keep): in system mode they
+// build without OSD_PACKS, which the system refuses (test/engine.mjs).
 //
 // Everything is made under one temporary directory, removed at the end (also
 // on a failure or a signal) unless --keep DIR names a directory to keep it in.

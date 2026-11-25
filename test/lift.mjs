@@ -4,7 +4,8 @@
 //   OSD_HOME=<open-steamgate checkout> node test/lift.mjs [--write]
 //
 // tools/lift.mjs reads the model out of BEFORE (the fleet tables' DDIC from
-// src/ddic, MANDT's data element from open-abap-core), ZCL_OSD_TPL renders
+// src/ddic, MANDT's data element from open-abap-core: .local/lars, or its
+// layer in an installed system), ZCL_OSD_TPL renders
 // recipes/r1-lookup-enrich/template.tpl from it, and the result must be the
 // region between `" lift:R1 begin` and `" lift:R1 end`. With --write the
 // region is replaced instead. It prints the model's open obligations, which
@@ -13,6 +14,7 @@
 import {readFileSync, writeFileSync} from "node:fs";
 import {dirname, join, resolve} from "node:path";
 import {fileURLToPath, pathToFileURL} from "node:url";
+import {libraryDir} from "./engine.mjs";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const home = process.env.OSD_HOME ? resolve(process.env.OSD_HOME) : "";
@@ -27,7 +29,7 @@ process.chdir(home);
 const {modelR1} = await load("tools/lift.mjs");
 let model;
 try {
-  model = modelR1(CLASS, "before", [join(repo, "src", "ddic"), join(home, ".local/lars/open-abap-core/src")]);
+  model = modelR1(CLASS, "before", [join(repo, "src", "ddic"), join(libraryDir(home, "open-abap-core"), "src")]);
 } catch (e) {
   // the lift refuses by throwing, with the obligation it could not close
   if (e.name !== "Refusal" && e.constructor?.name !== "Refusal") throw e;
